@@ -111,11 +111,20 @@ The player can access a mid-run or end-of-run shop system to mutate the swarm, s
 - These units independently calculate line-of-sight and fire projectiles at the nearest standard enemy.
 - Ranged units maintain standard Boids AI rules (cohesion, alignment, separation) while firing.
 
+## Feature 3: Currency Acquisition (Souls)
+
+- Enemies have a calculated probability to drop a temporary Soul entity upon destruction.
+- The game loop automatically awards a passive Soul stipend at 30-second survival milestones.
+- Rare "Cursed Chalice" powerups spawn periodically, granting a massive currency boost rather than swarm replenishment.
+
 ## User Stories
 
 - **As a player**, I want to spend my accumulated resources at a shop interface, **so that** I can purchase permanent upgrades that help me survive longer.
 - **As a player**, I want to purchase Skeletal Archers that fire projectiles automatically, **so that** my swarm can deal damage without risking direct 1-to-1 collision attrition.
 - **As a developer**, I want upgrades to dynamically attach new components to existing entities, **so that** the shop seamlessly integrates with the established ECS architecture without requiring hardcoded subclass changes.
+- **As a player**, I want destroyed enemies to drop temporary Souls, **so that** I am incentivized to maneuver my swarm aggressively into combat zones.
+- **As a player**, I want to receive passive currency the longer I survive, **so that** evasion and longevity are intrinsically rewarded.
+- **As a player**, I want to collect rare Cursed Chalices for massive wealth, **so that** I have to weigh the risk of breaking formation to chase high-value loot.
 
 # Epic 5: User Interface & Game State Management
 
