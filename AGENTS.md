@@ -31,6 +31,7 @@ When generating or modifying code, strict adherence to the project directory str
 - `components/`: The pure data layer holding attributes like velocity, coordinates, and health values.
 - `entities/`: Houses your OOP containers that bundle components together.
 - `systems/`: The logic layer that processes entities based on their components.
+- `ui/`: Dedicated MVC controllers for rendering and managing static interfaces (like the Shop and Main Menu) isolated from the ECS loops.
 - `utils/`: Helper modules for math or optimization, specifically storing the SpatialHash grid logic.
 - `docs/`: Holds the design documentation for Spec-driven development.
 

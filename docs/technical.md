@@ -42,7 +42,12 @@ Systems iterate over the entity pool every frame (60 FPS), targeting only entiti
 - **SpatialHash Grid (`spatial_hash.py`):** Divides the screen into a 2D grid matrix. Limits system processing queries strictly to adjacent cells to maintain 60 FPS.
 - **Math Utilities (`math_utils.py`):** Provides fast vector normalization and squared distance calculations.
 
-## 6. Deployment & Packaging
+## 6. UI Layer (`ui/`)
+
+- **MenuController (`menu_controller.py`):** Handles static UI drawing and state signals for the Main Menu and Game Over screens. Uses primitive Pygame shapes for placeholders.
+- **ShopController (`shop_controller.py`):** Manages rendering the Dark Altar overlay, item selection logic, and player currency validation during shop phases.
+
+## 7. Deployment & Packaging
 
 - **Web Assembly (pygbag):** The project is packaged for the web using `pygbag`.
 - **Asynchronous Execution:** The top-level controller in `main.py` utilizes the `asyncio` library. The primary game loop is wrapped in an asynchronous function containing `await asyncio.sleep(0)` to yield execution back to the browser, preventing the tab from locking up during gameplay.
