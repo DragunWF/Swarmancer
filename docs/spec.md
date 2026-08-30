@@ -151,9 +151,21 @@ The player navigates through distinct game states (Menu, Gameplay, Settings) bef
 - Adjustments are made via clickable sliders or discrete increment buttons (e.g., +/- 10%).
 - The Pygame mixer is updated dynamically as the user modifies these settings.
 
+## Feature 4: Pause Menu & Audio Settings
+
+- The pause menu is triggered by pressing the "P" key, safely halting the continuous tick of the real-time game loop.
+- The controls menu displays the "P" key binding alongside movement and swarm inputs.
+- The pause overlay provides options to Continue, Return to Main Menu, and adjust individual volume sliders for Sound Effects and Music.
+- Selecting the Main Menu option triggers a secondary confirmation dialog ("Are you sure? Progress will be lost.") to prevent accidental quits.
+- State transitions and volume adjustments are managed via an MVC overlay controller that pauses processing in the active ECS world.
+
 ## User Stories
 
 - **As a player**, I want to see my high score on the main menu, **so that** I have a clear benchmark to beat in my next session.
 - **As a player**, I want to access a Controls overlay from the main menu, **so that** I understand the density and scatter mechanics before starting a run.
 - **As a player**, I want to adjust the volume of sound effects and music independently in a Settings menu, **so that** I can balance the audio to my personal preference.
 - **As a developer**, I want the game logic to pause entirely while in the Menu or Settings states, **so that** enemies do not spawn and the physics engine does not process data in the background.
+- **As a player**, I want to press "P" to open the pause menu, **so that** I can safely step away from the active game loop without my swarm dying.
+- **As a player**, I want to see the "P" key listed in the controls menu, **so that** I know how to halt the game.
+- **As a player**, I want to adjust the sound effects and music volume within the pause screen, **so that** I can balance the audio to my preference.
+- **As a player**, I want a confirmation dialog to appear when selecting the Main Menu button, **so that** I do not accidentally erase my current survival run.
