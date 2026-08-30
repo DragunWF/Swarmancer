@@ -23,7 +23,7 @@ Entities are OOP classes that act as initialization containers. They automatical
 - **Player (`player.py`):** Holds the central `Transform` (mapped to cursor position) and `ScatterTimer`.
 - **Boid (`swarm.py`):** Represents a skeleton minion. Contains `Transform`, `Physics`, `Graphics`, `Collider` (small radius).
 - **Grunt (`enemies.py`):** The peasant militia. Contains `Transform`, `Physics` (tracking logic), `Graphics`, `Collider` (1-to-1 popping).
-- **Boomer (`enemies.py`):** The dwarf sapper. Contains `Transform`, `Physics` (slow speed), `Graphics`, `Collider` (contact trigger, `is_trigger=True`), `FuseTimer` (5s fuse). Carries `blast_radius` (randomized 80–150px per spawn), `fuse_proximity_radius` (450px — fuse only ticks within this range of the player cursor), and `fuse_expired` flag (set by behavior_system, read by collision_system).
+- **Boomer (`enemies.py`):** The dwarf sapper. Contains `Transform`, `Physics` (slow speed), `Graphics`, `Collider` (contact trigger, `is_trigger=True`), `FuseTimer` (5s fuse). Carries `blast_radius` (randomized 80–150px per spawn), `fuse_proximity_radius` (200px — fuse triggers within this range of the player cursor), and `fuse_expired` flag (set by behavior_system, read by collision_system).
 - **LaserDrone (`enemies.py`):** The wizard tower. Contains `Transform` (static), `Graphics`, `AimingTimer` (controls telegraph state), `LifespanTimer` (15s duration). Carries `beam_width = 50.0` (100px total laser band).
 - **SoulPickup (`powerups.py`):** Dropped currency. Contains `Transform`, `Graphics`, `Collider`, `LifespanTimer`, `Value`.
 
@@ -35,7 +35,7 @@ Systems iterate over the entity pool every frame (60 FPS), targeting only entiti
 - **Movement System (`movement_system.py`):** Iterates over `Transform` + `Physics` signatures to update spatial coordinates.
 - **Collision System (`collision_system.py`):** Evaluates squared distance overlaps between `Collider` components. Handles combat attrition and currency spawning.
 - **Particle System (`particle_system.py`):** Manages the `LifespanTimer` of visual effects and updates `Graphics.alpha` to fade objects.
-- **Render System (`render_system.py`):** Draws pixel art, primitive shapes, and UI overlays to the Pygame display surface.
+- **Render System (`render_system.py`):** Draws pixel art, primitive shapes, and UI overlays (including dynamic timer texts for enemies) to the Pygame display surface.
 
 ## 5. Optimization Layer (`utils/`)
 

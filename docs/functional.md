@@ -26,7 +26,7 @@
   - **Interaction:** Colliding with a skeleton minion triggers a 1-to-1 popping effect, destroying both entities.
 - **Dwarf Sappers (The Boomer):**
   - **Behavior:** Heavy dwarf sappers carrying powder keg bombs move slowly toward the swarm.
-  - **Fuse:** Each Boomer carries a 5-second fuse that only begins counting down once the Boomer enters within 450 pixels of the player cursor. If the Boomer retreats out of range, the timer pauses but does not reset, ensuring it cannot be stalled indefinitely.
+  - **Fuse:** Each Boomer carries a 5-second fuse that only begins counting down once the Boomer enters within 200 pixels of the player cursor. Once triggered, the timer continues to tick down even if the Boomer moves out of range, ensuring it will eventually detonate.
   - **Interaction:** Upon contact with any minion, or when the fuse expires, the Boomer detonates an area-of-effect explosion. Each Boomer's blast radius is randomized between 80 and 150 pixels per spawn, keeping encounters unpredictable. This mechanic specifically punishes players who hold the Dense state (Left Click) too long.
 - **Wizard Towers (The Laser Drone):**
   - **Behavior:** Stationary stone wizard towers that telegraph an attack before firing. They have a 15-second lifespan before they expire.
@@ -34,6 +34,7 @@
 
 ## 5. UI Flow & State Management
 
+- **HUD Elements:** In-game visual indicators including dynamic countdown timers floating above Boomers (fuse) and Laser Drones (lifespan) to clearly communicate threat urgency.
 - **Main Menu:** Contains options to Play, view Controls, and adjust Settings. Displays the current highest survival time.
 - **Settings:** Provides individual volume sliders/increments for master sound effects and background music.
 - **Game Over Screen:** Halts all gameplay physics and enemy spawning. Compares the current run's survival time against the high score, updates it if necessary, and allows the player to restart.
