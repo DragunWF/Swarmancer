@@ -13,6 +13,7 @@ from systems.spawner_system import SpawnerSystem
 from systems.particle_system import ParticleSystem
 from utils.state import GameState
 from ui.shop_controller import ShopController
+from ui.menu_controller import MenuController
 from components.combat import RangedAttack
 from systems.combat_system import CombatSystem
 
@@ -22,29 +23,26 @@ async def main():
     pygame.display.set_caption("Swarmancer")
     clock = pygame.time.Clock()
     
-    # Initialize Entities
     entities = []
-    player_x = SCREEN_WIDTH / 2
-    player_y = SCREEN_HEIGHT / 2
-    player = Player(player_x, player_y)
-    entities.append(player)
     
-    # Spawn 50 Boids around the initial player position
-    for _ in range(50):
-        boid = Boid(player_x + random.uniform(-60, 60), player_y + random.uniform(-60, 60))
-        entities.append(boid)
-        
+    # Session state
+    high_score = 0.0
+    current_survival_time = 0.0
+    player = None
+    
+    # External closures needed for systems
     def on_resource_collected(x, y):
         # Spawn 3 new boids slightly offset from the grave
         for _ in range(3):
             entities.append(Boid(x + random.uniform(-20, 20), y + random.uniform(-20, 20)))
 
     def on_currency_collected(amount):
-        player.souls += amount
+        if player:
+            player.souls += amount
 
     def on_entity_spawned(entity):
         entities.append(entity)
-
+        
     # Initialize Systems
     behavior_system = BehaviorSystem()
     movement_system = MovementSystem()
@@ -56,16 +54,36 @@ async def main():
     particle_system = ParticleSystem()
     render_system = RenderSystem()
     spawner_system = SpawnerSystem(SCREEN_WIDTH, SCREEN_HEIGHT)
-    
     combat_system = CombatSystem()
     
     systems = [spawner_system, behavior_system, combat_system, movement_system, collision_system, particle_system, render_system]
     
+    # Controllers
+    shop_controller = ShopController(SCREEN_WIDTH, SCREEN_HEIGHT)
+    menu_controller = MenuController(SCREEN_WIDTH, SCREEN_HEIGHT)
+    
+    current_state = GameState.MENU
+    hud_font = pygame.font.SysFont(None, 36)
+    
     resource_timer = 0.0
     shop_timer = 0.0
-    current_state = GameState.PLAYING
-    shop_controller = ShopController(SCREEN_WIDTH, SCREEN_HEIGHT)
-    hud_font = pygame.font.SysFont(None, 36)
+
+    def reset_game():
+        nonlocal player, resource_timer, shop_timer, current_survival_time
+        entities.clear()
+        
+        player_x = SCREEN_WIDTH / 2
+        player_y = SCREEN_HEIGHT / 2
+        player = Player(player_x, player_y)
+        entities.append(player)
+        
+        for _ in range(50):
+            boid = Boid(player_x + random.uniform(-60, 60), player_y + random.uniform(-60, 60))
+            entities.append(boid)
+            
+        resource_timer = 0.0
+        shop_timer = 0.0
+        current_survival_time = 0.0
 
     running = True
     while running:
@@ -75,7 +93,15 @@ async def main():
             if event.type == pygame.QUIT:
                 running = False
                 
-            if current_state == GameState.SHOP:
+            if current_state in (GameState.MENU, GameState.GAME_OVER):
+                action = menu_controller.handle_event(event, current_state)
+                if action == "PLAY":
+                    reset_game()
+                    current_state = GameState.PLAYING
+                elif action == "MAIN_MENU":
+                    current_state = GameState.MENU
+                    
+            elif current_state == GameState.SHOP:
                 selected_upgrade = shop_controller.handle_event(event)
                 if selected_upgrade is not None:
                     if selected_upgrade == 0:
@@ -103,6 +129,7 @@ async def main():
         screen.fill(BG_COLOR)
 
         if current_state == GameState.PLAYING:
+            current_survival_time += dt
             resource_timer += dt
             shop_timer += dt
             
@@ -122,6 +149,12 @@ async def main():
             # Cleanup deleted entities
             entities = [e for e in entities if not getattr(e, 'marked_for_deletion', False)]
             
+            # Check for Game Over condition
+            active_boids = [e for e in entities if isinstance(e, Boid)]
+            if len(active_boids) == 0:
+                high_score = max(high_score, current_survival_time)
+                current_state = GameState.GAME_OVER
+            
             # Draw HUD
             time_until_shop = max(0.0, 30.0 - shop_timer)
             timer_text = hud_font.render(f"Next Shop: {time_until_shop:.1f}s", True, (255, 255, 255))
@@ -133,6 +166,12 @@ async def main():
         elif current_state == GameState.SHOP:
             render_system.update(entities, 0)
             shop_controller.draw(screen, player.souls)
+            
+        elif current_state == GameState.MENU:
+            menu_controller.draw_main_menu(screen, high_score)
+            
+        elif current_state == GameState.GAME_OVER:
+            menu_controller.draw_game_over(screen, current_survival_time, high_score)
         
         pygame.display.flip()
         
