@@ -192,6 +192,33 @@ class BehaviorSystem(System):
                     steer.scale_to_length(self.max_force)
                 enemy.physics.acceleration += steer / enemy.physics.mass
 
+        # --- Boomer Fuse Tick ---
+        # The fuse only ticks while the Boomer is within fuse_proximity_radius of the player
+        # cursor. This prevents far-away Boomers from detonating before they've had a chance
+        # to reach the swarm. The elapsed value pauses (but does not reset) if the Boomer
+        # moves out of range, so repeated approach/retreat cannot stall the fuse indefinitely.
+        # Sole responsibility: advance timer data and set fuse_expired. No AoE math here.
+        for entity in entities:
+            if getattr(entity, 'enemy_type', None) != 'boomer':
+                continue
+            if getattr(entity, 'has_detonated', False) or getattr(entity, 'marked_for_deletion', False):
+                continue
+            if not hasattr(entity, 'fuse_timer'):
+                continue
+
+            # Proximity gate — squared distance to player cursor (no sqrt)
+            dx = entity.transform.x - target_pos.x
+            dy = entity.transform.y - target_pos.y
+            dist_sq = dx * dx + dy * dy
+            prox_sq = entity.fuse_proximity_radius * entity.fuse_proximity_radius
+
+            if dist_sq > prox_sq:
+                continue  # Still too far away — fuse stays paused
+
+            entity.fuse_timer.elapsed += dt
+            if entity.fuse_timer.elapsed >= entity.fuse_timer.duration:
+                entity.fuse_expired = True
+
         # --- LaserDrone AimingTimer Tick ---
         # Advances each drone through its telegraph → fire → reset cycle.
         # Sole responsibility: update timer data. Hit detection is in collision_system.

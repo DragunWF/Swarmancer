@@ -44,16 +44,17 @@ class CollisionSystem:
                     break # One enemy pops exactly one boid
 
         # --- Boomer AoE Detonation ---
-        # When a Boomer's contact radius touches any boid, it detonates immediately,
-        # destroying every boid within blast_radius. Punishes the Dense state implicitly:
-        # tightly packed swarms have more units within the radius.
+        # Triggers when: (a) the Boomer's contact radius touches any boid, OR
+        # (b) behavior_system has set fuse_expired = True after the fuse duration elapses.
+        # Once triggered, every boid within blast_radius is destroyed. Punishes Dense state
+        # implicitly — tightly packed swarms have more units within the blast footprint.
         boomers = [e for e in entities
                    if getattr(e, 'enemy_type', None) == 'boomer'
                    and not getattr(e, 'has_detonated', False)
                    and not getattr(e, 'marked_for_deletion', False)]
 
         for boomer in boomers:
-            # Phase 1: small contact trigger check
+            # Check contact trigger (Phase 1)
             contacted = False
             for boid in boids:
                 if getattr(boid, 'marked_for_deletion', False):
@@ -66,10 +67,11 @@ class CollisionSystem:
                     contacted = True
                     break
 
-            if not contacted:
+            # Detonate on contact OR expired fuse; skip if neither condition is met
+            if not contacted and not getattr(boomer, 'fuse_expired', False):
                 continue
 
-            # Phase 2: AoE sweep — mark every boid inside blast_radius
+            # AoE sweep — mark every boid inside blast_radius
             boomer.has_detonated = True
             boomer.marked_for_deletion = True
             blast_radius_sq = boomer.blast_radius * boomer.blast_radius
@@ -82,6 +84,7 @@ class CollisionSystem:
                 dist_sq = dx * dx + dy * dy
                 if dist_sq < blast_radius_sq:
                     boid.marked_for_deletion = True
+
 
         # --- LaserDrone Beam Hit Detection ---
         # Fires when behavior_system has set aiming_timer.is_firing = True.

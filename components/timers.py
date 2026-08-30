@@ -16,3 +16,11 @@ class AimingTimer:
         self.is_firing = False                  # Flipped by behavior_system when elapsed >= charge_duration
         self.fire_duration = fire_duration      # How long the beam stays active
         self.fire_elapsed = 0.0                 # Accumulates during firing; reset resets the cycle
+
+
+class FuseTimer:
+    def __init__(self, duration: float = 5.0):
+        # Total seconds before the Boomer self-detonates regardless of contact
+        self.duration = duration
+        # Accumulates dt each frame; written exclusively by behavior_system
+        self.elapsed = 0.0

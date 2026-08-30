@@ -2,7 +2,7 @@ from components.transform import Transform
 from components.physics import Physics
 from components.graphics import Graphics
 from components.collider import Collider
-from components.timers import AimingTimer
+from components.timers import AimingTimer, FuseTimer
 
 class Grunt:
     def __init__(self, x: float, y: float):
@@ -18,7 +18,7 @@ class Grunt:
 
 
 class Boomer:
-    def __init__(self, x: float, y: float):
+    def __init__(self, x: float, y: float, blast_radius: float = 120.0):
         self.transform = Transform(x, y)
         # Very slow, heavy sapper — easily kited but devastating on contact
         self.physics = Physics(max_speed=60.0, mass=3.0)
@@ -26,13 +26,19 @@ class Boomer:
         self.graphics = Graphics(color=(200, 120, 40), scale=7.0)
         # is_trigger=True signals collision_system to run AoE logic, not 1-to-1 pop
         self.collider = Collider(radius=7.0, is_trigger=True)
+        # Fuse: self-detonates after 5s regardless of contact; ticked by behavior_system
+        self.fuse_timer = FuseTimer(duration=5.0)
 
         self.is_enemy = True
         self.enemy_type = 'boomer'
-        # AoE blast radius in pixels — collision_system reads this exclusively
-        self.blast_radius = 120.0
+        # AoE blast radius — caller supplies a random value; collision_system reads exclusively
+        self.blast_radius = blast_radius
         # Guard flag: set True by collision_system after detonation to prevent re-triggering
         self.has_detonated = False
+        # Set True by behavior_system when fuse expires; collision_system reads this
+        self.fuse_expired = False
+        # Fuse only begins ticking once the Boomer enters this pixel radius of the player cursor
+        self.fuse_proximity_radius = 200.0
 
 
 class LaserDrone:
@@ -47,5 +53,6 @@ class LaserDrone:
         self.is_enemy = True
         self.enemy_type = 'laser_drone'
         # Half-width of the laser beam band in pixels — collision_system reads this exclusively
-        self.beam_width = 80.0
+        # Reduced from 80 to 50 (100px total band) for a tighter, fairer punishment window
+        self.beam_width = 50.0
 

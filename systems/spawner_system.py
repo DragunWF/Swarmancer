@@ -52,7 +52,9 @@ class SpawnerSystem:
 
     def spawn_boomer(self, entities):
         x, y = self._random_edge_position()
-        entities.append(Boomer(x, y))
+        # Each Boomer gets a unique blast radius to keep encounters unpredictable
+        blast_radius = random.uniform(80.0, 150.0)
+        entities.append(Boomer(x, y, blast_radius=blast_radius))
 
     def spawn_laser_drone(self, entities):
         # Interior spawn with 100px margin so the drone body and beam are fully visible
