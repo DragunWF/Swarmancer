@@ -10,6 +10,7 @@ from systems.movement_system import MovementSystem
 from systems.render_system import RenderSystem
 from systems.collision_system import CollisionSystem
 from systems.spawner_system import SpawnerSystem
+from systems.particle_system import ParticleSystem
 from utils.state import GameState
 from ui.shop_controller import ShopController
 from components.combat import RangedAttack
@@ -38,16 +39,27 @@ async def main():
         for _ in range(3):
             entities.append(Boid(x + random.uniform(-20, 20), y + random.uniform(-20, 20)))
 
+    def on_currency_collected(amount):
+        player.souls += amount
+
+    def on_entity_spawned(entity):
+        entities.append(entity)
+
     # Initialize Systems
     behavior_system = BehaviorSystem()
     movement_system = MovementSystem()
-    collision_system = CollisionSystem(on_resource_collected=on_resource_collected)
+    collision_system = CollisionSystem(
+        on_resource_collected=on_resource_collected,
+        on_currency_collected=on_currency_collected,
+        on_entity_spawned=on_entity_spawned
+    )
+    particle_system = ParticleSystem()
     render_system = RenderSystem()
     spawner_system = SpawnerSystem(SCREEN_WIDTH, SCREEN_HEIGHT)
     
     combat_system = CombatSystem()
     
-    systems = [spawner_system, behavior_system, combat_system, movement_system, collision_system, render_system]
+    systems = [spawner_system, behavior_system, combat_system, movement_system, collision_system, particle_system, render_system]
     
     resource_timer = 0.0
     shop_timer = 0.0

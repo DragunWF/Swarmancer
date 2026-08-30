@@ -1,9 +1,23 @@
+import random
 import math
 from utils.spatial_hash import SpatialHash
 
 class CollisionSystem:
-    def __init__(self, on_resource_collected=None):
+    def __init__(self, on_resource_collected=None, on_currency_collected=None, on_entity_spawned=None):
         self.on_resource_collected = on_resource_collected
+        self.on_currency_collected = on_currency_collected
+        self.on_entity_spawned = on_entity_spawned
+
+    def _try_drop_soul(self, x, y):
+        if not self.on_entity_spawned:
+            return
+        roll = random.random()
+        if roll < 0.01:
+            from entities.powerups import CursedChalice
+            self.on_entity_spawned(CursedChalice(x, y))
+        elif roll < 0.20:
+            from entities.powerups import SoulPickup
+            self.on_entity_spawned(SoulPickup(x, y))
 
     def update(self, entities, dt):
         boids = [e for e in entities if hasattr(e, 'collider') and hasattr(e, 'physics') and not getattr(e, 'is_enemy', False) and e.__class__.__name__ != 'Projectile']
@@ -35,6 +49,23 @@ class CollisionSystem:
                         self.on_resource_collected(resource.transform.x, resource.transform.y)
                     break # One boid can collect it
 
+        pickups = [e for e in entities if hasattr(e, 'collider') and hasattr(e, 'value') and not getattr(e, 'marked_for_deletion', False)]
+        for pickup in pickups:
+            max_radius = pickup.collider.radius + 15.0
+            potential_boids = spatial_hash.query_radius(pickup.transform.x, pickup.transform.y, max_radius)
+            for boid in potential_boids:
+                if getattr(boid, 'marked_for_deletion', False):
+                    continue
+                dx = boid.transform.x - pickup.transform.x
+                dy = boid.transform.y - pickup.transform.y
+                distance_sq = dx * dx + dy * dy
+                radius_sum = boid.collider.radius + pickup.collider.radius
+                if distance_sq < radius_sum * radius_sum:
+                    pickup.marked_for_deletion = True
+                    if self.on_currency_collected:
+                        self.on_currency_collected(pickup.value.soul_amount)
+                    break
+
         # 1-to-1 Attrition (Grunts only — Boomers use is_trigger and are handled below)
         for enemy in enemies:
             if getattr(enemy, 'marked_for_deletion', False):
@@ -56,6 +87,7 @@ class CollisionSystem:
                 if distance_sq < radius_sum * radius_sum:
                     enemy.marked_for_deletion = True
                     boid.marked_for_deletion = True
+                    self._try_drop_soul(enemy.transform.x, enemy.transform.y)
                     break # One enemy pops exactly one boid
 
         # --- Projectile Hit Detection ---
@@ -72,6 +104,7 @@ class CollisionSystem:
                 if distance_sq < radius_sum * radius_sum:
                     enemy.marked_for_deletion = True
                     proj.marked_for_deletion = True
+                    self._try_drop_soul(enemy.transform.x, enemy.transform.y)
                     break
 
         # --- Boomer AoE Detonation ---
@@ -109,6 +142,7 @@ class CollisionSystem:
             # AoE sweep — mark every boid inside blast_radius
             boomer.has_detonated = True
             boomer.marked_for_deletion = True
+            self._try_drop_soul(boomer.transform.x, boomer.transform.y)
             blast_radius_sq = boomer.blast_radius * boomer.blast_radius
 
             potential_blast_boids = spatial_hash.query_radius(boomer.transform.x, boomer.transform.y, boomer.blast_radius)
