@@ -36,6 +36,10 @@ class BehaviorSystem(System):
         if pygame.mouse.get_focused() or (mouse_x != 0 or mouse_y != 0):
             player.transform.x = mouse_x
             player.transform.y = mouse_y
+            
+        mouse_buttons = pygame.mouse.get_pressed()
+        if hasattr(player, 'state'):
+            player.state.is_dense = mouse_buttons[0]
         
         target_pos = Vector2(player.transform.x, player.transform.y)
 
@@ -109,10 +113,15 @@ class BehaviorSystem(System):
                     separation_steer.scale_to_length(self.max_force)
 
             # Combine forces
+            is_dense = hasattr(player, 'state') and player.state.is_dense
+            active_cursor_weight = self.cursor_weight * (3.0 if is_dense else 1.0)
+            active_cohesion_weight = self.cohesion_weight * (5.0 if is_dense else 1.0)
+            active_separation_weight = self.separation_weight * (0.5 if is_dense else 1.0)
+            
             total_steer = (
-                cursor_steer * self.cursor_weight +
-                separation_steer * self.separation_weight +
-                cohesion_steer * self.cohesion_weight +
+                cursor_steer * active_cursor_weight +
+                separation_steer * active_separation_weight +
+                cohesion_steer * active_cohesion_weight +
                 alignment_steer * self.alignment_weight
             )
 
