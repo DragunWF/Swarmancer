@@ -13,7 +13,7 @@ Components contain only flat data attributes and zero game logic.
 - **Graphics:** `sprite_ref` (string), `color` (RGB tuple), `scale` (float), `alpha` (int 0-255).
 - **Collider:** `radius` (float), `is_trigger` (boolean).
 - **Health:** `current` (int), `max` (int).
-- **Timers:** `ScatterTimer` (float, defaults to 3.0), `AimingTimer` (float), `LifespanTimer` (float for particle/pickup decay).
+- **Timers:** `ScatterTimer` (float, defaults to 3.0), `AimingTimer` (float), `FuseTimer` (float, 5s default for Boomer self-detonation), `LifespanTimer` (float for particle/pickup decay).
 - **Value:** `soul_amount` (int for currency drops).
 
 ## 3. Entity Prefabs (`entities/`)
@@ -23,8 +23,8 @@ Entities are OOP classes that act as initialization containers. They automatical
 - **Player (`player.py`):** Holds the central `Transform` (mapped to cursor position) and `ScatterTimer`.
 - **Boid (`swarm.py`):** Represents a skeleton minion. Contains `Transform`, `Physics`, `Graphics`, `Collider` (small radius).
 - **Grunt (`enemies.py`):** The peasant militia. Contains `Transform`, `Physics` (tracking logic), `Graphics`, `Collider` (1-to-1 popping).
-- **Boomer (`enemies.py`):** The dwarf sapper. Contains `Transform`, `Physics` (slow speed), `Graphics`, `Collider` (large blast radius trigger).
-- **LaserDrone (`enemies.py`):** The wizard tower. Contains `Transform` (static), `Graphics`, `AimingTimer` (controls telegraph state).
+- **Boomer (`enemies.py`):** The dwarf sapper. Contains `Transform`, `Physics` (slow speed), `Graphics`, `Collider` (contact trigger, `is_trigger=True`), `FuseTimer` (5s fuse). Carries `blast_radius` (randomized 80–150px per spawn), `fuse_proximity_radius` (200px — fuse only ticks within this range of the player cursor), and `fuse_expired` flag (set by behavior_system, read by collision_system).
+- **LaserDrone (`enemies.py`):** The wizard tower. Contains `Transform` (static), `Graphics`, `AimingTimer` (controls telegraph state). Carries `beam_width = 50.0` (100px total laser band).
 - **SoulPickup (`powerups.py`):** Dropped currency. Contains `Transform`, `Graphics`, `Collider`, `LifespanTimer`, `Value`.
 
 ## 4. System Layer (`systems/`)

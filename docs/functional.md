@@ -26,10 +26,11 @@
   - **Interaction:** Colliding with a skeleton minion triggers a 1-to-1 popping effect, destroying both entities.
 - **Dwarf Sappers (The Boomer):**
   - **Behavior:** Heavy dwarf sappers carrying powder keg bombs move slowly toward the swarm.
-  - **Interaction:** Upon contact, they detonate an area-of-effect explosion. This mechanic specifically punishes players who hold the Dense state (Left Click) too long.
+  - **Fuse:** Each Boomer carries a 5-second fuse that only begins counting down once the Boomer enters within 200 pixels of the player cursor. If the Boomer retreats out of range, the timer pauses but does not reset, ensuring it cannot be stalled indefinitely.
+  - **Interaction:** Upon contact with any minion, or when the fuse expires, the Boomer detonates an area-of-effect explosion. Each Boomer's blast radius is randomized between 80 and 150 pixels per spawn, keeping encounters unpredictable. This mechanic specifically punishes players who hold the Dense state (Left Click) too long.
 - **Wizard Towers (The Laser Drone):**
   - **Behavior:** Stationary stone wizard towers that telegraph an attack before firing.
-  - **Interaction:** Fires a wide, holy light laser beam. This attack destroys any minion caught in its path, specifically punishing loose, spread-out formations.
+  - **Interaction:** Fires a wide, holy light laser beam with a 100-pixel total band (50px half-width) centered on the drone's position. This attack destroys any minion caught in its path, specifically punishing loose, spread-out formations.
 
 ## 5. UI Flow & State Management
 
