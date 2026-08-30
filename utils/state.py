@@ -5,3 +5,4 @@ class GameState(Enum):
     SHOP = auto()
     MENU = auto()
     GAME_OVER = auto()
+    PAUSED = auto()

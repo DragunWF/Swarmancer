@@ -14,6 +14,7 @@ from systems.particle_system import ParticleSystem
 from utils.state import GameState
 from ui.shop_controller import ShopController
 from ui.menu_controller import MenuController
+from ui.pause_controller import PauseController
 from components.combat import RangedAttack
 from systems.combat_system import CombatSystem
 
@@ -61,6 +62,7 @@ async def main():
     # Controllers
     shop_controller = ShopController(SCREEN_WIDTH, SCREEN_HEIGHT)
     menu_controller = MenuController(SCREEN_WIDTH, SCREEN_HEIGHT)
+    pause_controller = PauseController(SCREEN_WIDTH, SCREEN_HEIGHT)
     
     current_state = GameState.MENU
     hud_font = pygame.font.SysFont(None, 36)
@@ -92,6 +94,10 @@ async def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+                
+            if current_state == GameState.PLAYING and event.type == pygame.KEYDOWN and event.key == pygame.K_p:
+                current_state = GameState.PAUSED
+                continue
                 
             if current_state in (GameState.MENU, GameState.GAME_OVER):
                 action = menu_controller.handle_event(event, current_state)
@@ -125,6 +131,13 @@ async def main():
                             current_state = GameState.PLAYING
                         else:
                             print("Not enough souls!")
+                            
+            elif current_state == GameState.PAUSED:
+                action = pause_controller.handle_event(event)
+                if action == "RESUME":
+                    current_state = GameState.PLAYING
+                elif action == "MAIN_MENU":
+                    current_state = GameState.MENU
 
         screen.fill(BG_COLOR)
 
@@ -166,6 +179,10 @@ async def main():
         elif current_state == GameState.SHOP:
             render_system.update(entities, 0)
             shop_controller.draw(screen, player.souls)
+            
+        elif current_state == GameState.PAUSED:
+            render_system.update(entities, 0)
+            pause_controller.draw(screen)
             
         elif current_state == GameState.MENU:
             menu_controller.draw_main_menu(screen, high_score)

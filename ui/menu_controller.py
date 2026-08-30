@@ -81,7 +81,7 @@ class MenuController:
         self.draw_button(screen, self.settings_button, "Settings")
         
         if self.show_controls:
-            self._draw_overlay(screen, "Controls", ["Move: Mouse", "Dense State: Hold Left Click", "Scatter: Right Click (3s Cooldown)"])
+            self._draw_overlay(screen, "Controls", ["Move: Mouse", "Dense State: Hold Left Click", "Scatter: Right Click (3s Cooldown)", "Pause: P Key"])
         elif self.show_settings:
             self._draw_overlay(screen, "Settings", ["Master Volume: [Placeholder]", "Music Volume: [Placeholder]"])
 
