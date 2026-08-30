@@ -8,3 +8,4 @@ class Player:
         self.state = PlayerState()
         self.scatter_timer = ScatterTimer()
         self.is_player = True
+        self.souls = 0

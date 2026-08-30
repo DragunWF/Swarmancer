@@ -10,6 +10,8 @@ from systems.movement_system import MovementSystem
 from systems.render_system import RenderSystem
 from systems.collision_system import CollisionSystem
 from systems.spawner_system import SpawnerSystem
+from utils.state import GameState
+from ui.shop_controller import ShopController
 
 async def main():
     pygame.init()
@@ -44,28 +46,59 @@ async def main():
     systems = [spawner_system, behavior_system, movement_system, collision_system, render_system]
     
     resource_timer = 0.0
+    shop_timer = 0.0
+    current_state = GameState.PLAYING
+    shop_controller = ShopController(SCREEN_WIDTH, SCREEN_HEIGHT)
+    hud_font = pygame.font.SysFont(None, 36)
 
     running = True
     while running:
         dt = clock.tick(FPS) / 1000.0
-        resource_timer += dt
         
-        if resource_timer > 3.0: # Spawn a grave every 3 seconds
-            entities.append(Resource(random.uniform(50, SCREEN_WIDTH - 50), random.uniform(50, SCREEN_HEIGHT - 50)))
-            resource_timer = 0.0
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+                
+            if current_state == GameState.SHOP:
+                selected_upgrade = shop_controller.handle_event(event)
+                if selected_upgrade is not None:
+                    # TODO: Implement specific upgrade logic based on selected_upgrade ID
+                    if player.souls >= 10:
+                        player.souls -= 10
+                        current_state = GameState.PLAYING
+                    else:
+                        print("Not enough souls!")
 
         screen.fill(BG_COLOR)
 
-        # Systems update logic
-        for system in systems:
-            system.update(entities, dt)
+        if current_state == GameState.PLAYING:
+            resource_timer += dt
+            shop_timer += dt
             
-        # Cleanup deleted entities
-        entities = [e for e in entities if not getattr(e, 'marked_for_deletion', False)]
+            if resource_timer > 3.0: # Spawn a grave every 3 seconds
+                entities.append(Resource(random.uniform(50, SCREEN_WIDTH - 50), random.uniform(50, SCREEN_HEIGHT - 50)))
+                resource_timer = 0.0
+                
+            if shop_timer > 30.0: # Enter shop every 30 seconds
+                current_state = GameState.SHOP
+                shop_timer = 0.0
+                player.souls += 20 # Passive stipend as per Functional Spec
+
+            # Systems update logic
+            for system in systems:
+                system.update(entities, dt)
+                
+            # Cleanup deleted entities
+            entities = [e for e in entities if not getattr(e, 'marked_for_deletion', False)]
+            
+            # Draw HUD
+            time_until_shop = max(0.0, 30.0 - shop_timer)
+            timer_text = hud_font.render(f"Next Shop: {time_until_shop:.1f}s", True, (255, 255, 255))
+            screen.blit(timer_text, (SCREEN_WIDTH // 2 - timer_text.get_width() // 2, 10))
+            
+        elif current_state == GameState.SHOP:
+            render_system.update(entities, 0)
+            shop_controller.draw(screen, player.souls)
         
         pygame.display.flip()
         
