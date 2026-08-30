@@ -1,0 +1,23 @@
+# DragunWF
+dragunwf-secret
+
+# macOS
+.DS_Store
+
+# Player generated
+data/save_data.json
+
+# Python/Build
+__pycache__/
+*.py[cod]
+*.so
+build/
+dist/
+*.egg-info/
+venv/
+.venv/
+.env/
+
+# IDE/Editor
+.vscode/
+.idea/

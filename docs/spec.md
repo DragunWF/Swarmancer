@@ -1,0 +1,96 @@
+# Swarmancer - Game Specification
+
+## Overview
+
+A fast-paced dark fantasy survival arena game built in Pygame using an Entity-Component-System (ECS) architecture.
+
+# Epic 1: The Swarm Economy & Basic Attrition
+
+The player must manage a fluid swarm against escalating waves of enemies. The swarm count acts directly as the player's health bar, requiring constant movement to consume resources and offset the 1-to-1 attrition rate of standard enemies.
+
+## Feature 1: Boids Swarm Navigation
+
+- The player acts as the central commander or cursor logic.
+- The swarm consists of a fluid horde of tiny skeleton minions.
+- Minion movement relies on calculating Boid AI rules (cohesion, alignment, separation) toward the cursor.
+
+## Feature 2: The Replenishment Cycle
+
+- The game periodically spawns open glowing graves to act as resource cores.
+- A collision system checks for overlaps between entities with Collider components.
+- Consuming an open glowing grave grants new soldiers to the swarm.
+
+## Feature 3: Standard Enemy Attrition
+
+- The game spawns charging peasant militia as the standard "Grunt" enemy.
+- The militia utilize basic tracking logic to rush the swarm.
+- Colliding with a peasant militia triggers a 1-to-1 popping effect.
+
+## User Stories
+
+- **As a player**, I want my skeleton minions to constantly update their position toward my cursor using Boids AI rules, **so that** I can seamlessly steer the entire horde.
+- **As a player**, I want to guide my swarm into open glowing graves, **so that** my overall swarm count increases, acting as my replenishing health bar.
+- **As a player**, I want charging peasant militia to destroy one of my skeletons upon contact, **so that** I must actively manage my attrition rate to prevent a game over.
+
+# Epic 2: Shape-Shifting Combat Mechanics
+
+The player's ability to manipulate the swarm's density and trigger scatter evasions. This epic covers the active input states required to survive advanced enemy types.
+
+## Feature 1: Density Control (Dense State)
+
+- The player can trigger a physical state change by holding Left Click.
+- Activating this state drastically increases cohesion and cursor attraction.
+- This mechanic allows the swarm to shrink into a tight ball to evade area-of-effect explosions from Boomers.
+
+## Feature 2: Scatter Evasion (Panic State)
+
+- The player triggers a temporary scatter evasion by pressing the right mouse button.
+- The ability functions by applying correct repulsion physics to push the boids rapidly outward.
+- The mechanic is restricted by a 3-second cooldown.
+
+## Feature 3: Anti-State Enemy Interactions
+
+- Boomer enemies initialize with a blast radius component.
+- Boomers act as heavy dwarf sappers carrying powder keg bombs.
+- Boomer explosions heavily punish players who stay in the tightly packed "Dense" state.
+- Laser Drones act as stationary stone wizard towers that telegraph a wide, holy light laser beam.
+- A Laser Drone will telegraph an attack before firing.
+- Laser Drones specifically punish loose, spread-out swarm formations.
+
+## User Stories
+
+- **As a player**, I want to hold Left Click to drastically increase cohesion and cursor attraction, **so that** my swarm shrinks into a tight ball to evade area-of-effect explosions from Boomers.
+- **As a player**, I want to press the right mouse button to scatter my swarm using repulsion physics, **so that** I can rapidly escape immediate danger.
+- **As a player**, I want the scatter evasion to trigger a 3-second cooldown, **so that** I cannot spam the ability to stay permanently invincible.
+- **As a player**, I want a Laser Drone to telegraph an attack before firing, **so that** I have enough warning to condense my spread-out swarm and dodge the beam.
+
+# Epic 3: Technical ECS Architecture & Systems
+
+Establish the underlying hybrid Entity-Component-System (ECS) engine and spatial optimization structures. This epic ensures high-performance rendering and sequential data processing required to manage hundreds of active boid entities without framerate drops.
+
+## Feature 1: Component & Entity Composition
+
+- Define light, data-only Component classes to hold position, velocity, hitboxes, and timers.
+- Use Object-Oriented Entity containers as prefabs to bundle components automatically upon instantiation.
+- Maintain strict separation between entity data storage and system processing logic.
+
+## Feature 2: Core Processing Systems
+
+- Movement System: Iterates through entities containing Transform and Physics components to calculate new positions.
+- Behavior System: Evaluates Boids flocking vectors, tracking behaviors, and laser telegraphing routines.
+- Collision System: Evaluates bounding box and distance-squared overlaps between active Colliders.
+- Particle System: Processes life cycles, shrink scale logic, and rendering for death burst particles.
+- Render System: Draws entities and active particle effects onto the Pygame display surface.
+
+## Feature 3: Spatial Partitioning & Performance Optimization
+
+- Implement a SpatialHash grid system in the utility layer.
+- Group spatial entities into discrete grid cells based on screen coordinates.
+- Query only neighboring grid cells during Boid perception and collision detection routines to maintain a constant 60 FPS.
+
+## User Stories
+
+- **As a developer**, I want components to contain only data attributes, **so that** systems can process game logic in clean, sequential sweeps.
+- **As a developer**, I want to query spatial neighbors through a SpatialHash grid, **so that** distance calculations for hundreds of swarm entities remain performant without checking every entity against every other entity.
+- **As a developer**, I want collision checks to evaluate squared distance values, **so that** the computational overhead of square root calculations is avoided during runtime.
+- **As a player**, I want entity deaths to spawn fading particle pops managed by a particle system, **so that** combat impacts feel visually clear and responsive.
