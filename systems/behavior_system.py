@@ -192,3 +192,30 @@ class BehaviorSystem(System):
                     steer.scale_to_length(self.max_force)
                 enemy.physics.acceleration += steer / enemy.physics.mass
 
+        # --- LaserDrone AimingTimer Tick ---
+        # Advances each drone through its telegraph → fire → reset cycle.
+        # Sole responsibility: update timer data. Hit detection is in collision_system.
+        for entity in entities:
+            if getattr(entity, 'enemy_type', None) != 'laser_drone':
+                continue
+            if not hasattr(entity, 'aiming_timer'):
+                continue
+
+            at = entity.aiming_timer
+
+            if not at.is_firing:
+                # Telegraph phase: accumulate charge time
+                at.elapsed += dt
+                if at.elapsed >= at.charge_duration:
+                    # Threshold reached — begin firing
+                    at.is_firing = True
+                    at.elapsed = 0.0
+            else:
+                # Active firing phase: count down beam duration
+                at.fire_elapsed += dt
+                if at.fire_elapsed >= at.fire_duration:
+                    # Firing complete — reset full cycle back to telegraph
+                    at.is_firing = False
+                    at.fire_elapsed = 0.0
+                    at.elapsed = 0.0
+

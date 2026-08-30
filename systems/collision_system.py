@@ -24,9 +24,12 @@ class CollisionSystem:
                     if self.on_resource_collected:
                         self.on_resource_collected(resource.transform.x, resource.transform.y)
 
-        # 1-to-1 Attrition
+        # 1-to-1 Attrition (Grunts only — Boomers use is_trigger and are handled below)
         for enemy in enemies:
             if getattr(enemy, 'marked_for_deletion', False):
+                continue
+            # Skip trigger-type colliders; they are processed in the AoE block
+            if getattr(enemy, 'collider', None) and enemy.collider.is_trigger:
                 continue
             for boid in boids:
                 if getattr(boid, 'marked_for_deletion', False):
@@ -39,3 +42,63 @@ class CollisionSystem:
                     enemy.marked_for_deletion = True
                     boid.marked_for_deletion = True
                     break # One enemy pops exactly one boid
+
+        # --- Boomer AoE Detonation ---
+        # When a Boomer's contact radius touches any boid, it detonates immediately,
+        # destroying every boid within blast_radius. Punishes the Dense state implicitly:
+        # tightly packed swarms have more units within the radius.
+        boomers = [e for e in entities
+                   if getattr(e, 'enemy_type', None) == 'boomer'
+                   and not getattr(e, 'has_detonated', False)
+                   and not getattr(e, 'marked_for_deletion', False)]
+
+        for boomer in boomers:
+            # Phase 1: small contact trigger check
+            contacted = False
+            for boid in boids:
+                if getattr(boid, 'marked_for_deletion', False):
+                    continue
+                dx = boomer.transform.x - boid.transform.x
+                dy = boomer.transform.y - boid.transform.y
+                dist_sq = dx * dx + dy * dy
+                contact_sum = boomer.collider.radius + boid.collider.radius
+                if dist_sq < contact_sum * contact_sum:
+                    contacted = True
+                    break
+
+            if not contacted:
+                continue
+
+            # Phase 2: AoE sweep — mark every boid inside blast_radius
+            boomer.has_detonated = True
+            boomer.marked_for_deletion = True
+            blast_radius_sq = boomer.blast_radius * boomer.blast_radius
+
+            for boid in boids:
+                if getattr(boid, 'marked_for_deletion', False):
+                    continue
+                dx = boomer.transform.x - boid.transform.x
+                dy = boomer.transform.y - boid.transform.y
+                dist_sq = dx * dx + dy * dy
+                if dist_sq < blast_radius_sq:
+                    boid.marked_for_deletion = True
+
+        # --- LaserDrone Beam Hit Detection ---
+        # Fires when behavior_system has set aiming_timer.is_firing = True.
+        # Destroys every boid within the horizontal band at the drone's y position.
+        # Punishes spread-out formations implicitly: scattered boids fan across many
+        # y values and are more likely to intersect the beam band.
+        drones = [e for e in entities
+                  if getattr(e, 'enemy_type', None) == 'laser_drone'
+                  and hasattr(e, 'aiming_timer')
+                  and e.aiming_timer.is_firing]
+
+        for drone in drones:
+            for boid in boids:
+                if getattr(boid, 'marked_for_deletion', False):
+                    continue
+                # Horizontal band check — pure subtraction, no sqrt
+                vertical_dist = abs(boid.transform.y - drone.transform.y)
+                if vertical_dist < drone.beam_width:
+                    boid.marked_for_deletion = True
+
