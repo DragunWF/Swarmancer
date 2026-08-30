@@ -1,6 +1,7 @@
 from components.transform import Transform
 from components.physics import Physics
 from components.graphics import Graphics
+from components.collider import Collider
 import random
 
 class Boid:
@@ -13,3 +14,4 @@ class Boid:
         self.physics.velocity.y = random.uniform(-20, 20)
             
         self.graphics = Graphics(color=(220, 220, 220), scale=3.0)
+        self.collider = Collider(radius=3.0)
