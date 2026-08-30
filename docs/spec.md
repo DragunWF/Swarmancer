@@ -52,11 +52,12 @@ The player's ability to manipulate the swarm's density and trigger scatter evasi
 
 - Boomer enemies initialize with a variable blast radius component, randomized per spawn between 80 and 150 pixels.
 - Boomers act as heavy dwarf sappers carrying powder keg bombs.
-- A Boomer detonates its area-of-effect explosion either upon contact with any minion, or automatically after a 5-second fuse timer expires, whichever comes first. The fuse only begins counting down once the Boomer enters within 200 pixels of the player swarm, preventing premature detonations while the Boomer is still far away.
+- A Boomer detonates its area-of-effect explosion either upon contact with any minion, or automatically after a 5-second fuse timer expires, whichever comes first. The fuse only begins counting down once the Boomer enters within 450 pixels of the player swarm, preventing premature detonations while the Boomer is still far away.
 - Boomer explosions heavily punish players who stay in the tightly packed "Dense" state.
 - Laser Drones act as stationary stone wizard towers that telegraph a wide, holy light laser beam.
 - A Laser Drone will telegraph an attack before firing.
 - Laser Drones fire a beam with a 100-pixel total band (50px half-width), specifically punishing loose, spread-out swarm formations.
+- Laser Drones have a lifespan of 15 seconds, after which they automatically despawn to prevent cluttering the arena.
 
 ## User Stories
 
