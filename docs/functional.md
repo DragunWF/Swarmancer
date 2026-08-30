@@ -1,0 +1,45 @@
+# Swarmancer: Functional Design Specification
+
+## 1. Core Gameplay Loop & Win/Loss States
+
+- **Objective:** Survive endless waves of enemies for as long as possible.
+- **Health System:** The player does not have a traditional health bar; the total swarm count acts directly as the player's health.
+- **Loss Condition:** A "Game Over" state triggers the moment the swarm count reaches zero.
+- **Progression:** The game difficulty scales over time by increasing enemy spawn rates and occasionally pausing for a shop phase where players spend collected resources on upgrades.
+
+## 2. Input Mapping & Mechanics
+
+- **Mouse Movement:** The cursor dictates the central target point for the swarm. The swarm automatically follows the cursor using Boids AI rules (cohesion, alignment, separation).
+- **Dense State (Hold Left Click):** Drastically increases cohesion and cursor attraction. The swarm shrinks into a tight ball, useful for navigating narrow gaps or evading wide attacks.
+- **Scatter Evasion (Press Right Click):** Triggers a temporary scatter evasion by applying massive repulsion physics. This forces the swarm to rapidly explode outward to escape immediate danger. This ability is restricted by a strict 3-second cooldown.
+
+## 3. The Swarm Economy
+
+- **The Swarm:** A massive, fluid horde of tiny skeleton minions.
+- **Resource Cores:** The game spawns open glowing graves across the map.
+- **Replenishment:** Guiding the swarm to consume an open glowing grave instantly grants new soldiers, offsetting combat attrition.
+
+## 4. Enemy Entity Behaviors
+
+- **Peasant Militia (The Grunt):**
+  - **Behavior:** Charging peasant militia rush toward the player's cursor.
+  - **Interaction:** Colliding with a skeleton minion triggers a 1-to-1 popping effect, destroying both entities.
+- **Dwarf Sappers (The Boomer):**
+  - **Behavior:** Heavy dwarf sappers carrying powder keg bombs move slowly toward the swarm.
+  - **Interaction:** Upon contact, they detonate an area-of-effect explosion. This mechanic specifically punishes players who hold the Dense state (Left Click) too long.
+- **Wizard Towers (The Laser Drone):**
+  - **Behavior:** Stationary stone wizard towers that telegraph an attack before firing.
+  - **Interaction:** Fires a wide, holy light laser beam. This attack destroys any minion caught in its path, specifically punishing loose, spread-out formations.
+
+## 5. UI Flow & State Management
+
+- **Main Menu:** Contains options to Play, view Controls, and adjust Settings. Displays the current highest survival time.
+- **Settings:** Provides individual volume sliders/increments for master sound effects and background music.
+- **Game Over Screen:** Halts all gameplay physics and enemy spawning. Compares the current run's survival time against the high score, updates it if necessary, and allows the player to restart.
+
+## 6. The Shop Economy & Progression
+
+- **Currency (Souls):** A secondary resource explicitly used for purchasing upgrades during shop phases, independent of the player's active swarm count.
+- **Acquisition - Combat Drops:** Destroying enemies has a chance to drop a temporary Soul pickup. The player must physically maneuver the swarm to collect it before it fades.
+- **Acquisition - Survival Milestones:** Players receive a passive Soul stipend for every 30 seconds they remain alive, encouraging evasion and longevity.
+- **Acquisition - Rare Pickups:** High-value powerups spawn occasionally across the map. Unlike glowing graves that replenish the swarm, these specific pickups grant a massive boost to shop currency.
