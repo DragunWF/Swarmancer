@@ -12,6 +12,8 @@ from systems.collision_system import CollisionSystem
 from systems.spawner_system import SpawnerSystem
 from utils.state import GameState
 from ui.shop_controller import ShopController
+from components.combat import RangedAttack
+from systems.combat_system import CombatSystem
 
 async def main():
     pygame.init()
@@ -43,7 +45,9 @@ async def main():
     render_system = RenderSystem()
     spawner_system = SpawnerSystem(SCREEN_WIDTH, SCREEN_HEIGHT)
     
-    systems = [spawner_system, behavior_system, movement_system, collision_system, render_system]
+    combat_system = CombatSystem()
+    
+    systems = [spawner_system, behavior_system, combat_system, movement_system, collision_system, render_system]
     
     resource_timer = 0.0
     shop_timer = 0.0
@@ -62,12 +66,27 @@ async def main():
             if current_state == GameState.SHOP:
                 selected_upgrade = shop_controller.handle_event(event)
                 if selected_upgrade is not None:
-                    # TODO: Implement specific upgrade logic based on selected_upgrade ID
-                    if player.souls >= 10:
-                        player.souls -= 10
-                        current_state = GameState.PLAYING
+                    if selected_upgrade == 0:
+                        if player.souls >= 10:
+                            player.souls -= 10
+                            
+                            # Apply Archer Upgrade
+                            boids = [e for e in entities if isinstance(e, Boid) and not hasattr(e, 'ranged_attack')]
+                            upgrade_count = min(10, len(boids))
+                            if upgrade_count > 0:
+                                for b in random.sample(boids, upgrade_count):
+                                    b.ranged_attack = RangedAttack(fire_rate=1.0, attack_range=150.0, projectile_speed=300.0)
+                                    b.graphics.color = (100, 100, 255) # Tint blue
+                                    
+                            current_state = GameState.PLAYING
+                        else:
+                            print("Not enough souls!")
                     else:
-                        print("Not enough souls!")
+                        if player.souls >= 10:
+                            player.souls -= 10
+                            current_state = GameState.PLAYING
+                        else:
+                            print("Not enough souls!")
 
         screen.fill(BG_COLOR)
 

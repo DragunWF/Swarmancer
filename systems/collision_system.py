@@ -6,10 +6,10 @@ class CollisionSystem:
         self.on_resource_collected = on_resource_collected
 
     def update(self, entities, dt):
-        boids = [e for e in entities if hasattr(e, 'collider') and hasattr(e, 'physics') and not getattr(e, 'is_enemy', False)]
+        boids = [e for e in entities if hasattr(e, 'collider') and hasattr(e, 'physics') and not getattr(e, 'is_enemy', False) and e.__class__.__name__ != 'Projectile']
         resources = [e for e in entities if hasattr(e, 'collider') and hasattr(e, 'graphics') and hasattr(e, 'transform') and e.__class__.__name__ == 'Resource']
         enemies = [e for e in entities if getattr(e, 'is_enemy', False) and hasattr(e, 'collider')]
-
+        projectiles = [e for e in entities if e.__class__.__name__ == 'Projectile']
         
         # 150.0 covers max Boomer blast radius
         spatial_hash = SpatialHash(150.0)
@@ -57,6 +57,22 @@ class CollisionSystem:
                     enemy.marked_for_deletion = True
                     boid.marked_for_deletion = True
                     break # One enemy pops exactly one boid
+
+        # --- Projectile Hit Detection ---
+        for proj in projectiles:
+            if getattr(proj, 'marked_for_deletion', False):
+                continue
+            for enemy in enemies:
+                if getattr(enemy, 'marked_for_deletion', False):
+                    continue
+                dx = proj.transform.x - enemy.transform.x
+                dy = proj.transform.y - enemy.transform.y
+                distance_sq = dx * dx + dy * dy
+                radius_sum = proj.collider.radius + enemy.collider.radius
+                if distance_sq < radius_sum * radius_sum:
+                    enemy.marked_for_deletion = True
+                    proj.marked_for_deletion = True
+                    break
 
         # --- Boomer AoE Detonation ---
         # Triggers when: (a) the Boomer's contact radius touches any boid, OR

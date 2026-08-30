@@ -15,7 +15,7 @@ class ShopController:
         y_pos = (screen_height - button_height) // 2
         
         self.buttons = [
-            {"rect": pygame.Rect(start_x, y_pos, button_width, button_height), "id": 0, "color": (100, 100, 100), "hover_color": (150, 150, 150), "text": "Upgrade A\nCost: 10 Souls"},
+            {"rect": pygame.Rect(start_x, y_pos, button_width, button_height), "id": 0, "color": (100, 100, 100), "hover_color": (150, 150, 150), "text": "Skeletal Archers\nCost: 10 Souls"},
             {"rect": pygame.Rect(start_x + button_width + padding, y_pos, button_width, button_height), "id": 1, "color": (100, 100, 100), "hover_color": (150, 150, 150), "text": "Upgrade B\nCost: 15 Souls"},
             {"rect": pygame.Rect(start_x + 2 * (button_width + padding), y_pos, button_width, button_height), "id": 2, "color": (100, 100, 100), "hover_color": (150, 150, 150), "text": "Upgrade C\nCost: 20 Souls"}
         ]
