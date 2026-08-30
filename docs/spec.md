@@ -116,3 +116,33 @@ The player can access a mid-run or end-of-run shop system to mutate the swarm, s
 - **As a player**, I want to spend my accumulated resources at a shop interface, **so that** I can purchase permanent upgrades that help me survive longer.
 - **As a player**, I want to purchase Skeletal Archers that fire projectiles automatically, **so that** my swarm can deal damage without risking direct 1-to-1 collision attrition.
 - **As a developer**, I want upgrades to dynamically attach new components to existing entities, **so that** the shop seamlessly integrates with the established ECS architecture without requiring hardcoded subclass changes.
+
+# Epic 5: User Interface & Game State Management
+
+The player navigates through distinct game states (Menu, Gameplay, Settings) before and after the core survival loop. This epic defines the main menu screens, audio configuration, and high score tracking required for a polished game jam entry.
+
+## Feature 1: Main Menu & Navigation
+
+- The application initializes into a Main Menu state upon launch.
+- The menu contains clearly labeled buttons: "Play", "Controls", and "Settings".
+- Clicking "Play" transitions the application into the active Gameplay state, resetting the survival timer and swarm count.
+- Clicking "Controls" opens an overlay detailing the left-click (Dense) and right-click (Scatter) inputs.
+
+## Feature 2: High Score Tracking
+
+- The game records the highest survival time achieved during the current session.
+- The high score is prominently displayed on the Main Menu interface.
+- When a "Game Over" state triggers (swarm count reaches zero), the system compares the final survival time against the stored high score and updates it if necessary.
+
+## Feature 3: Audio Settings & Configuration
+
+- The Settings menu allows players to adjust the master volume for sound effects and background music independently.
+- Adjustments are made via clickable sliders or discrete increment buttons (e.g., +/- 10%).
+- The Pygame mixer is updated dynamically as the user modifies these settings.
+
+## User Stories
+
+- **As a player**, I want to see my high score on the main menu, **so that** I have a clear benchmark to beat in my next session.
+- **As a player**, I want to access a Controls overlay from the main menu, **so that** I understand the density and scatter mechanics before starting a run.
+- **As a player**, I want to adjust the volume of sound effects and music independently in a Settings menu, **so that** I can balance the audio to my personal preference.
+- **As a developer**, I want the game logic to pause entirely while in the Menu or Settings states, **so that** enemies do not spawn and the physics engine does not process data in the background.
