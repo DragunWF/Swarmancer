@@ -1,3 +1,10 @@
+class DenseTimer:
+    def __init__(self, max_duration: float = 2.0, cooldown_duration: float = 3.0):
+        self.active_time = 0.0
+        self.cooldown_time = 0.0
+        self.max_duration = max_duration
+        self.cooldown_duration = cooldown_duration
+
 class ScatterTimer:
     def __init__(self, cooldown_duration: float = 3.0, scatter_duration: float = 0.35):
         self.current_time = 0.0

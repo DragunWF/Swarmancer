@@ -58,8 +58,36 @@ class BehaviorSystem(System):
             player.transform.y = mouse_y
             
         mouse_buttons = pygame.mouse.get_pressed()
+        wants_dense = mouse_buttons[0]
+        
+        is_dense = False
+        if hasattr(player, 'dense_timer'):
+            dt_timer = player.dense_timer
+            
+            # Decrease cooldown if active
+            if dt_timer.cooldown_time > 0.0:
+                dt_timer.cooldown_time -= dt
+                if dt_timer.cooldown_time < 0.0:
+                    dt_timer.cooldown_time = 0.0
+                    
+            if wants_dense and dt_timer.cooldown_time <= 0.0:
+                dt_timer.active_time += dt
+                is_dense = True
+                if dt_timer.active_time >= dt_timer.max_duration:
+                    # Overheat/Max duration reached
+                    dt_timer.cooldown_time = dt_timer.cooldown_duration
+                    dt_timer.active_time = 0.0
+                    is_dense = False
+            else:
+                if not wants_dense and dt_timer.active_time > 0.0:
+                    # Released early, trigger proportional cooldown
+                    dt_timer.cooldown_time = dt_timer.cooldown_duration * (dt_timer.active_time / dt_timer.max_duration)
+                    dt_timer.active_time = 0.0
+        else:
+            is_dense = wants_dense
+
         if hasattr(player, 'state'):
-            player.state.is_dense = mouse_buttons[0]
+            player.state.is_dense = is_dense
             
         if mouse_buttons[2] and hasattr(player, 'scatter_timer'):  # Right click
             st = player.scatter_timer
@@ -169,9 +197,9 @@ class BehaviorSystem(System):
 
                 # Combine forces
                 is_dense = hasattr(player, 'state') and player.state.is_dense
-                active_cursor_weight = self.cursor_weight * (3.0 if is_dense else 1.0)
-                active_cohesion_weight = self.cohesion_weight * (5.0 if is_dense else 1.0)
-                active_separation_weight = self.separation_weight * (0.5 if is_dense else 1.0)
+                active_cursor_weight = self.cursor_weight * (2.5 if is_dense else 1.0)
+                active_cohesion_weight = self.cohesion_weight * (3.0 if is_dense else 1.0)
+                active_separation_weight = self.separation_weight * (0.7 if is_dense else 1.0)
                 
                 total_steer = (
                     cursor_steer * active_cursor_weight +
