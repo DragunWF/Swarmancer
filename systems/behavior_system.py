@@ -1,5 +1,6 @@
 from systems.system import System
 from pygame.math import Vector2
+from utils.spatial_hash import SpatialHash
 import pygame
 import random
 import math
@@ -69,6 +70,9 @@ class BehaviorSystem(System):
                 just_triggered_scatter = True
         
         target_pos = Vector2(player.transform.x, player.transform.y)
+        spatial_hash = SpatialHash(65.0) # slightly larger than perception_radius
+        for boid in boids:
+            spatial_hash.insert(boid, boid.transform.x, boid.transform.y)
 
         for boid in boids:
             boid_pos = Vector2(boid.transform.x, boid.transform.y)
@@ -115,9 +119,11 @@ class BehaviorSystem(System):
                 center_of_mass = Vector2(0, 0)
                 avg_velocity = Vector2(0, 0)
                 separation_repulsion = Vector2(0, 0)
-                neighbors = 0
+                neighbors_count = 0
                 
-                for other in boids:
+                potential_neighbors = spatial_hash.query_radius(boid_pos.x, boid_pos.y, self.perception_radius)
+                
+                for other in potential_neighbors:
                     if boid is other:
                         continue
                     other_pos = Vector2(other.transform.x, other.transform.y)
@@ -126,7 +132,7 @@ class BehaviorSystem(System):
                     if dist < self.perception_radius:
                         center_of_mass += other_pos
                         avg_velocity += other.physics.velocity
-                        neighbors += 1
+                        neighbors_count += 1
                         
                         if 0 < dist < self.separation_radius:
                             diff = (boid_pos - other_pos).normalize() / dist
@@ -136,9 +142,9 @@ class BehaviorSystem(System):
                 alignment_steer = Vector2(0, 0)
                 separation_steer = Vector2(0, 0)
 
-                if neighbors > 0:
+                if neighbors_count > 0:
                     # Cohesion
-                    center_of_mass /= neighbors
+                    center_of_mass /= neighbors_count
                     to_com = center_of_mass - boid_pos
                     if to_com.length_squared() > 0:
                         desired = to_com.normalize() * max_speed
@@ -147,7 +153,7 @@ class BehaviorSystem(System):
                             cohesion_steer.scale_to_length(self.max_force)
 
                     # Alignment
-                    avg_velocity /= neighbors
+                    avg_velocity /= neighbors_count
                     if avg_velocity.length_squared() > 0:
                         desired = avg_velocity.normalize() * max_speed
                         alignment_steer = desired - boid.physics.velocity

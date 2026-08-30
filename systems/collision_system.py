@@ -1,4 +1,5 @@
 import math
+from utils.spatial_hash import SpatialHash
 
 class CollisionSystem:
     def __init__(self, on_resource_collected=None):
@@ -9,11 +10,20 @@ class CollisionSystem:
         resources = [e for e in entities if hasattr(e, 'collider') and hasattr(e, 'graphics') and hasattr(e, 'transform') and e.__class__.__name__ == 'Resource']
         enemies = [e for e in entities if getattr(e, 'is_enemy', False) and hasattr(e, 'collider')]
 
+        
+        # 150.0 covers max Boomer blast radius
+        spatial_hash = SpatialHash(150.0)
         for boid in boids:
-            for resource in resources:
-                if resource.marked_for_deletion:
-                    continue
+            spatial_hash.insert(boid, boid.transform.x, boid.transform.y)
 
+        for resource in resources:
+            if resource.marked_for_deletion:
+                continue
+
+            max_radius = resource.collider.radius + 15.0 # Assuming max boid radius is small (~15)
+            potential_boids = spatial_hash.query_radius(resource.transform.x, resource.transform.y, max_radius)
+
+            for boid in potential_boids:
                 dx = boid.transform.x - resource.transform.x
                 dy = boid.transform.y - resource.transform.y
                 distance_sq = dx * dx + dy * dy
@@ -23,6 +33,7 @@ class CollisionSystem:
                     resource.marked_for_deletion = True
                     if self.on_resource_collected:
                         self.on_resource_collected(resource.transform.x, resource.transform.y)
+                    break # One boid can collect it
 
         # 1-to-1 Attrition (Grunts only — Boomers use is_trigger and are handled below)
         for enemy in enemies:
@@ -31,7 +42,11 @@ class CollisionSystem:
             # Skip trigger-type colliders; they are processed in the AoE block
             if getattr(enemy, 'collider', None) and enemy.collider.is_trigger:
                 continue
-            for boid in boids:
+                
+            max_radius = enemy.collider.radius + 15.0
+            potential_boids = spatial_hash.query_radius(enemy.transform.x, enemy.transform.y, max_radius)
+            
+            for boid in potential_boids:
                 if getattr(boid, 'marked_for_deletion', False):
                     continue
                 dx = enemy.transform.x - boid.transform.x
@@ -56,7 +71,11 @@ class CollisionSystem:
         for boomer in boomers:
             # Check contact trigger (Phase 1)
             contacted = False
-            for boid in boids:
+            
+            max_contact_radius = boomer.collider.radius + 15.0
+            potential_contact_boids = spatial_hash.query_radius(boomer.transform.x, boomer.transform.y, max_contact_radius)
+            
+            for boid in potential_contact_boids:
                 if getattr(boid, 'marked_for_deletion', False):
                     continue
                 dx = boomer.transform.x - boid.transform.x
@@ -76,7 +95,8 @@ class CollisionSystem:
             boomer.marked_for_deletion = True
             blast_radius_sq = boomer.blast_radius * boomer.blast_radius
 
-            for boid in boids:
+            potential_blast_boids = spatial_hash.query_radius(boomer.transform.x, boomer.transform.y, boomer.blast_radius)
+            for boid in potential_blast_boids:
                 if getattr(boid, 'marked_for_deletion', False):
                     continue
                 dx = boomer.transform.x - boid.transform.x
