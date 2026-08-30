@@ -207,13 +207,15 @@ class BehaviorSystem(System):
                 continue
 
             # Proximity gate — squared distance to player cursor (no sqrt)
-            dx = entity.transform.x - target_pos.x
-            dy = entity.transform.y - target_pos.y
-            dist_sq = dx * dx + dy * dy
-            prox_sq = entity.fuse_proximity_radius * entity.fuse_proximity_radius
+            # The fuse only needs to be triggered once. If elapsed > 0, it keeps ticking regardless of distance.
+            if entity.fuse_timer.elapsed == 0.0:
+                dx = entity.transform.x - target_pos.x
+                dy = entity.transform.y - target_pos.y
+                dist_sq = dx * dx + dy * dy
+                prox_sq = entity.fuse_proximity_radius * entity.fuse_proximity_radius
 
-            if dist_sq > prox_sq:
-                continue  # Still too far away — fuse stays paused
+                if dist_sq > prox_sq:
+                    continue  # Still too far away to start the fuse
 
             entity.fuse_timer.elapsed += dt
             if entity.fuse_timer.elapsed >= entity.fuse_timer.duration:

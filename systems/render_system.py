@@ -2,6 +2,10 @@ from systems.system import System
 import pygame
 
 class RenderSystem(System):
+    def __init__(self):
+        pygame.font.init()
+        self.font = pygame.font.SysFont(None, 20)
+
     def update(self, entities, dt):
         screen = pygame.display.get_surface()
         if not screen:
@@ -29,6 +33,12 @@ class RenderSystem(System):
             pos = (int(entity.transform.x), int(entity.transform.y))
             pygame.draw.circle(screen, (200, 120, 40), pos, int(entity.blast_radius), 1)
 
+            if hasattr(entity, 'fuse_timer') and entity.fuse_timer.elapsed > 0:
+                time_left = max(0.0, entity.fuse_timer.duration - entity.fuse_timer.elapsed)
+                text_surf = self.font.render(f"{time_left:.1f}s", True, (255, 150, 50))
+                text_rect = text_surf.get_rect(center=(pos[0], pos[1] - int(entity.graphics.scale) - 15))
+                screen.blit(text_surf, text_rect)
+
         # --- LaserDrone Telegraph & Beam ---
         for entity in entities:
             if getattr(entity, 'enemy_type', None) != 'laser_drone':
@@ -55,3 +65,9 @@ class RenderSystem(System):
                 beam_surface = pygame.Surface((screen_width, int(entity.beam_width) * 2), pygame.SRCALPHA)
                 beam_surface.fill((255, 255, 200, 210))
                 screen.blit(beam_surface, beam_rect.topleft)
+
+            if hasattr(entity, 'lifespan_timer'):
+                time_left = max(0.0, entity.lifespan_timer.duration - entity.lifespan_timer.elapsed)
+                text_surf = self.font.render(f"{time_left:.1f}s", True, (200, 200, 200))
+                text_rect = text_surf.get_rect(center=(int(entity.transform.x), drone_y - int(entity.graphics.scale) - 15))
+                screen.blit(text_surf, text_rect)

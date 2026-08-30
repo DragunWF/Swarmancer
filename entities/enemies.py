@@ -38,7 +38,7 @@ class Boomer:
         # Set True by behavior_system when fuse expires; collision_system reads this
         self.fuse_expired = False
         # Fuse only begins ticking once the Boomer enters this pixel radius of the player cursor
-        self.fuse_proximity_radius = 450.0
+        self.fuse_proximity_radius = 200.0
 
 
 class LaserDrone:
