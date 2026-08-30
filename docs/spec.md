@@ -94,3 +94,25 @@ Establish the underlying hybrid Entity-Component-System (ECS) engine and spatial
 - **As a developer**, I want to query spatial neighbors through a SpatialHash grid, **so that** distance calculations for hundreds of swarm entities remain performant without checking every entity against every other entity.
 - **As a developer**, I want collision checks to evaluate squared distance values, **so that** the computational overhead of square root calculations is avoided during runtime.
 - **As a player**, I want entity deaths to spawn fading particle pops managed by a particle system, **so that** combat impacts feel visually clear and responsive.
+
+# Epic 4: Swarm Upgrades & Progression
+
+The player can access a mid-run or end-of-run shop system to mutate the swarm, spending collected resources to unlock specialized units and stat enhancements.
+
+## Feature 1: The Dark Altar (Shop UI)
+
+- The game pauses and overlays a shop interface at designated survival intervals.
+- The UI displays current currency (e.g., Souls) and three randomized upgrade choices.
+- Selecting an upgrade immediately applies the associated ECS components to the active swarm pool.
+
+## Feature 2: Specialized Swarm Units
+
+- The engine supports equipping a `RangedAttack` component to a subset of the swarm.
+- These units independently calculate line-of-sight and fire projectiles at the nearest standard enemy.
+- Ranged units maintain standard Boids AI rules (cohesion, alignment, separation) while firing.
+
+## User Stories
+
+- **As a player**, I want to spend my accumulated resources at a shop interface, **so that** I can purchase permanent upgrades that help me survive longer.
+- **As a player**, I want to purchase Skeletal Archers that fire projectiles automatically, **so that** my swarm can deal damage without risking direct 1-to-1 collision attrition.
+- **As a developer**, I want upgrades to dynamically attach new components to existing entities, **so that** the shop seamlessly integrates with the established ECS architecture without requiring hardcoded subclass changes.
