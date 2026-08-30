@@ -96,6 +96,9 @@ async def main():
             timer_text = hud_font.render(f"Next Shop: {time_until_shop:.1f}s", True, (255, 255, 255))
             screen.blit(timer_text, (SCREEN_WIDTH // 2 - timer_text.get_width() // 2, 10))
             
+            souls_text = hud_font.render(f"Souls: {player.souls}", True, (255, 215, 0))
+            screen.blit(souls_text, (SCREEN_WIDTH // 2 - souls_text.get_width() // 2, 45))
+            
         elif current_state == GameState.SHOP:
             render_system.update(entities, 0)
             shop_controller.draw(screen, player.souls)
