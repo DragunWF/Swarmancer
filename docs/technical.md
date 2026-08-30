@@ -13,14 +13,14 @@ Components contain only flat data attributes and zero game logic.
 - **Graphics:** `sprite_ref` (string), `color` (RGB tuple), `scale` (float), `alpha` (int 0-255).
 - **Collider:** `radius` (float), `is_trigger` (boolean).
 - **Health:** `current` (int), `max` (int).
-- **Timers:** `ScatterTimer` (float, defaults to 3.0), `AimingTimer` (float), `FuseTimer` (float, 5s default for Boomer self-detonation), `LifespanTimer` (float for particle/pickup decay).
+- **Timers:** `DenseTimer` (float, 2s max duration, 3s cooldown), `ScatterTimer` (float, defaults to 3.0), `AimingTimer` (float), `FuseTimer` (float, 5s default for Boomer self-detonation), `LifespanTimer` (float for particle/pickup decay).
 - **Value:** `soul_amount` (int for currency drops).
 
 ## 3. Entity Prefabs (`entities/`)
 
 Entities are OOP classes that act as initialization containers. They automatically instantiate and attach the required components to themselves upon creation.
 
-- **Player (`player.py`):** Holds the central `Transform` (mapped to cursor position) and `ScatterTimer`.
+- **Player (`player.py`):** Holds the central `Transform` (mapped to cursor position), `ScatterTimer`, and `DenseTimer`.
 - **Boid (`swarm.py`):** Represents a skeleton minion. Contains `Transform`, `Physics`, `Graphics`, `Collider` (small radius).
 - **Grunt (`enemies.py`):** The peasant militia. Contains `Transform`, `Physics` (tracking logic), `Graphics`, `Collider` (1-to-1 popping).
 - **Boomer (`enemies.py`):** The dwarf sapper. Contains `Transform`, `Physics` (slow speed), `Graphics`, `Collider` (contact trigger, `is_trigger=True`), `FuseTimer` (5s fuse). Carries `blast_radius` (randomized 80–150px per spawn), `fuse_proximity_radius` (200px — fuse triggers within this range of the player cursor), and `fuse_expired` flag (set by behavior_system, read by collision_system).

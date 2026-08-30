@@ -10,7 +10,7 @@
 ## 2. Input Mapping & Mechanics
 
 - **Mouse Movement:** The cursor dictates the central target point for the swarm. The swarm automatically follows the cursor using Boids AI rules (cohesion, alignment, separation).
-- **Dense State (Hold Left Click):** Drastically increases cohesion and cursor attraction. The swarm shrinks into a tight ball, useful for navigating narrow gaps or evading wide attacks.
+- **Dense State (Hold Left Click):** Increases cohesion and cursor attraction. The swarm shrinks into a tight ball, useful for navigating narrow gaps or evading wide attacks. This state has a 2-second maximum duration before overheating, triggering a 3-second cooldown. Releasing early triggers a proportional cooldown.
 - **Scatter Evasion (Press Right Click):** Triggers a temporary scatter evasion by applying massive repulsion physics. This forces the swarm to rapidly explode outward to escape immediate danger. This ability is restricted by a strict 3-second cooldown.
 
 ## 3. The Swarm Economy

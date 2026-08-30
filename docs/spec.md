@@ -39,8 +39,9 @@ The player's ability to manipulate the swarm's density and trigger scatter evasi
 ## Feature 1: Density Control (Dense State)
 
 - The player can trigger a physical state change by holding Left Click.
-- Activating this state drastically increases cohesion and cursor attraction.
+- Activating this state increases cohesion and cursor attraction.
 - This mechanic allows the swarm to shrink into a tight ball to evade area-of-effect explosions from Boomers.
+- The state has a 2-second maximum duration before overheating, which triggers a 3-second cooldown. Releasing early triggers a proportional cooldown.
 
 ## Feature 2: Scatter Evasion (Panic State)
 
