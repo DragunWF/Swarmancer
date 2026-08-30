@@ -2,7 +2,7 @@ from components.transform import Transform
 from components.physics import Physics
 from components.graphics import Graphics
 from components.collider import Collider
-from components.timers import AimingTimer, FuseTimer
+from components.timers import AimingTimer, FuseTimer, LifespanTimer
 
 class Grunt:
     def __init__(self, x: float, y: float):
@@ -38,7 +38,7 @@ class Boomer:
         # Set True by behavior_system when fuse expires; collision_system reads this
         self.fuse_expired = False
         # Fuse only begins ticking once the Boomer enters this pixel radius of the player cursor
-        self.fuse_proximity_radius = 200.0
+        self.fuse_proximity_radius = 450.0
 
 
 class LaserDrone:
@@ -49,6 +49,8 @@ class LaserDrone:
         self.graphics = Graphics(color=(220, 220, 100), scale=8.0)
         # Telegraph timer controls the charge → fire → reset cycle; ticked by behavior_system
         self.aiming_timer = AimingTimer(charge_duration=2.5, fire_duration=0.5)
+        # Destroys the drone after a set time so they don't accumulate forever
+        self.lifespan_timer = LifespanTimer(duration=15.0)
 
         self.is_enemy = True
         self.enemy_type = 'laser_drone'

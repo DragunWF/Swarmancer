@@ -246,3 +246,14 @@ class BehaviorSystem(System):
                     at.fire_elapsed = 0.0
                     at.elapsed = 0.0
 
+        # --- LifespanTimer Tick ---
+        # Marks entities for deletion once their lifespan expires
+        for entity in entities:
+            if not hasattr(entity, 'lifespan_timer'):
+                continue
+            if getattr(entity, 'marked_for_deletion', False):
+                continue
+                
+            entity.lifespan_timer.elapsed += dt
+            if entity.lifespan_timer.elapsed >= entity.lifespan_timer.duration:
+                entity.marked_for_deletion = True

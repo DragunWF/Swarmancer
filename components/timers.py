@@ -24,3 +24,9 @@ class FuseTimer:
         self.duration = duration
         # Accumulates dt each frame; written exclusively by behavior_system
         self.elapsed = 0.0
+
+
+class LifespanTimer:
+    def __init__(self, duration: float = 15.0):
+        self.duration = duration
+        self.elapsed = 0.0
