@@ -9,6 +9,7 @@ from systems.behavior_system import BehaviorSystem
 from systems.movement_system import MovementSystem
 from systems.render_system import RenderSystem
 from systems.collision_system import CollisionSystem
+from systems.spawner_system import SpawnerSystem
 
 async def main():
     pygame.init()
@@ -38,8 +39,9 @@ async def main():
     movement_system = MovementSystem()
     collision_system = CollisionSystem(on_resource_collected=on_resource_collected)
     render_system = RenderSystem()
+    spawner_system = SpawnerSystem(SCREEN_WIDTH, SCREEN_HEIGHT)
     
-    systems = [behavior_system, movement_system, collision_system, render_system]
+    systems = [spawner_system, behavior_system, movement_system, collision_system, render_system]
     
     resource_timer = 0.0
 

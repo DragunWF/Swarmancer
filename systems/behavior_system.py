@@ -17,12 +17,16 @@ class BehaviorSystem(System):
     def update(self, entities, dt):
         player = None
         boids = []
+        enemies = []
         
         for entity in entities:
             if hasattr(entity, 'is_player'):
                 player = entity
             elif hasattr(entity, 'physics') and hasattr(entity, 'transform'):
-                boids.append(entity)
+                if getattr(entity, 'is_enemy', False):
+                    enemies.append(entity)
+                else:
+                    boids.append(entity)
 
         if not player:
             return
@@ -117,3 +121,14 @@ class BehaviorSystem(System):
                 total_steer.scale_to_length(self.max_force)
 
             boid.physics.acceleration += total_steer / boid.physics.mass
+
+        # Enemy Tracking Logic
+        for enemy in enemies:
+            enemy_pos = Vector2(enemy.transform.x, enemy.transform.y)
+            to_target = target_pos - enemy_pos
+            if to_target.length_squared() > 0:
+                desired = to_target.normalize() * enemy.physics.max_speed
+                steer = desired - enemy.physics.velocity
+                if steer.length_squared() > self.max_force ** 2:
+                    steer.scale_to_length(self.max_force)
+                enemy.physics.acceleration += steer / enemy.physics.mass
