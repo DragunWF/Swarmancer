@@ -33,3 +33,7 @@ When generating or modifying code, strict adherence to the project directory str
 - `systems/`: The logic layer that processes entities based on their components.
 - `utils/`: Helper modules for math or optimization, specifically storing the SpatialHash grid logic.
 - `docs/`: Holds the design documentation for Spec-driven development.
+
+## 5. Coding Standards & Performance
+
+- **Global Imports Only:** Do not add import statements inside functions or methods. Doing so in a game loop severely impacts the performance of the game. All imports must be placed at the top of the file.
