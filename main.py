@@ -18,9 +18,11 @@ from ui.pause_controller import PauseController
 from components.combat import RangedAttack
 from systems.combat_system import CombatSystem
 
+# Explicit time thresholds (seconds) for Threat Levels 2 through 10
+THREAT_THRESHOLDS = [20.0, 45.0, 75.0, 120.0, 180.0, 255.0, 330.0, 420.0, 510.0]
+
 # Ordered list of survival-time milestones (seconds) that trigger automatic shop pauses.
-# Corresponds to the end of each even-numbered Threat Level (L2=2:00, L4=4:00, L6=6:00, L8=8:00).
-SHOP_MILESTONES = [120.0, 240.0, 360.0, 480.0]
+SHOP_MILESTONES = [75.0, 180.0, 330.0, 510.0]
 
 # Survival time (seconds) at which the game is won.
 VICTORY_DURATION = 600.0
@@ -188,8 +190,8 @@ async def main():
             resource_timer += dt
 
             # --- Threat Level Derivation ---
-            # Derived each frame from survival time; capped at 10.
-            current_threat_level = min(10, int(current_survival_time // 60) + 1)
+            # Derived by counting how many thresholds have been exceeded.
+            current_threat_level = sum(current_survival_time >= t for t in THREAT_THRESHOLDS) + 1
 
             # --- Victory Check (10 minutes) ---
             if current_survival_time >= VICTORY_DURATION:
@@ -208,8 +210,8 @@ async def main():
                 shop_timer = 0.0
                 player.souls += 20  # Passive stipend as per Functional Spec
 
-            # --- Grave Spawn Rate (tightens at Threat Level 5+) ---
-            grave_rate = _GRAVE_RATE_EARLY if current_threat_level <= 4 else _GRAVE_RATE_LATE
+            # --- Grave Spawn Rate (tightens at Threat Level 6+) ---
+            grave_rate = _GRAVE_RATE_EARLY if current_threat_level < 6 else _GRAVE_RATE_LATE
             if resource_timer > grave_rate:
                 entities.append(Resource(random.uniform(50, SCREEN_WIDTH - 50), random.uniform(50, SCREEN_HEIGHT - 50)))
                 resource_timer = 0.0

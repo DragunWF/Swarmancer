@@ -271,11 +271,11 @@ class BehaviorSystem(System):
                 # Telegraph phase: accumulate charge time
                 at.elapsed += dt
 
-                # Elite tracking (Threat Level 8+): slowly interpolate the drone's Y
+                # Elite tracking (Threat Level 9+): slowly interpolate the drone's Y
                 # toward the player cursor Y during the telegraph window. Once the beam
                 # fires (is_firing = True) the position is locked, giving the player a
                 # narrow reaction window to evade.
-                if threat_level >= 8:
+                if threat_level >= 9:
                     tracking_speed = 30.0  # pixels per second
                     dy = target_pos.y - entity.transform.y
                     max_move = tracking_speed * dt
