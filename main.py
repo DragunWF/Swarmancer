@@ -18,6 +18,17 @@ from ui.pause_controller import PauseController
 from components.combat import RangedAttack
 from systems.combat_system import CombatSystem
 
+# Ordered list of survival-time milestones (seconds) that trigger automatic shop pauses.
+# Corresponds to the end of each even-numbered Threat Level (L2=2:00, L4=4:00, L6=6:00, L8=8:00).
+SHOP_MILESTONES = [120.0, 240.0, 360.0, 480.0]
+
+# Survival time (seconds) at which the game is won.
+VICTORY_DURATION = 600.0
+
+# Grave spawn interval (seconds) by Threat Level tier.
+_GRAVE_RATE_EARLY = 3.0   # Levels 1–4
+_GRAVE_RATE_LATE = 5.0    # Levels 5–10
+
 async def main():
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -31,6 +42,9 @@ async def main():
     current_survival_time = 0.0
     player = None
     current_boid_max_speed = 350.0
+    current_threat_level = 1
+    next_shop_milestone_index = 0  # Pointer into SHOP_MILESTONES
+    victory_souls = 0              # Captured at the moment of victory for display
     
     # External closures needed for systems
     def on_resource_collected(resource):
@@ -78,22 +92,26 @@ async def main():
 
     def reset_game():
         nonlocal player, resource_timer, shop_timer, current_survival_time, current_boid_max_speed
+        nonlocal current_threat_level, next_shop_milestone_index, victory_souls
         entities.clear()
-        
+
         player_x = SCREEN_WIDTH / 2
         player_y = SCREEN_HEIGHT / 2
         player = Player(player_x, player_y)
         entities.append(player)
-        
+
         current_boid_max_speed = 350.0
         Resource.yield_amount = 3
         shop_controller.available_upgrades = shop_controller.all_upgrades.copy()
         shop_controller.refresh_upgrades()
+        current_threat_level = 1
+        next_shop_milestone_index = 0
+        victory_souls = 0
 
         for _ in range(50):
             boid = Boid(player_x + random.uniform(-60, 60), player_y + random.uniform(-60, 60), max_speed=current_boid_max_speed)
             entities.append(boid)
-            
+
         resource_timer = 0.0
         shop_timer = 0.0
         current_survival_time = 0.0
@@ -110,7 +128,7 @@ async def main():
                 current_state = GameState.PAUSED
                 continue
                 
-            if current_state in (GameState.MENU, GameState.GAME_OVER):
+            if current_state in (GameState.MENU, GameState.GAME_OVER, GameState.VICTORY):
                 action = menu_controller.handle_event(event, current_state)
                 if action == "PLAY":
                     reset_game()
@@ -168,52 +186,75 @@ async def main():
         if current_state == GameState.PLAYING:
             current_survival_time += dt
             resource_timer += dt
-            shop_timer += dt
-            
-            if resource_timer > 3.0: # Spawn a grave every 3 seconds
-                entities.append(Resource(random.uniform(50, SCREEN_WIDTH - 50), random.uniform(50, SCREEN_HEIGHT - 50)))
-                resource_timer = 0.0
-                
-            if shop_timer > 30.0: # Enter shop every 30 seconds
+
+            # --- Threat Level Derivation ---
+            # Derived each frame from survival time; capped at 10.
+            current_threat_level = min(10, int(current_survival_time // 60) + 1)
+
+            # --- Victory Check (10 minutes) ---
+            if current_survival_time >= VICTORY_DURATION:
+                victory_souls = player.souls
+                high_score = max(high_score, current_survival_time)
+                current_state = GameState.VICTORY
+
+            # --- Automatic Shop Milestone Trigger ---
+            # Opens the Dark Altar at the end of each even Threat Level (2:00, 4:00, 6:00, 8:00).
+            # The index guard ensures each milestone fires exactly once per run.
+            if (next_shop_milestone_index < len(SHOP_MILESTONES)
+                    and current_survival_time >= SHOP_MILESTONES[next_shop_milestone_index]):
+                next_shop_milestone_index += 1
                 current_state = GameState.SHOP
                 shop_controller.refresh_upgrades()
                 shop_timer = 0.0
-                player.souls += 20 # Passive stipend as per Functional Spec
+                player.souls += 20  # Passive stipend as per Functional Spec
 
-            # Systems update logic
+            # --- Grave Spawn Rate (tightens at Threat Level 5+) ---
+            grave_rate = _GRAVE_RATE_EARLY if current_threat_level <= 4 else _GRAVE_RATE_LATE
+            if resource_timer > grave_rate:
+                entities.append(Resource(random.uniform(50, SCREEN_WIDTH - 50), random.uniform(50, SCREEN_HEIGHT - 50)))
+                resource_timer = 0.0
+
+            # Systems update logic — pass threat_level into the systems that need it
             for system in systems:
-                system.update(entities, dt)
-                
+                if system is spawner_system or system is behavior_system:
+                    system.update(entities, dt, threat_level=current_threat_level)
+                else:
+                    system.update(entities, dt)
+
             # Cleanup deleted entities
             entities = [e for e in entities if not getattr(e, 'marked_for_deletion', False)]
-            
+
             # Check for Game Over condition
             active_boids = [e for e in entities if isinstance(e, Boid)]
             if len(active_boids) == 0:
                 high_score = max(high_score, current_survival_time)
                 current_state = GameState.GAME_OVER
-            
-            # Draw HUD
-            time_until_shop = max(0.0, 30.0 - shop_timer)
-            timer_text = hud_font.render(f"Next Shop: {time_until_shop:.1f}s", True, (255, 255, 255))
+
+            # --- HUD ---
+            minutes = int(current_survival_time) // 60
+            seconds = int(current_survival_time) % 60
+            timer_text = hud_font.render(f"{minutes:02d}:{seconds:02d}  Threat Lv.{current_threat_level}", True, (255, 255, 255))
             screen.blit(timer_text, (SCREEN_WIDTH // 2 - timer_text.get_width() // 2, 10))
-            
+
             souls_text = hud_font.render(f"Souls: {player.souls}", True, (255, 215, 0))
             screen.blit(souls_text, (SCREEN_WIDTH // 2 - souls_text.get_width() // 2, 45))
             
         elif current_state == GameState.SHOP:
             render_system.update(entities, 0)
             shop_controller.draw(screen, player.souls)
-            
+
         elif current_state == GameState.PAUSED:
             render_system.update(entities, 0)
             pause_controller.draw(screen)
-            
+
         elif current_state == GameState.MENU:
             menu_controller.draw_main_menu(screen, high_score)
-            
+
         elif current_state == GameState.GAME_OVER:
             menu_controller.draw_game_over(screen, current_survival_time, high_score)
+
+        elif current_state == GameState.VICTORY:
+            menu_controller.draw_victory(screen, current_survival_time, victory_souls)
         
         pygame.display.flip()
         

@@ -1,6 +1,9 @@
 import pygame
 from utils.state import GameState
 
+# Y-position of the victory "Main Menu" button — used by both draw and handle_event
+_VICTORY_MENU_BTN_Y = 380
+
 class MenuController:
     def __init__(self, screen_width, screen_height):
         pygame.font.init()
@@ -21,6 +24,7 @@ class MenuController:
         
         self.restart_button = pygame.Rect(center_x, 350, button_width, button_height)
         self.menu_button = pygame.Rect(center_x, 420, button_width, button_height)
+        self.victory_menu_button = pygame.Rect(center_x, _VICTORY_MENU_BTN_Y, button_width, button_height)
         
         self.show_controls = False
         self.show_settings = False
@@ -53,6 +57,10 @@ class MenuController:
                 if self.restart_button.collidepoint(mouse_pos):
                     return "PLAY"
                 elif self.menu_button.collidepoint(mouse_pos):
+                    return "MAIN_MENU"
+
+            elif current_state == GameState.VICTORY:
+                if self.victory_menu_button.collidepoint(mouse_pos):
                     return "MAIN_MENU"
                     
         return None
@@ -103,6 +111,34 @@ class MenuController:
         # Draw Buttons
         self.draw_button(screen, self.restart_button, "Restart")
         self.draw_button(screen, self.menu_button, "Main Menu")
+
+    def draw_victory(self, screen, final_time, souls):
+        """Renders the Victory screen, displayed when the player survives all 10 minutes."""
+        minutes = int(final_time) // 60
+        seconds = int(final_time) % 60
+
+        # Draw golden "VICTORY" title
+        victory_surf = self.title_font.render("VICTORY", True, (255, 215, 0))
+        victory_rect = victory_surf.get_rect(center=(self.screen_width // 2, 130))
+        screen.blit(victory_surf, victory_rect)
+
+        # Draw subtitle
+        sub_surf = self.menu_font.render("You held the line for 10 minutes!", True, (200, 200, 200))
+        sub_rect = sub_surf.get_rect(center=(self.screen_width // 2, 205))
+        screen.blit(sub_surf, sub_rect)
+
+        # Draw final survival time
+        time_surf = self.menu_font.render(f"Survived: {minutes:02d}:{seconds:02d}", True, (255, 255, 255))
+        time_rect = time_surf.get_rect(center=(self.screen_width // 2, 265))
+        screen.blit(time_surf, time_rect)
+
+        # Draw final soul count
+        souls_surf = self.small_font.render(f"Souls Collected: {souls}", True, (255, 215, 0))
+        souls_rect = souls_surf.get_rect(center=(self.screen_width // 2, 310))
+        screen.blit(souls_surf, souls_rect)
+
+        # Draw Main Menu button
+        self.draw_button(screen, self.victory_menu_button, "Main Menu")
 
     def _draw_overlay(self, screen, title, lines):
         # Darken background

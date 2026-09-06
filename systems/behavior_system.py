@@ -17,7 +17,7 @@ class BehaviorSystem(System):
         self.arrival_radius = 65.0
         self.max_force = 1200.0
 
-    def update(self, entities, dt):
+    def update(self, entities, dt, threat_level=1):
         player = None
         boids = []
         enemies = []
@@ -257,7 +257,8 @@ class BehaviorSystem(System):
 
         # --- LaserDrone AimingTimer Tick ---
         # Advances each drone through its telegraph → fire → reset cycle.
-        # Sole responsibility: update timer data. Hit detection is in collision_system.
+        # Sole responsibility: update timer data and (at elite levels) position tracking.
+        # Hit detection is in collision_system.
         for entity in entities:
             if getattr(entity, 'enemy_type', None) != 'laser_drone':
                 continue
@@ -269,6 +270,20 @@ class BehaviorSystem(System):
             if not at.is_firing:
                 # Telegraph phase: accumulate charge time
                 at.elapsed += dt
+
+                # Elite tracking (Threat Level 8+): slowly interpolate the drone's Y
+                # toward the player cursor Y during the telegraph window. Once the beam
+                # fires (is_firing = True) the position is locked, giving the player a
+                # narrow reaction window to evade.
+                if threat_level >= 8:
+                    tracking_speed = 30.0  # pixels per second
+                    dy = target_pos.y - entity.transform.y
+                    max_move = tracking_speed * dt
+                    if abs(dy) <= max_move:
+                        entity.transform.y = target_pos.y
+                    else:
+                        entity.transform.y += max_move if dy > 0 else -max_move
+
                 if at.elapsed >= at.charge_duration:
                     # Threshold reached — begin firing
                     at.is_firing = True

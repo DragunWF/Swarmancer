@@ -1,12 +1,20 @@
 import random
 from entities.enemies import Grunt, Boomer, LaserDrone
 
+# Grunt spawn rates (seconds between spawns) keyed by Threat Level tier
+_GRUNT_SPAWN_RATES = {
+    (1, 2): 2.0,
+    (3, 4): 2.0,
+    (5, 7): 1.5,
+    (8, 10): 0.8,
+}
+
 class SpawnerSystem:
     def __init__(self, screen_width, screen_height):
         self.screen_width = screen_width
         self.screen_height = screen_height
 
-        # Grunt: one every 2 seconds, spawns off-screen edges
+        # Grunt: rate is adjusted dynamically per threat level
         self.spawn_timer = 0.0
         self.spawn_rate = 2.0
 
@@ -18,21 +26,36 @@ class SpawnerSystem:
         self.drone_spawn_timer = 0.0
         self.drone_spawn_rate = 15.0
 
-    def update(self, entities, dt):
+    def _get_grunt_spawn_rate(self, threat_level):
+        """Returns the correct Grunt spawn rate (seconds) for the given Threat Level."""
+        for (low, high), rate in _GRUNT_SPAWN_RATES.items():
+            if low <= threat_level <= high:
+                return rate
+        return 2.0
+
+    def update(self, entities, dt, threat_level=1):
+        # Dynamically update the grunt spawn rate based on current threat level
+        self.spawn_rate = self._get_grunt_spawn_rate(threat_level)
+
+        # --- Grunt Spawning (always active) ---
         self.spawn_timer += dt
         if self.spawn_timer >= self.spawn_rate:
             self.spawn_timer = 0.0
             self.spawn_grunt(entities)
 
-        self.boomer_spawn_timer += dt
-        if self.boomer_spawn_timer >= self.boomer_spawn_rate:
-            self.boomer_spawn_timer = 0.0
-            self.spawn_boomer(entities)
+        # --- Boomer Spawning (Threat Level 3+) ---
+        if threat_level >= 3:
+            self.boomer_spawn_timer += dt
+            if self.boomer_spawn_timer >= self.boomer_spawn_rate:
+                self.boomer_spawn_timer = 0.0
+                self.spawn_boomer(entities)
 
-        self.drone_spawn_timer += dt
-        if self.drone_spawn_timer >= self.drone_spawn_rate:
-            self.drone_spawn_timer = 0.0
-            self.spawn_laser_drone(entities)
+        # --- LaserDrone Spawning (Threat Level 5+) ---
+        if threat_level >= 5:
+            self.drone_spawn_timer += dt
+            if self.drone_spawn_timer >= self.drone_spawn_rate:
+                self.drone_spawn_timer = 0.0
+                self.spawn_laser_drone(entities)
 
     def _random_edge_position(self):
         """Returns a random (x, y) just outside one of the four screen edges."""
