@@ -176,3 +176,37 @@ The player navigates through distinct game states (Menu, Gameplay, Settings) bef
 - **As a player**, I want to see the "P" key listed in the controls menu, **so that** I know how to halt the game.
 - **As a player**, I want to adjust the sound effects and music volume within the pause screen, **so that** I can balance the audio to my preference.
 - **As a player**, I want a confirmation dialog to appear when selecting the Main Menu button, **so that** I do not accidentally erase my current survival run.
+
+# Epic 6: Pacing, Escalation & Victory
+
+The game presents a structured 10-minute survival arc, where a global Threat Level (1–10) escalates every 60 seconds, automatically injecting new enemy types into the spawn pool, tightening shop intervals, and culminating in a Victory state when the player survives all 10 levels.
+
+## Feature 1: Threat Level Scaling
+
+- A global `threat_level` integer increments from 1 to 10 every 60 seconds of active survival time.
+- The `SpawnerSystem` reads the current `threat_level` to determine the active spawn pool and spawn rates.
+- Levels 1–2: Only the charging peasant militia (Grunts) are spawned. Glowing graves appear frequently (every 3 seconds).
+- Levels 3–4: The heavy dwarf sapper (Boomer) is injected into the spawn pool alongside Grunts.
+- Levels 5–7: The stationary stone wizard tower (LaserDrone) is added to the spawn pool. Glowing grave frequency is reduced (every 5 seconds) to increase resource scarcity.
+- Levels 8–10: Grunt spawn density is maximized. LaserDrones enter an elite tracking mode, slowly adjusting their Y position toward the player cursor during their telegraph phase before firing.
+
+## Feature 2: Automatic Shop Intervals
+
+- The Dark Altar shop UI automatically triggers at the end of every even-numbered Threat Level (at 2:00, 4:00, 6:00, and 8:00 of survival time).
+- The shop trigger safely pauses the ECS physics loop and awards the passive Soul stipend.
+- A flag ensures each timed milestone triggers the shop exactly once per run.
+
+## Feature 3: 10-Minute Victory Condition
+
+- When `current_survival_time` reaches 600 seconds (10 minutes), all enemy spawning halts.
+- The game transitions to the `VICTORY` state via the MVC state machine in `main.py`.
+- The `VictoryController` (rendered by `menu_controller.py`) displays a victory title, the final survival score, and a "Main Menu" button to return to the start screen.
+
+## User Stories
+
+- **As a player**, I want the game to clearly escalate its difficulty over 10 stages, **so that** I experience a structured challenge arc rather than an immediate, unmanageable difficulty spike.
+- **As a player**, I want the shop to automatically open at fixed 2-minute intervals, **so that** I can plan my build progression around a reliable upgrade schedule.
+- **As a player**, I want to be rewarded with a Victory screen if I survive 10 full minutes, **so that** my run has a clear, achievable win condition beyond endless attrition.
+- **As a player**, I want glowing graves to become scarcer at higher Threat Levels, **so that** the mid-to-late game feels increasingly desperate and the swarm economy tightens.
+- **As a player**, I want elite LaserDrones to track my swarm's Y position during higher Threat Levels, **so that** the late game demands active, precise evasion rather than static positioning.
+- **As a developer**, I want the `threat_level` to be passed as a parameter into `SpawnerSystem.update()` and `BehaviorSystem.update()`, **so that** the escalation logic remains cleanly contained within the System layer and does not pollute the main game loop.

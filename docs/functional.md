@@ -51,3 +51,26 @@
 - **Upgrade - Necrotic Momentum:** Increases the maximum speed limits of the swarm, allowing them to condense and shrink into a tight ball much faster.
 - **Single-Purchase System:** Upgrades are strictly single-purchase. Once acquired, an upgrade is permanently removed from the available pool and cannot be selected in future shop phases.
 - **Dormant State:** When the available upgrade pool reaches zero, the shop UI renders a "The Dark Altar is Dormant" message with a single "Continue" button to seamlessly resume the active game loop.
+
+## 7. Threat Level Escalation
+
+The game operates on a 10-stage difficulty arc, with the Threat Level incrementing every 60 seconds of active survival time.
+
+| Threat Level | Time Elapsed | Active Spawn Pool                                  | Grave Spawn Rate |
+|--------------|--------------|----------------------------------------------------|------------------|
+| 1–2          | 0:00 – 1:59  | Grunts only                                        | Every 3 seconds  |
+| 3–4          | 2:00 – 3:59  | Grunts + Boomers                                   | Every 3 seconds  |
+| 5–7          | 4:00 – 6:59  | Grunts + Boomers + LaserDrones                     | Every 5 seconds  |
+| 8–10         | 7:00 – 9:59  | Grunts (max density) + Boomers + Elite LaserDrones | Every 5 seconds  |
+
+- **Grunt Spawn Rate by Level:** Levels 1–4: every 2.0s. Levels 5–7: every 1.5s. Levels 8–10: every 0.8s.
+- **Elite LaserDrone Tracking (Levels 8–10):** During the telegraph phase, the drone's Y position slowly interpolates toward the player cursor's Y position at a rate of 30 pixels per second, making the horizontal laser band harder to evade with static positioning.
+- **Automatic Shop Intervals:** The Dark Altar shop triggers precisely when `current_survival_time` crosses 120s, 240s, 360s, and 480s (the end of each even Threat Level). Each trigger is gated by a flag to prevent double-triggering.
+
+## 8. Victory State
+
+- **Win Condition:** The game is won when `current_survival_time` reaches 600 seconds (10:00).
+- **On Victory:** All enemy spawning halts immediately. The game state transitions to `VICTORY`.
+- **Victory Screen:** Displays a "VICTORY" title, the player's final survival score (formatted as `MM:SS`), and a "Main Menu" button.
+- **Score Display:** The victory screen shows both the full 600-second run time and the final Soul count as a measure of performance.
+

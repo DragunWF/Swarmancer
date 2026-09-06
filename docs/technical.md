@@ -60,3 +60,20 @@ Systems iterate over the entity pool every frame (60 FPS), targeting only entiti
 - **Bone Shrapnel:** Add a secondary micro-collision damage check to the ECS logic in `collision_system.py` when Grunts and minions pop during a 1-to-1 collision.
 - **Necrotic Momentum:** Increase the `max_speed` limit within the `Physics` component so the boids can condense significantly faster.
 - **Single-Purchase Logic:** Upon a successful purchase in `main.py`, the selected upgrade is permanently removed from `shop_controller.available_upgrades`. If `available_upgrades` is empty, a dormant state with a single "Continue" button is rendered.
+
+## 9. Pacing & Threat Level Architecture
+
+- **Global Timer:** `current_survival_time` (float) in `main.py` accumulates `dt` every frame while `current_state == GameState.PLAYING`.
+- **Threat Level Derivation:** `current_threat_level = min(10, int(current_survival_time // 60) + 1)`. This is computed each frame and passed to `SpawnerSystem.update()` and `BehaviorSystem.update()` as the `threat_level` keyword argument.
+- **Spawner Escalation:** `SpawnerSystem.update(entities, dt, threat_level)` gates enemy type spawning behind level thresholds and dynamically sets `self.spawn_rate` based on the level tier, reading from a constant rate table.
+- **Shop Trigger Logic:** Four milestone targets (`SHOP_MILESTONES = {120.0, 240.0, 360.0, 480.0}`) are tracked in a `next_shop_milestone` variable in `main.py`. When `current_survival_time >= next_shop_milestone`, the loop enters `GameState.SHOP`, awards the soul stipend, and advances `next_shop_milestone` to the next target.
+- **Grave Spawn Rate:** `resource_timer_threshold` in `main.py` is set to `3.0` for Threat Levels 1–4 and `5.0` for Levels 5–10.
+- **Elite Laser Tracking:** `BehaviorSystem.update(entities, dt, threat_level)` adds a Y-axis interpolation step (`lerp` toward `target_pos.y` at 30px/s) for all `laser_drone` entities when `threat_level >= 8` and the drone is in its telegraph phase (`not at.is_firing`). This preserves the single-responsibility principle: position mutation stays in the behavior system.
+
+## 10. Victory State
+
+- **GameState.VICTORY** is added to `utils/state.py` as a new enum value.
+- **Transition:** In `main.py`, after incrementing `current_survival_time`, the check `if current_survival_time >= 600.0 and current_state == GameState.PLAYING` transitions to `GameState.VICTORY` and records the final time.
+- **Spawner Guard:** `SpawnerSystem.update()` is not called when the state is `VICTORY`, naturally halting all spawning.
+- **VictoryController (MenuController):** `draw_victory(screen, final_time, souls)` renders the Victory screen. `handle_event` is extended to return `"MAIN_MENU"` when the menu button is clicked while `current_state == GameState.VICTORY`.
+
