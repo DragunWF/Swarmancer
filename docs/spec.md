@@ -181,20 +181,24 @@ The player navigates through distinct game states (Menu, Gameplay, Settings) bef
 
 The game presents a structured 10-minute survival arc, where a global Threat Level (1–10) escalates every 60 seconds, automatically injecting new enemy types into the spawn pool, tightening shop intervals, and culminating in a Victory state when the player survives all 10 levels.
 
-## Feature 1: Threat Level Scaling
+## Feature 1: Non-Linear Threat Level Scaling
 
-- A global `threat_level` integer increments from 1 to 10 every 60 seconds of active survival time.
-- The `SpawnerSystem` reads the current `threat_level` to determine the active spawn pool and spawn rates.
-- Levels 1–2: Only the charging peasant militia (Grunts) are spawned. Glowing graves appear frequently (every 3 seconds).
-- Levels 3–4: The heavy dwarf sapper (Boomer) is injected into the spawn pool alongside Grunts.
-- Levels 5–7: The stationary stone wizard tower (LaserDrone) is added to the spawn pool. Glowing grave frequency is reduced (every 5 seconds) to increase resource scarcity.
-- Levels 8–10: Grunt spawn density is maximized. LaserDrones enter an elite tracking mode, slowly adjusting their Y position toward the player cursor during their telegraph phase before firing.
+- A global `threat_level` integer (1-10) is determined by evaluating the survival time against an explicit, non-linear threshold array, dramatically compressing the early game.
+- The `SpawnerSystem` reads the current `threat_level` to govern hazard injection.
+- Level 1 (0:00): Grunts only. Plentiful glowing graves.
+- Level 2 (0:20): Grunt spawn cooldown halved; wave density doubles.
+- Level 3 (0:45): Heavy dwarf sappers (Boomers) enter the spawn pool.
+- Level 5 (2:00): Stationary stone wizard towers (LaserDrones) enter the spawn pool.
+- Level 7 (4:15): Newly spawned Grunts receive a boosted maximum velocity via their Physics component.
+- Level 8 (5:30): Grunts spawn in tight, dense clusters rather than isolated individuals.
+- Level 9 (7:00): LaserDrones engage elite Y-axis tracking during their telegraph phase.
+- Level 10 (8:30): Spawn rates across all hazard types are maximized.
 
-## Feature 2: Automatic Shop Intervals
+## Feature 2: Staggered Shop Intervals
 
-- The Dark Altar shop UI automatically triggers at the end of every even-numbered Threat Level (at 2:00, 4:00, 6:00, and 8:00 of survival time).
+- The Dark Altar shop UI automatically triggers at the exact start times of Threat Levels 4 (1:15), 6 (3:00), 8 (5:30), and 10 (8:30).
+- Level 6 specifically begins resource starvation by throttling the spawn rate of glowing graves.
 - The shop trigger safely pauses the ECS physics loop and awards the passive Soul stipend.
-- A flag ensures each timed milestone triggers the shop exactly once per run.
 
 ## Feature 3: 10-Minute Victory Condition
 

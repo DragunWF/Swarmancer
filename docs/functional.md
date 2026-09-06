@@ -54,18 +54,26 @@
 
 ## 7. Threat Level Escalation
 
-The game operates on a 10-stage difficulty arc, with the Threat Level incrementing every 60 seconds of active survival time.
+The game operates on a non-linear 10-stage difficulty arc designed to compress the early game and rapidly scale chaos. The Threat Level shifts according to an explicit schedule of survival time thresholds.
 
-| Threat Level | Time Elapsed | Active Spawn Pool                                  | Grave Spawn Rate |
-|--------------|--------------|----------------------------------------------------|------------------|
-| 1–2          | 0:00 – 1:59  | Grunts only                                        | Every 3 seconds  |
-| 3–4          | 2:00 – 3:59  | Grunts + Boomers                                   | Every 3 seconds  |
-| 5–7          | 4:00 – 6:59  | Grunts + Boomers + LaserDrones                     | Every 5 seconds  |
-| 8–10         | 7:00 – 9:59  | Grunts (max density) + Boomers + Elite LaserDrones | Every 5 seconds  |
+| Level | Time | Key Escalation Trigger | Shop Pause |
+|-------|------|------------------------|------------|
+| 1 | 0:00 | Baseline Grunts | - |
+| 2 | 0:20 | Grunt density doubled | - |
+| 3 | 0:45 | Boomers introduced | - |
+| 4 | 1:15 | Boomer spawn rate increased | YES |
+| 5 | 2:00 | LaserDrones introduced | - |
+| 6 | 3:00 | Grave spawns throttled | YES |
+| 7 | 4:15 | Grunt velocity increased | - |
+| 8 | 5:30 | Grunts spawn in massive clusters | YES |
+| 9 | 7:00 | Elite tracking on LaserDrones | - |
+| 10 | 8:30 | All spawn rates maximized | YES |
 
-- **Grunt Spawn Rate by Level:** Levels 1–4: every 2.0s. Levels 5–7: every 1.5s. Levels 8–10: every 0.8s.
-- **Elite LaserDrone Tracking (Levels 8–10):** During the telegraph phase, the drone's Y position slowly interpolates toward the player cursor's Y position at a rate of 30 pixels per second, making the horizontal laser band harder to evade with static positioning.
-- **Automatic Shop Intervals:** The Dark Altar shop triggers precisely when `current_survival_time` crosses 120s, 240s, 360s, and 480s (the end of each even Threat Level). Each trigger is gated by a flag to prevent double-triggering.
+- **Automatic Shop Intervals:** The Dark Altar shop triggers precisely at 75s, 180s, 330s, and 510s.
+- **Resource Starvation:** The time between glowing grave spawns increases from 3 seconds to 5 seconds at Level 6.
+- **Velocity Scaling (Level 7+):** Newly spawned Grunts have their Physics `max_speed` significantly elevated.
+- **Cluster Spawning (Level 8+):** Grunts spawn in groups of 3-5 simultaneously at a single edge location.
+- **Elite LaserDrone Tracking (Level 9+):** During the telegraph phase, the drone's Y position slowly interpolates toward the player cursor's Y position at a rate of 30 pixels per second.
 
 ## 8. Victory State
 

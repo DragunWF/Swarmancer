@@ -64,11 +64,14 @@ Systems iterate over the entity pool every frame (60 FPS), targeting only entiti
 ## 9. Pacing & Threat Level Architecture
 
 - **Global Timer:** `current_survival_time` (float) in `main.py` accumulates `dt` every frame while `current_state == GameState.PLAYING`.
-- **Threat Level Derivation:** `current_threat_level = min(10, int(current_survival_time // 60) + 1)`. This is computed each frame and passed to `SpawnerSystem.update()` and `BehaviorSystem.update()` as the `threat_level` keyword argument.
-- **Spawner Escalation:** `SpawnerSystem.update(entities, dt, threat_level)` gates enemy type spawning behind level thresholds and dynamically sets `self.spawn_rate` based on the level tier, reading from a constant rate table.
-- **Shop Trigger Logic:** Four milestone targets (`SHOP_MILESTONES = {120.0, 240.0, 360.0, 480.0}`) are tracked in a `next_shop_milestone` variable in `main.py`. When `current_survival_time >= next_shop_milestone`, the loop enters `GameState.SHOP`, awards the soul stipend, and advances `next_shop_milestone` to the next target.
-- **Grave Spawn Rate:** `resource_timer_threshold` in `main.py` is set to `3.0` for Threat Levels 1–4 and `5.0` for Levels 5–10.
-- **Elite Laser Tracking:** `BehaviorSystem.update(entities, dt, threat_level)` adds a Y-axis interpolation step (`lerp` toward `target_pos.y` at 30px/s) for all `laser_drone` entities when `threat_level >= 8` and the drone is in its telegraph phase (`not at.is_firing`). This preserves the single-responsibility principle: position mutation stays in the behavior system.
+- **Non-Linear Threat Derivation:** `THREAT_THRESHOLDS = [20.0, 45.0, 75.0, 120.0, 180.0, 255.0, 330.0, 420.0, 510.0]` is defined in `main.py`. The `current_threat_level` is calculated by determining how many thresholds have been exceeded. This is passed to systems via the `threat_level` keyword argument.
+- **Spawner Escalation:** `SpawnerSystem.update(entities, dt, threat_level)` heavily mutates its internal timers and spawn routines based on the level tier:
+  - Spawn rates dynamically adjust according to a lookup matrix.
+  - At Level 7+, `Grunt(x, y)` instantiation is modified to override the default `max_speed` of the generated `Physics` component, ensuring the change remains data-driven and avoids inheritance.
+  - At Level 8+, the `spawn_grunt` method loops multiple times, adding random coordinate offsets to create swarm clusters.
+- **Shop Trigger Logic:** Four milestone targets (`SHOP_MILESTONES = [75.0, 180.0, 330.0, 510.0]`) are tracked via a pointer in `main.py`. When `current_survival_time >= next_shop_milestone`, the loop enters `GameState.SHOP`.
+- **Grave Spawn Rate:** `resource_timer_threshold` in `main.py` is set to `3.0` for `threat_level < 6` and `5.0` for `threat_level >= 6`.
+- **Elite Laser Tracking:** `BehaviorSystem.update(entities, dt, threat_level)` performs Y-axis interpolation (`lerp` toward `target_pos.y`) for `laser_drone` entities during telegraphing when `threat_level >= 9`.
 
 ## 10. Victory State
 
