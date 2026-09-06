@@ -113,7 +113,9 @@ async def main():
                     
             elif current_state == GameState.SHOP:
                 selected_upgrade = shop_controller.handle_event(event)
-                if selected_upgrade is not None:
+                if selected_upgrade == "CONTINUE":
+                    current_state = GameState.PLAYING
+                elif selected_upgrade is not None:
                     upgrade_data = next((u for u in shop_controller.all_upgrades if u["id"] == selected_upgrade), None)
                     if upgrade_data and player.souls >= upgrade_data["cost"]:
                         player.souls -= upgrade_data["cost"]
@@ -141,6 +143,7 @@ async def main():
                             for b in [e for e in entities if isinstance(e, Boid)]:
                                 b.physics.max_speed = current_boid_max_speed
                                 
+                        shop_controller.remove_upgrade(selected_upgrade)
                         current_state = GameState.PLAYING
                     elif upgrade_data:
                         print("Not enough souls!")
