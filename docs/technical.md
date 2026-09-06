@@ -51,3 +51,10 @@ Systems iterate over the entity pool every frame (60 FPS), targeting only entiti
 
 - **Web Assembly (pygbag):** The project is packaged for the web using `pygbag`.
 - **Asynchronous Execution:** The top-level controller in `main.py` utilizes the `asyncio` library. The primary game loop is wrapped in an asynchronous function containing `await asyncio.sleep(0)` to yield execution back to the browser, preventing the tab from locking up during gameplay.
+
+## 8. Upgrades Logic
+
+- **Grave Robber's Yield:** Modify the `Resource` class within `entities/powerups.py` and the associated logic in `collision_system.py` to scale the yield multiplier upon collision per upgrade tier.
+- **Evasion Mastery:** Reduce the 3.0 second cooldown threshold on the `ScatterTimer` component attached to the Player entity.
+- **Bone Shrapnel:** Add a secondary micro-collision damage check to the ECS logic in `collision_system.py` when Grunts and minions pop during a 1-to-1 collision.
+- **Necrotic Momentum:** Increase the `max_speed` limit within the `Physics` component so the boids can condense significantly faster.

@@ -45,3 +45,7 @@
 - **Acquisition - Combat Drops:** Destroying enemies has a chance to drop a temporary Soul pickup. The player must physically maneuver the swarm to collect it before it fades.
 - **Acquisition - Survival Milestones:** Players receive a passive Soul stipend for every 30 seconds they remain alive, encouraging evasion and longevity.
 - **Acquisition - Rare Pickups:** High-value powerups spawn occasionally across the map. Unlike glowing graves that replenish the swarm, these specific pickups grant a massive boost to shop currency.
+- **Upgrade - Grave Robber's Yield:** Consuming an open glowing grave grants an increased number of new soldiers per upgrade tier.
+- **Upgrade - Evasion Mastery:** Reduces the standard 3-second cooldown on the scatter evasion (Right Click), allowing players to utilize repulsion physics more frequently against stationary stone wizard towers.
+- **Upgrade - Bone Shrapnel:** Adds a secondary micro-collision damage check when Grunts pop during a 1-to-1 collision with the swarm, damaging nearby enemies.
+- **Upgrade - Necrotic Momentum:** Increases the maximum speed limits of the swarm, allowing them to condense and shrink into a tight ball much faster.
