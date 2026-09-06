@@ -1,4 +1,5 @@
 import pygame
+import random
 from utils.state import GameState
 
 class ShopController:
@@ -9,16 +10,34 @@ class ShopController:
         self.font_small = pygame.font.SysFont(None, 24)
         
         # Define buttons
-        button_width, button_height = 200, 300
-        padding = 40
-        start_x = (screen_width - (3 * button_width + 2 * padding)) // 2
-        y_pos = (screen_height - button_height) // 2
+        self.button_width, self.button_height = 200, 300
+        self.padding = 40
+        self.start_x = (screen_width - (3 * self.button_width + 2 * self.padding)) // 2
+        self.y_pos = (screen_height - self.button_height) // 2
         
-        self.buttons = [
-            {"rect": pygame.Rect(start_x, y_pos, button_width, button_height), "id": 0, "color": (100, 100, 100), "hover_color": (150, 150, 150), "text": "Skeletal Archers\nCost: 10 Souls"},
-            {"rect": pygame.Rect(start_x + button_width + padding, y_pos, button_width, button_height), "id": 1, "color": (100, 100, 100), "hover_color": (150, 150, 150), "text": "Upgrade B\nCost: 15 Souls"},
-            {"rect": pygame.Rect(start_x + 2 * (button_width + padding), y_pos, button_width, button_height), "id": 2, "color": (100, 100, 100), "hover_color": (150, 150, 150), "text": "Upgrade C\nCost: 20 Souls"}
+        self.all_upgrades = [
+            {"id": 0, "name": "Skeletal Archers", "cost": 10},
+            {"id": 1, "name": "Grave Robber's Yield", "cost": 15},
+            {"id": 2, "name": "Evasion Mastery", "cost": 15},
+            {"id": 3, "name": "Bone Shrapnel", "cost": 20},
+            {"id": 4, "name": "Necrotic Momentum", "cost": 20}
         ]
+        self.buttons = []
+        self.refresh_upgrades()
+        
+    def refresh_upgrades(self):
+        selected = random.sample(self.all_upgrades, 3)
+        self.buttons = []
+        for i, upg in enumerate(selected):
+            rect = pygame.Rect(self.start_x + i * (self.button_width + self.padding), self.y_pos, self.button_width, self.button_height)
+            self.buttons.append({
+                "rect": rect,
+                "id": upg["id"],
+                "color": (100, 100, 100),
+                "hover_color": (150, 150, 150),
+                "text": f"{upg['name']}\nCost: {upg['cost']} Souls",
+                "cost": upg["cost"]
+            })
         
     def draw(self, screen: pygame.Surface, souls: int):
         # Draw semi-transparent overlay

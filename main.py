@@ -30,12 +30,13 @@ async def main():
     high_score = 0.0
     current_survival_time = 0.0
     player = None
+    current_boid_max_speed = 350.0
     
     # External closures needed for systems
-    def on_resource_collected(x, y):
-        # Spawn 3 new boids slightly offset from the grave
-        for _ in range(3):
-            entities.append(Boid(x + random.uniform(-20, 20), y + random.uniform(-20, 20)))
+    def on_resource_collected(resource):
+        # Spawn boids slightly offset from the grave based on yield amount
+        for _ in range(resource.yield_amount):
+            entities.append(Boid(resource.transform.x + random.uniform(-20, 20), resource.transform.y + random.uniform(-20, 20), max_speed=current_boid_max_speed))
 
     def on_currency_collected(amount):
         if player:
@@ -71,7 +72,7 @@ async def main():
     shop_timer = 0.0
 
     def reset_game():
-        nonlocal player, resource_timer, shop_timer, current_survival_time
+        nonlocal player, resource_timer, shop_timer, current_survival_time, current_boid_max_speed
         entities.clear()
         
         player_x = SCREEN_WIDTH / 2
@@ -79,8 +80,11 @@ async def main():
         player = Player(player_x, player_y)
         entities.append(player)
         
+        current_boid_max_speed = 350.0
+        Resource.yield_amount = 3
+
         for _ in range(50):
-            boid = Boid(player_x + random.uniform(-60, 60), player_y + random.uniform(-60, 60))
+            boid = Boid(player_x + random.uniform(-60, 60), player_y + random.uniform(-60, 60), max_speed=current_boid_max_speed)
             entities.append(boid)
             
         resource_timer = 0.0
@@ -110,10 +114,11 @@ async def main():
             elif current_state == GameState.SHOP:
                 selected_upgrade = shop_controller.handle_event(event)
                 if selected_upgrade is not None:
-                    if selected_upgrade == 0:
-                        if player.souls >= 10:
-                            player.souls -= 10
-                            
+                    upgrade_data = next((u for u in shop_controller.all_upgrades if u["id"] == selected_upgrade), None)
+                    if upgrade_data and player.souls >= upgrade_data["cost"]:
+                        player.souls -= upgrade_data["cost"]
+                        
+                        if selected_upgrade == 0:
                             # Apply Archer Upgrade
                             boids = [e for e in entities if isinstance(e, Boid) and not hasattr(e, 'ranged_attack')]
                             upgrade_count = min(10, len(boids))
@@ -121,16 +126,24 @@ async def main():
                                 for b in random.sample(boids, upgrade_count):
                                     b.ranged_attack = RangedAttack(fire_rate=1.0, attack_range=150.0, projectile_speed=300.0)
                                     b.graphics.color = (100, 100, 255) # Tint blue
-                                    
-                            current_state = GameState.PLAYING
-                        else:
-                            print("Not enough souls!")
-                    else:
-                        if player.souls >= 10:
-                            player.souls -= 10
-                            current_state = GameState.PLAYING
-                        else:
-                            print("Not enough souls!")
+                        elif selected_upgrade == 1:
+                            # Grave Robber's Yield
+                            Resource.yield_amount += 1
+                        elif selected_upgrade == 2:
+                            # Evasion Mastery
+                            player.scatter_timer.cooldown_duration = max(1.0, player.scatter_timer.cooldown_duration - 0.5)
+                        elif selected_upgrade == 3:
+                            # Bone Shrapnel
+                            setattr(player.state, 'has_bone_shrapnel', True)
+                        elif selected_upgrade == 4:
+                            # Necrotic Momentum
+                            current_boid_max_speed += 50.0
+                            for b in [e for e in entities if isinstance(e, Boid)]:
+                                b.physics.max_speed = current_boid_max_speed
+                                
+                        current_state = GameState.PLAYING
+                    elif upgrade_data:
+                        print("Not enough souls!")
                             
             elif current_state == GameState.PAUSED:
                 action = pause_controller.handle_event(event)
@@ -152,6 +165,7 @@ async def main():
                 
             if shop_timer > 30.0: # Enter shop every 30 seconds
                 current_state = GameState.SHOP
+                shop_controller.refresh_upgrades()
                 shop_timer = 0.0
                 player.souls += 20 # Passive stipend as per Functional Spec
 

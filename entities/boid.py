@@ -5,9 +5,9 @@ from components.collider import Collider
 import random
 
 class Boid:
-    def __init__(self, x: float, y: float):
+    def __init__(self, x: float, y: float, max_speed: float = 350.0):
         self.transform = Transform(x, y)
-        self.physics = Physics(max_speed=350.0, mass=1.0)
+        self.physics = Physics(max_speed=max_speed, mass=1.0)
         
         # Moderate initial velocity
         self.physics.velocity.x = random.uniform(-20, 20)

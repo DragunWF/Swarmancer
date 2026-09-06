@@ -62,4 +62,3 @@ class SpawnerSystem:
         x = random.uniform(margin, self.screen_width - margin)
         y = random.uniform(margin, self.screen_height - margin)
         entities.append(LaserDrone(x, y))
-

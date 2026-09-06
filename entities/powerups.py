@@ -5,10 +5,13 @@ from components.timers import LifespanTimer
 from components.value import Value
 
 class Resource:
-    def __init__(self, x: float, y: float):
+    yield_amount = 3
+
+    def __init__(self, x: float, y: float, yield_amount: int = None):
         self.transform = Transform(x, y)
         self.graphics = Graphics(color=(100, 255, 100), scale=6.0) # glowing green grave
         self.collider = Collider(radius=6.0, is_trigger=True)
+        self.yield_amount = yield_amount if yield_amount is not None else Resource.yield_amount
         self.marked_for_deletion = False
 
 class SoulPickup:

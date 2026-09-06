@@ -24,6 +24,9 @@ class CollisionSystem:
         resources = [e for e in entities if hasattr(e, 'collider') and hasattr(e, 'graphics') and hasattr(e, 'transform') and e.__class__.__name__ == 'Resource']
         enemies = [e for e in entities if getattr(e, 'is_enemy', False) and hasattr(e, 'collider')]
         projectiles = [e for e in entities if e.__class__.__name__ == 'Projectile']
+        player = next((e for e in entities if getattr(e, 'is_player', False)), None)
+        has_bone_shrapnel = player and getattr(player.state, 'has_bone_shrapnel', False)
+
         
         # 150.0 covers max Boomer blast radius
         spatial_hash = SpatialHash(150.0)
@@ -46,7 +49,7 @@ class CollisionSystem:
                 if distance_sq < radius_sum * radius_sum:
                     resource.marked_for_deletion = True
                     if self.on_resource_collected:
-                        self.on_resource_collected(resource.transform.x, resource.transform.y)
+                        self.on_resource_collected(resource)
                     break # One boid can collect it
 
         pickups = [e for e in entities if hasattr(e, 'collider') and hasattr(e, 'value') and not getattr(e, 'marked_for_deletion', False)]
@@ -88,6 +91,23 @@ class CollisionSystem:
                     enemy.marked_for_deletion = True
                     boid.marked_for_deletion = True
                     self._try_drop_soul(enemy.transform.x, enemy.transform.y)
+                    
+                    # Bone Shrapnel: Secondary micro-collision damage check
+                    if has_bone_shrapnel:
+                        shrapnel_radius = 50.0
+                        for other_enemy in enemies:
+                            if other_enemy == enemy or getattr(other_enemy, 'marked_for_deletion', False):
+                                continue
+                            # Ensure it's a Grunt (not a Boomer or LaserDrone)
+                            if getattr(other_enemy, 'collider', None) and other_enemy.collider.is_trigger:
+                                continue
+                            dx_shrapnel = enemy.transform.x - other_enemy.transform.x
+                            dy_shrapnel = enemy.transform.y - other_enemy.transform.y
+                            dist_shrapnel_sq = dx_shrapnel * dx_shrapnel + dy_shrapnel * dy_shrapnel
+                            if dist_shrapnel_sq < shrapnel_radius * shrapnel_radius:
+                                other_enemy.marked_for_deletion = True
+                                self._try_drop_soul(other_enemy.transform.x, other_enemy.transform.y)
+                            
                     break # One enemy pops exactly one boid
 
         # --- Projectile Hit Detection ---
