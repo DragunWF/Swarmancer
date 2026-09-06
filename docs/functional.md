@@ -49,3 +49,5 @@
 - **Upgrade - Evasion Mastery:** Reduces the standard 3-second cooldown on the scatter evasion (Right Click), allowing players to utilize repulsion physics more frequently against stationary stone wizard towers.
 - **Upgrade - Bone Shrapnel:** Adds a secondary micro-collision damage check when Grunts pop during a 1-to-1 collision with the swarm, damaging nearby enemies.
 - **Upgrade - Necrotic Momentum:** Increases the maximum speed limits of the swarm, allowing them to condense and shrink into a tight ball much faster.
+- **Single-Purchase System:** Upgrades are strictly single-purchase. Once acquired, an upgrade is permanently removed from the available pool and cannot be selected in future shop phases.
+- **Dormant State:** When the available upgrade pool reaches zero, the shop UI renders a "The Dark Altar is Dormant" message with a single "Continue" button to seamlessly resume the active game loop.

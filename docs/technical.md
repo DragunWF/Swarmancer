@@ -45,7 +45,7 @@ Systems iterate over the entity pool every frame (60 FPS), targeting only entiti
 ## 6. UI Layer (`ui/`)
 
 - **MenuController (`menu_controller.py`):** Handles static UI drawing and state signals for the Main Menu and Game Over screens. Uses primitive Pygame shapes for placeholders.
-- **ShopController (`shop_controller.py`):** Manages rendering the Dark Altar overlay, item selection logic, and player currency validation during shop phases.
+- **ShopController (`shop_controller.py`):** Manages rendering the Dark Altar overlay, item selection logic, and player currency validation during shop phases. Maintains a dynamic list (`available_upgrades`) to track single-purchase constraints.
 
 ## 7. Deployment & Packaging
 
@@ -58,3 +58,4 @@ Systems iterate over the entity pool every frame (60 FPS), targeting only entiti
 - **Evasion Mastery:** Reduce the 3.0 second cooldown threshold on the `ScatterTimer` component attached to the Player entity.
 - **Bone Shrapnel:** Add a secondary micro-collision damage check to the ECS logic in `collision_system.py` when Grunts and minions pop during a 1-to-1 collision.
 - **Necrotic Momentum:** Increase the `max_speed` limit within the `Physics` component so the boids can condense significantly faster.
+- **Single-Purchase Logic:** Upon a successful purchase in `main.py`, the selected upgrade is permanently removed from `shop_controller.available_upgrades`. If `available_upgrades` is empty, a dormant state with a single "Continue" button is rendered.

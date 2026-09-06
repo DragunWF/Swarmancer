@@ -132,6 +132,8 @@ The player can access a mid-run or end-of-run shop system to mutate the swarm, s
 - **As a player**, I want to purchase Evasion Mastery, **so that** the cooldown on my scatter evasion is reduced, allowing me to dodge Laser Drone beams more frequently.
 - **As a player**, I want to purchase Bone Shrapnel, **so that** my minions deal secondary area damage when they pop against charging peasant militia.
 - **As a player**, I want to purchase Necrotic Momentum, **so that** my swarm's maximum speed increases, letting them condense into a tight ball much faster.
+- **As a player**, I want upgrade items to disappear from the shop pool after I purchase them, **so that** I am forced to diversify my build instead of stacking the same upgrade repeatedly.
+- **As a player**, I want the shop to display a "The Dark Altar is Dormant" message with a continue button when all upgrades are purchased, **so that** the shop phase resolves smoothly when the pool is empty.
 
 # Epic 5: User Interface & Game State Management
 
