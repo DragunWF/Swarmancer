@@ -35,8 +35,13 @@ async def main():
     # External closures needed for systems
     def on_resource_collected(resource):
         # Spawn boids slightly offset from the grave based on yield amount
-        for _ in range(resource.yield_amount):
-            entities.append(Boid(resource.transform.x + random.uniform(-20, 20), resource.transform.y + random.uniform(-20, 20), max_speed=current_boid_max_speed))
+        has_archers = player and getattr(player.state, 'has_skeletal_archers', False)
+        for i in range(resource.yield_amount):
+            boid = Boid(resource.transform.x + random.uniform(-20, 20), resource.transform.y + random.uniform(-20, 20), max_speed=current_boid_max_speed)
+            if has_archers and (i == 0 or random.random() < 0.25):
+                boid.ranged_attack = RangedAttack(fire_rate=1.0, attack_range=150.0, projectile_speed=300.0)
+                boid.graphics.color = (100, 100, 255) # Tint blue
+            entities.append(boid)
 
     def on_currency_collected(amount):
         if player:
@@ -82,6 +87,8 @@ async def main():
         
         current_boid_max_speed = 350.0
         Resource.yield_amount = 3
+        shop_controller.available_upgrades = shop_controller.all_upgrades.copy()
+        shop_controller.refresh_upgrades()
 
         for _ in range(50):
             boid = Boid(player_x + random.uniform(-60, 60), player_y + random.uniform(-60, 60), max_speed=current_boid_max_speed)
@@ -122,6 +129,7 @@ async def main():
                         
                         if selected_upgrade == 0:
                             # Apply Archer Upgrade
+                            player.state.has_skeletal_archers = True
                             boids = [e for e in entities if isinstance(e, Boid) and not hasattr(e, 'ranged_attack')]
                             upgrade_count = min(10, len(boids))
                             if upgrade_count > 0:
