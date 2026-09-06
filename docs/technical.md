@@ -54,6 +54,7 @@ Systems iterate over the entity pool every frame (60 FPS), targeting only entiti
 
 ## 8. Upgrades Logic
 
+- **Skeletal Archers:** Equips the `RangedAttack` component to a subset of existing boids upon purchase and sets `has_skeletal_archers` on `PlayerState`, ensuring that minions resurrected at glowing graves continue to spawn archers.
 - **Grave Robber's Yield:** Modify the `Resource` class within `entities/powerups.py` and the associated logic in `collision_system.py` to scale the yield multiplier upon collision per upgrade tier.
 - **Evasion Mastery:** Reduce the 3.0 second cooldown threshold on the `ScatterTimer` component attached to the Player entity.
 - **Bone Shrapnel:** Add a secondary micro-collision damage check to the ECS logic in `collision_system.py` when Grunts and minions pop during a 1-to-1 collision.
