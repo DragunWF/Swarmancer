@@ -15,7 +15,7 @@
 
 ## 3. The Swarm Economy
 
-- **The Swarm:** A massive, fluid horde of tiny skeleton minions.
+- **The Swarm:** A massive, fluid horde of tiny skeleton minions. They visually represent their movement using 8-directional skeleton sprites, and upgraded Skeletal Archers use a blue-tinted variant of these sprites.
 - **Resource Cores:** The game spawns open glowing graves across the map.
 - **Replenishment:** Guiding the swarm to consume an open glowing grave instantly grants new soldiers, offsetting combat attrition.
 

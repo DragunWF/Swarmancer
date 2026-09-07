@@ -31,6 +31,8 @@ The player must manage a fluid swarm against escalating waves of enemies. The sw
 - **As a player**, I want my skeleton minions to constantly update their position toward my cursor using Boids AI rules, **so that** I can seamlessly steer the entire horde.
 - **As a player**, I want to guide my swarm into open glowing graves, **so that** my overall swarm count increases, acting as my replenishing health bar.
 - **As a player**, I want charging peasant militia to destroy one of my skeletons upon contact, **so that** I must actively manage my attrition rate to prevent a game over.
+- **As a player**, I want to see minions face the direction they are moving using 8-directional skeleton sprites, **so that** the swarm feels alive and cohesive.
+  - *Acceptance Criteria:* Minions moving in 8 cardinal/ordinal directions display the corresponding sprite. Stationary minions fallback to a default facing (e.g., South). Performance remains at 60 FPS with 300+ minions.
 
 # Epic 2: Shape-Shifting Combat Mechanics
 
