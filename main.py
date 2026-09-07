@@ -36,7 +36,7 @@ async def main():
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Swarmancer")
-    AssetLoader().initialize(scale=1.0, archer_tint=(100, 100, 255))
+    AssetLoader().initialize(scale=1.0)
     clock = pygame.time.Clock()
     
     entities = []
@@ -58,7 +58,7 @@ async def main():
             boid = Boid(resource.transform.x + random.uniform(-20, 20), resource.transform.y + random.uniform(-20, 20), max_speed=current_boid_max_speed)
             if has_archers and (i == 0 or random.random() < 0.25):
                 boid.ranged_attack = RangedAttack(fire_rate=1.0, attack_range=150.0, projectile_speed=300.0)
-                boid.graphics.color = (100, 100, 255) # Tint blue
+                boid.graphics.sprite_ref = "skeleton_archer"
             entities.append(boid)
 
     def on_currency_collected(amount):
@@ -157,7 +157,7 @@ async def main():
                             if upgrade_count > 0:
                                 for b in random.sample(boids, upgrade_count):
                                     b.ranged_attack = RangedAttack(fire_rate=1.0, attack_range=150.0, projectile_speed=300.0)
-                                    b.graphics.color = (100, 100, 255) # Tint blue
+                                    b.graphics.sprite_ref = "skeleton_archer"
                         elif selected_upgrade == 1:
                             # Grave Robber's Yield
                             Resource.yield_amount += 1

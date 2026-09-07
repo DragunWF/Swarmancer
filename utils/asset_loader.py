@@ -11,38 +11,34 @@ class AssetLoader:
             cls._instance._initialized = False
         return cls._instance
 
-    def initialize(self, scale: float = 1.0, archer_tint: tuple = (100, 100, 255)):
+    def initialize(self, scale: float = 1.0):
         """Loads and pre-caches assets to prevent disk I/O during gameplay."""
         if self._initialized:
             return
             
-        base_path = os.path.join("sprites", "skeleton")
+        sprite_refs = ["skeleton", "skeleton_archer"]
         directions = ["east", "north-east", "north", "north-west", 
                       "west", "south-west", "south", "south-east"]
         
-        for d in directions:
-            path = os.path.join(base_path, f"{d}.png")
-            if os.path.exists(path):
-                img = pygame.image.load(path).convert_alpha()
-                
-                # Pre-scale the image if not native scale
-                if scale != 1.0:
-                    w, h = img.get_size()
-                    scaled_img = pygame.transform.scale(img, (int(w * scale), int(h * scale)))
-                else:
-                    scaled_img = img
-                
-                # Store default variant
-                self._sprites[f"skeleton_{d}_default"] = scaled_img
-                
-                # Create and store archer (tinted) variant
-                archer_img = scaled_img.copy()
-                archer_img.fill(archer_tint, special_flags=pygame.BLEND_MULT)
-                self._sprites[f"skeleton_{d}_archer"] = archer_img
-                
+        for ref in sprite_refs:
+            base_path = os.path.join("sprites", ref)
+            for d in directions:
+                path = os.path.join(base_path, f"{d}.png")
+                if os.path.exists(path):
+                    img = pygame.image.load(path).convert_alpha()
+                    
+                    # Pre-scale the image if not native scale
+                    if scale != 1.0:
+                        w, h = img.get_size()
+                        scaled_img = pygame.transform.scale(img, (int(w * scale), int(h * scale)))
+                    else:
+                        scaled_img = img
+                    
+                    self._sprites[f"{ref}_{d}"] = scaled_img
+                    
         self._initialized = True
 
-    def get_sprite(self, sprite_ref: str, direction: str, variant: str = "default") -> pygame.Surface:
+    def get_sprite(self, sprite_ref: str, direction: str) -> pygame.Surface:
         """Retrieves a cached sprite surface."""
-        key = f"{sprite_ref}_{direction}_{variant}"
+        key = f"{sprite_ref}_{direction}"
         return self._sprites.get(key)

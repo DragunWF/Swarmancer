@@ -20,16 +20,12 @@ class RenderSystem(System):
                 gfx = entity.graphics
                 pos = (int(entity.transform.x), int(entity.transform.y))
                 
-                if gfx.sprite_ref == "skeleton":
+                if gfx.sprite_ref:
                     vx = entity.physics.velocity.x if hasattr(entity, 'physics') else 0.0
                     vy = entity.physics.velocity.y if hasattr(entity, 'physics') else 0.0
                     direction = velocity_to_direction(vx, vy)
                     
-                    variant = "default"
-                    if gfx.color == (100, 100, 255):
-                        variant = "archer"
-                        
-                    sprite = AssetLoader().get_sprite("skeleton", direction, variant)
+                    sprite = AssetLoader().get_sprite(gfx.sprite_ref, direction)
                     if sprite:
                         # Blit centered
                         rect = sprite.get_rect(center=pos)
