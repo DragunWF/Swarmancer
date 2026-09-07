@@ -81,3 +81,7 @@ Systems iterate over the entity pool every frame (60 FPS), targeting only entiti
 - **Spawner Guard:** `SpawnerSystem.update()` is not called when the state is `VICTORY`, naturally halting all spawning.
 - **VictoryController (MenuController):** `draw_victory(screen, final_time, souls)` renders the Victory screen. `handle_event` is extended to return `"MAIN_MENU"` when the menu button is clicked while `current_state == GameState.VICTORY`.
 
+## 11. Static Arena Rendering
+
+- **Background Caching:** The static arena floor (`background.jpg`) is preloaded and cached by the `AssetLoader` utility at initialization. It is loaded using Pygame's `.convert()` method to maximize opaque blitting speed. Any required dimensional scaling occurs only once at startup to prevent frame drops during gameplay.
+- **ECS Decoupling:** Adhering to SOLID principles, the background is not processed as an ECS Entity. It bypasses the spatial `Transform` and `Graphics` component architecture entirely. Instead, it is blitted directly to the display surface at the very beginning of the main rendering loop (`main.py`), acting as the global base layer.

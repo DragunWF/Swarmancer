@@ -216,3 +216,8 @@ The game presents a structured 10-minute survival arc, where a global Threat Lev
 - **As a player**, I want glowing graves to become scarcer at higher Threat Levels, **so that** the mid-to-late game feels increasingly desperate and the swarm economy tightens.
 - **As a player**, I want elite LaserDrones to track my swarm's Y position during higher Threat Levels, **so that** the late game demands active, precise evasion rather than static positioning.
 - **As a developer**, I want the `threat_level` to be passed as a parameter into `SpawnerSystem.update()` and `BehaviorSystem.update()`, **so that** the escalation logic remains cleanly contained within the System layer and does not pollute the main game loop.
+
+## Feature 5: Static Environmental Assets
+- The game arena utilizes a static 2D pixel art background (`background.jpg`) as the foundational floor layer.
+- The background sits seamlessly behind all active ECS entities, particles, and UI elements without impacting collision physics.
+- **User Story:** **As a player**, I want to see a detailed, thematic arena background, **so that** the game world feels cohesive and immersive rather than an empty black void.
