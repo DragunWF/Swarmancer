@@ -41,7 +41,7 @@ Systems iterate over the entity pool every frame (60 FPS), targeting only entiti
 
 - **SpatialHash Grid (`spatial_hash.py`):** Divides the screen into a 2D grid matrix. Limits system processing queries strictly to adjacent cells to maintain 60 FPS.
 - **Math Utilities (`math_utils.py`):** Provides fast vector normalization, squared distance calculations, and angle-to-direction mapping (`velocity_to_direction`) to map 2D velocities into 8 directional sectors (45° each).
-- **Asset Loader (`asset_loader.py`):** Centralized caching utility that loads sprites at startup, pre-scales them (e.g., 1.0x native scale), and generates pre-tinted variants (e.g., blue tint for Skeletal Archers) using `pygame.BLEND_MULT` to eliminate real-time scaling and tinting overhead during the render loop.
+- **Asset Loader (`asset_loader.py`):** Centralized caching utility that loads multiple distinct sprite folders (e.g., `"skeleton"`, `"skeleton_archer"`) at startup, keeping sprites at native 1.0x scale (16x16 canvas) to maintain the 60 FPS standard by eliminating disk I/O and real-time pixel modifications during the render loop.
 
 ## 6. UI Layer (`ui/`)
 
