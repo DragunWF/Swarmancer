@@ -11,7 +11,7 @@ class AssetLoader:
             cls._instance._initialized = False
         return cls._instance
 
-    def initialize(self, scale: float = 3.0, archer_tint: tuple = (100, 100, 255)):
+    def initialize(self, scale: float = 1.0, archer_tint: tuple = (100, 100, 255)):
         """Loads and pre-caches assets to prevent disk I/O during gameplay."""
         if self._initialized:
             return
@@ -25,9 +25,12 @@ class AssetLoader:
             if os.path.exists(path):
                 img = pygame.image.load(path).convert_alpha()
                 
-                # Pre-scale the image
-                w, h = img.get_size()
-                scaled_img = pygame.transform.scale(img, (int(w * scale), int(h * scale)))
+                # Pre-scale the image if not native scale
+                if scale != 1.0:
+                    w, h = img.get_size()
+                    scaled_img = pygame.transform.scale(img, (int(w * scale), int(h * scale)))
+                else:
+                    scaled_img = img
                 
                 # Store default variant
                 self._sprites[f"skeleton_{d}_default"] = scaled_img

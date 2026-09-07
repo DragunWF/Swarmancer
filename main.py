@@ -36,7 +36,7 @@ async def main():
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Swarmancer")
-    AssetLoader().initialize(scale=3.0, archer_tint=(100, 100, 255))
+    AssetLoader().initialize(scale=1.0, archer_tint=(100, 100, 255))
     clock = pygame.time.Clock()
     
     entities = []
