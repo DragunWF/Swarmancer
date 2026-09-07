@@ -13,5 +13,5 @@ class Boid:
         self.physics.velocity.x = random.uniform(-20, 20)
         self.physics.velocity.y = random.uniform(-20, 20)
             
-        self.graphics = Graphics(color=(220, 220, 220), scale=3.0)
+        self.graphics = Graphics(color=(220, 220, 220), scale=3.0, sprite_ref="skeleton")
         self.collider = Collider(radius=3.0)

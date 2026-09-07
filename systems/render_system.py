@@ -1,5 +1,7 @@
 from systems.system import System
 import pygame
+from utils.asset_loader import AssetLoader
+from utils.math_utils import velocity_to_direction
 
 class RenderSystem(System):
     def __init__(self):
@@ -17,7 +19,26 @@ class RenderSystem(System):
             if hasattr(entity, 'graphics') and hasattr(entity, 'transform'):
                 gfx = entity.graphics
                 pos = (int(entity.transform.x), int(entity.transform.y))
-                pygame.draw.circle(screen, gfx.color, pos, int(gfx.scale))
+                
+                if gfx.sprite_ref == "skeleton":
+                    vx = entity.physics.velocity.x if hasattr(entity, 'physics') else 0.0
+                    vy = entity.physics.velocity.y if hasattr(entity, 'physics') else 0.0
+                    direction = velocity_to_direction(vx, vy)
+                    
+                    variant = "default"
+                    if gfx.color == (100, 100, 255):
+                        variant = "archer"
+                        
+                    sprite = AssetLoader().get_sprite("skeleton", direction, variant)
+                    if sprite:
+                        # Blit centered
+                        rect = sprite.get_rect(center=pos)
+                        screen.blit(sprite, rect)
+                    else:
+                        # Fallback if sprite is missing
+                        pygame.draw.circle(screen, gfx.color, pos, int(gfx.scale))
+                else:
+                    pygame.draw.circle(screen, gfx.color, pos, int(gfx.scale))
                 
             elif hasattr(entity, 'is_player'):
                 pos = (int(entity.transform.x), int(entity.transform.y))

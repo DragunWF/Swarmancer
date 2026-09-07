@@ -17,6 +17,7 @@ from ui.menu_controller import MenuController
 from ui.pause_controller import PauseController
 from components.combat import RangedAttack
 from systems.combat_system import CombatSystem
+from utils.asset_loader import AssetLoader
 
 # Explicit time thresholds (seconds) for Threat Levels 2 through 10
 THREAT_THRESHOLDS = [20.0, 45.0, 75.0, 120.0, 180.0, 255.0, 330.0, 420.0, 510.0]
@@ -35,6 +36,7 @@ async def main():
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Swarmancer")
+    AssetLoader().initialize(scale=3.0, archer_tint=(100, 100, 255))
     clock = pygame.time.Clock()
     
     entities = []
