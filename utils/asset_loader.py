@@ -1,5 +1,6 @@
 import pygame
 import os
+from settings import SCREEN_WIDTH, SCREEN_HEIGHT
 
 class AssetLoader:
     _instance = None
@@ -8,6 +9,7 @@ class AssetLoader:
         if cls._instance is None:
             cls._instance = super(AssetLoader, cls).__new__(cls)
             cls._instance._sprites = {}
+            cls._instance._background = None
             cls._instance._initialized = False
         return cls._instance
 
@@ -16,6 +18,12 @@ class AssetLoader:
         if self._initialized:
             return
             
+        # Preload and scale background
+        bg_path = os.path.join("sprites", "environment", "background.jpg")
+        if os.path.exists(bg_path):
+            bg_img = pygame.image.load(bg_path).convert()
+            self._background = pygame.transform.smoothscale(bg_img, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
         sprite_refs = ["skeleton", "skeleton_archer"]
         directions = ["east", "north-east", "north", "north-west", 
                       "west", "south-west", "south", "south-east"]
@@ -42,3 +50,7 @@ class AssetLoader:
         """Retrieves a cached sprite surface."""
         key = f"{sprite_ref}_{direction}"
         return self._sprites.get(key)
+
+    def get_background(self) -> pygame.Surface:
+        """Retrieves the cached background surface."""
+        return self._background

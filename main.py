@@ -184,8 +184,11 @@ async def main():
                     current_state = GameState.PLAYING
                 elif action == "MAIN_MENU":
                     current_state = GameState.MENU
-
-        screen.fill(BG_COLOR)
+        bg = AssetLoader().get_background()
+        if bg:
+            screen.blit(bg, (0, 0))
+        else:
+            screen.fill(BG_COLOR)
 
         if current_state == GameState.PLAYING:
             current_survival_time += dt
