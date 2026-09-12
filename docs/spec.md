@@ -190,6 +190,7 @@ The player navigates through distinct game states (Menu, Gameplay, Settings) bef
 - **Advanced Rendering:** HUD elements use 1px outlines and drop shadows for high contrast against the background.
 - **Diegetic Floating Text:** Collecting currency drops spawns a "+[amount]" text entity that floats upward and fades out.
 - **Danger Vignette:** A faint red pulsing vignette appears at the screen edges when the swarm count drops below 15.
+- **Command Orb:** A visual cooldown indicator anchored at the bottom-center of the screen. It features a bottom-to-top liquid fill in Necrotic Cyan and pulses when the Scatter ability is ready. Flanked by `[LMB] Condense` and `Scatter [RMB]` text hints.
 
 # Epic 6: Pacing, Escalation & Victory
 
