@@ -49,7 +49,7 @@ class CollisionSystem:
                 if distance_sq < radius_sum * radius_sum:
                     resource.marked_for_deletion = True
                     if self.on_resource_collected:
-                        self.on_resource_collected(resource)
+                        self.on_resource_collected(resource, boid)
                     break # One boid can collect it
 
         pickups = [e for e in entities if hasattr(e, 'collider') and hasattr(e, 'value') and not getattr(e, 'marked_for_deletion', False)]
@@ -66,7 +66,7 @@ class CollisionSystem:
                 if distance_sq < radius_sum * radius_sum:
                     pickup.marked_for_deletion = True
                     if self.on_currency_collected:
-                        self.on_currency_collected(pickup.value.soul_amount)
+                        self.on_currency_collected(pickup.value.soul_amount, boid, pickup.transform.x, pickup.transform.y)
                     break
 
         # 1-to-1 Attrition (Grunts only — Boomers use is_trigger and are handled below)

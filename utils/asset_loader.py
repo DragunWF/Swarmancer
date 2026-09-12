@@ -69,6 +69,25 @@ class AssetLoader:
         key = f"{sprite_ref}_{direction}"
         return self._sprites.get(key)
 
+    def get_scaled_sprite(self, sprite_ref: str, direction: str, scale_factor: float) -> pygame.Surface:
+        """Retrieves a dynamically scaled sprite, caching the result to maintain 60 FPS."""
+        # Discretize scale_factor to 2 decimal places to limit cache size
+        rounded_scale = round(scale_factor, 2)
+        base_key = f"{sprite_ref}_{direction}"
+        cache_key = f"{base_key}_{rounded_scale:.2f}"
+        
+        if cache_key in self._sprites:
+            return self._sprites[cache_key]
+            
+        base_sprite = self._sprites.get(base_key)
+        if not base_sprite:
+            return None
+            
+        w, h = base_sprite.get_size()
+        scaled_sprite = pygame.transform.scale(base_sprite, (int(w * rounded_scale), int(h * rounded_scale)))
+        self._sprites[cache_key] = scaled_sprite
+        return scaled_sprite
+
     def get_background(self) -> pygame.Surface:
         """Retrieves the cached background surface."""
         return self._background

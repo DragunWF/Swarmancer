@@ -1,5 +1,6 @@
 from systems.system import System
 import pygame
+import math
 from utils.asset_loader import AssetLoader
 from utils.math_utils import velocity_to_direction
 
@@ -20,6 +21,12 @@ class RenderSystem(System):
                 gfx = entity.graphics
                 pos = (int(entity.transform.x), int(entity.transform.y))
                 
+                scale_multiplier = 1.0
+                if hasattr(entity, 'pulsing_animation'):
+                    anim = entity.pulsing_animation
+                    anim.time_elapsed += dt
+                    scale_multiplier = 1.0 + (anim.amplitude * math.sin(anim.time_elapsed * anim.speed))
+                
                 if gfx.sprite_ref:
                     if hasattr(entity, 'physics'):
                         vx = entity.physics.velocity.x
@@ -28,16 +35,38 @@ class RenderSystem(System):
                     else:
                         direction = "static"
                     
-                    sprite = AssetLoader().get_sprite(gfx.sprite_ref, direction)
+                    if scale_multiplier != 1.0:
+                        sprite = AssetLoader().get_scaled_sprite(gfx.sprite_ref, direction, scale_multiplier)
+                    else:
+                        sprite = AssetLoader().get_sprite(gfx.sprite_ref, direction)
+                        
                     if sprite:
                         # Blit centered
                         rect = sprite.get_rect(center=pos)
+                        
+                        # Apply alpha if needed
+                        if hasattr(gfx, 'alpha') and gfx.alpha < 255:
+                            sprite = sprite.copy()
+                            sprite.set_alpha(gfx.alpha)
+                            
                         screen.blit(sprite, rect)
                     else:
                         # Fallback if sprite is missing
-                        pygame.draw.circle(screen, gfx.color, pos, int(gfx.scale))
+                        if hasattr(gfx, 'alpha') and gfx.alpha < 255:
+                            surf = pygame.Surface((int(gfx.scale)*2, int(gfx.scale)*2), pygame.SRCALPHA)
+                            pygame.draw.circle(surf, (*gfx.color, gfx.alpha), (int(gfx.scale), int(gfx.scale)), int(gfx.scale))
+                            rect = surf.get_rect(center=pos)
+                            screen.blit(surf, rect)
+                        else:
+                            pygame.draw.circle(screen, gfx.color, pos, int(gfx.scale))
                 else:
-                    pygame.draw.circle(screen, gfx.color, pos, int(gfx.scale))
+                    if hasattr(gfx, 'alpha') and gfx.alpha < 255:
+                        surf = pygame.Surface((int(gfx.scale)*2, int(gfx.scale)*2), pygame.SRCALPHA)
+                        pygame.draw.circle(surf, (*gfx.color, gfx.alpha), (int(gfx.scale), int(gfx.scale)), int(gfx.scale))
+                        rect = surf.get_rect(center=pos)
+                        screen.blit(surf, rect)
+                    else:
+                        pygame.draw.circle(screen, gfx.color, pos, int(gfx.scale))
                 
             elif hasattr(entity, 'is_player'):
                 pos = (int(entity.transform.x), int(entity.transform.y))

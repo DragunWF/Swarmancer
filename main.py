@@ -11,6 +11,7 @@ from systems.render_system import RenderSystem
 from systems.collision_system import CollisionSystem
 from systems.spawner_system import SpawnerSystem
 from systems.particle_system import ParticleSystem
+from entities.particles import SiphonParticle
 from utils.state import GameState
 from ui.shop_controller import ShopController
 from ui.menu_controller import MenuController
@@ -51,17 +52,25 @@ async def main():
     victory_souls = 0              # Captured at the moment of victory for display
     
     # External closures needed for systems
-    def on_resource_collected(resource):
+    def on_resource_collected(resource, boid):
+        # Spawn SiphonParticles
+        for _ in range(5):
+            entities.append(SiphonParticle(resource.transform.x, resource.transform.y, boid))
+
         # Spawn boids slightly offset from the grave based on yield amount
         has_archers = player and getattr(player.state, 'has_skeletal_archers', False)
         for i in range(resource.yield_amount):
-            boid = Boid(resource.transform.x + random.uniform(-20, 20), resource.transform.y + random.uniform(-20, 20), max_speed=current_boid_max_speed)
+            new_boid = Boid(resource.transform.x + random.uniform(-20, 20), resource.transform.y + random.uniform(-20, 20), max_speed=current_boid_max_speed)
             if has_archers and (i == 0 or random.random() < 0.25):
-                boid.ranged_attack = RangedAttack(fire_rate=1.0, attack_range=150.0, projectile_speed=300.0)
-                boid.graphics.sprite_ref = "skeleton_archer"
-            entities.append(boid)
+                new_boid.ranged_attack = RangedAttack(fire_rate=1.0, attack_range=150.0, projectile_speed=300.0)
+                new_boid.graphics.sprite_ref = "skeleton_archer"
+            entities.append(new_boid)
 
-    def on_currency_collected(amount):
+    def on_currency_collected(amount, boid, x, y):
+        # Spawn SiphonParticles for currency
+        for _ in range(3):
+            entities.append(SiphonParticle(x, y, boid))
+            
         if player:
             player.souls += amount
 
