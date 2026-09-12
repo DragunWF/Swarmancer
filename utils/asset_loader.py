@@ -10,6 +10,7 @@ class AssetLoader:
             cls._instance = super(AssetLoader, cls).__new__(cls)
             cls._instance._sprites = {}
             cls._instance._background = None
+            cls._instance._menu_background = None
             cls._instance._initialized = False
         return cls._instance
 
@@ -24,6 +25,11 @@ class AssetLoader:
         if os.path.exists(bg_path):
             bg_img = pygame.image.load(bg_path).convert()
             self._background = pygame.transform.smoothscale(bg_img, (SCREEN_WIDTH, SCREEN_HEIGHT))
+            
+        menu_bg_path = os.path.join("sprites", "environment", "menu-background.png")
+        if os.path.exists(menu_bg_path):
+            menu_bg_img = pygame.image.load(menu_bg_path).convert()
+            self._menu_background = pygame.transform.smoothscale(menu_bg_img, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
         sprite_refs = ["skeleton", "skeleton_archer", "grunt", "dwarf_sapper", "sun_wizard"]
         directions = ["east", "north-east", "north", "north-west", 
@@ -100,3 +106,7 @@ class AssetLoader:
     def get_background(self) -> pygame.Surface:
         """Retrieves the cached background surface."""
         return self._background
+
+    def get_menu_background(self) -> pygame.Surface:
+        """Retrieves the cached main menu background surface."""
+        return self._menu_background

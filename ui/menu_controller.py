@@ -1,5 +1,6 @@
 import pygame
 from utils.state import GameState
+from utils.asset_loader import AssetLoader
 
 # Y-position of the victory "Main Menu" button — used by both draw and handle_event
 _VICTORY_MENU_BTN_Y = 380
@@ -73,6 +74,12 @@ class MenuController:
         screen.blit(text_surf, text_rect)
 
     def draw_main_menu(self, screen, high_score):
+        bg = AssetLoader().get_menu_background()
+        if bg:
+            screen.blit(bg, (0, 0))
+        else:
+            screen.fill((20, 20, 20))
+            
         # Draw Title
         title_surf = self.title_font.render("SWARMANCER", True, (255, 50, 50))
         title_rect = title_surf.get_rect(center=(self.screen_width // 2, 150))
