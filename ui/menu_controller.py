@@ -1,6 +1,7 @@
 import pygame
 from utils.state import GameState
 from utils.asset_loader import AssetLoader
+from ui.ui_utils import draw_text_with_outline, draw_polished_button
 
 # Y-position of the victory "Main Menu" button — used by both draw and handle_event
 _VICTORY_MENU_BTN_Y = 380
@@ -66,12 +67,10 @@ class MenuController:
                     
         return None
 
-    def draw_button(self, screen, rect, text):
-        pygame.draw.rect(screen, (70, 70, 70), rect)
-        pygame.draw.rect(screen, (200, 200, 200), rect, 2)
-        text_surf = self.menu_font.render(text, True, (255, 255, 255))
-        text_rect = text_surf.get_rect(center=rect.center)
-        screen.blit(text_surf, text_rect)
+    def _draw_dimming_overlay(self, screen):
+        dim_overlay = pygame.Surface((self.screen_width, self.screen_height), pygame.SRCALPHA)
+        dim_overlay.fill((0, 0, 0, 150))
+        screen.blit(dim_overlay, (0, 0))
 
     def draw_main_menu(self, screen, high_score):
         bg = AssetLoader().get_menu_background()
@@ -80,20 +79,18 @@ class MenuController:
         else:
             screen.fill((20, 20, 20))
             
+        self._draw_dimming_overlay(screen)
+            
         # Draw Title
-        title_surf = self.title_font.render("SWARMANCER", True, (255, 50, 50))
-        title_rect = title_surf.get_rect(center=(self.screen_width // 2, 150))
-        screen.blit(title_surf, title_rect)
+        draw_text_with_outline(screen, "SWARMANCER", self.title_font, (232, 232, 232), (self.screen_width // 2, 150))
         
         # Draw High Score
-        hs_surf = self.menu_font.render(f"High Score: {high_score:.1f}s", True, (255, 215, 0))
-        hs_rect = hs_surf.get_rect(center=(self.screen_width // 2, 220))
-        screen.blit(hs_surf, hs_rect)
+        draw_text_with_outline(screen, f"High Score: {high_score:.1f}s", self.menu_font, (255, 215, 0), (self.screen_width // 2, 220))
         
         # Draw Buttons
-        self.draw_button(screen, self.play_button, "Play")
-        self.draw_button(screen, self.controls_button, "Controls")
-        self.draw_button(screen, self.settings_button, "Settings")
+        draw_polished_button(screen, self.play_button, "Play", self.menu_font)
+        draw_polished_button(screen, self.controls_button, "Controls", self.menu_font)
+        draw_polished_button(screen, self.settings_button, "Settings", self.menu_font)
         
         if self.show_controls:
             self._draw_overlay(screen, "Controls", ["Move: Mouse", "Dense State: Hold Left Click", "Scatter: Right Click (3s Cooldown)", "Pause: P Key"])
@@ -101,51 +98,41 @@ class MenuController:
             self._draw_overlay(screen, "Settings", ["Master Volume: [Placeholder]", "Music Volume: [Placeholder]"])
 
     def draw_game_over(self, screen, final_time, high_score):
+        self._draw_dimming_overlay(screen)
+        
         # Draw Game Over Text
-        go_surf = self.title_font.render("GAME OVER", True, (255, 50, 50))
-        go_rect = go_surf.get_rect(center=(self.screen_width // 2, 150))
-        screen.blit(go_surf, go_rect)
+        draw_text_with_outline(screen, "GAME OVER", self.title_font, (255, 50, 50), (self.screen_width // 2, 150))
         
         # Draw Times
-        time_surf = self.menu_font.render(f"Survived: {final_time:.1f}s", True, (255, 255, 255))
-        time_rect = time_surf.get_rect(center=(self.screen_width // 2, 220))
-        screen.blit(time_surf, time_rect)
+        draw_text_with_outline(screen, f"Survived: {final_time:.1f}s", self.menu_font, (232, 232, 232), (self.screen_width // 2, 220))
         
-        hs_surf = self.small_font.render(f"High Score: {high_score:.1f}s", True, (255, 215, 0))
-        hs_rect = hs_surf.get_rect(center=(self.screen_width // 2, 260))
-        screen.blit(hs_surf, hs_rect)
+        draw_text_with_outline(screen, f"High Score: {high_score:.1f}s", self.small_font, (255, 215, 0), (self.screen_width // 2, 260))
         
         # Draw Buttons
-        self.draw_button(screen, self.restart_button, "Restart")
-        self.draw_button(screen, self.menu_button, "Main Menu")
+        draw_polished_button(screen, self.restart_button, "Restart", self.menu_font)
+        draw_polished_button(screen, self.menu_button, "Main Menu", self.menu_font)
 
     def draw_victory(self, screen, final_time, souls):
         """Renders the Victory screen, displayed when the player survives all 10 minutes."""
+        self._draw_dimming_overlay(screen)
+        
         minutes = int(final_time) // 60
         seconds = int(final_time) % 60
 
         # Draw golden "VICTORY" title
-        victory_surf = self.title_font.render("VICTORY", True, (255, 215, 0))
-        victory_rect = victory_surf.get_rect(center=(self.screen_width // 2, 130))
-        screen.blit(victory_surf, victory_rect)
+        draw_text_with_outline(screen, "VICTORY", self.title_font, (255, 215, 0), (self.screen_width // 2, 130))
 
         # Draw subtitle
-        sub_surf = self.menu_font.render("You held the line for 10 minutes!", True, (200, 200, 200))
-        sub_rect = sub_surf.get_rect(center=(self.screen_width // 2, 205))
-        screen.blit(sub_surf, sub_rect)
+        draw_text_with_outline(screen, "You held the line for 10 minutes!", self.menu_font, (232, 232, 232), (self.screen_width // 2, 205))
 
         # Draw final survival time
-        time_surf = self.menu_font.render(f"Survived: {minutes:02d}:{seconds:02d}", True, (255, 255, 255))
-        time_rect = time_surf.get_rect(center=(self.screen_width // 2, 265))
-        screen.blit(time_surf, time_rect)
+        draw_text_with_outline(screen, f"Survived: {minutes:02d}:{seconds:02d}", self.menu_font, (232, 232, 232), (self.screen_width // 2, 265))
 
         # Draw final soul count
-        souls_surf = self.small_font.render(f"Souls Collected: {souls}", True, (255, 215, 0))
-        souls_rect = souls_surf.get_rect(center=(self.screen_width // 2, 310))
-        screen.blit(souls_surf, souls_rect)
+        draw_text_with_outline(screen, f"Souls Collected: {souls}", self.small_font, (255, 215, 0), (self.screen_width // 2, 310))
 
         # Draw Main Menu button
-        self.draw_button(screen, self.victory_menu_button, "Main Menu")
+        draw_polished_button(screen, self.victory_menu_button, "Main Menu", self.menu_font)
 
     def _draw_overlay(self, screen, title, lines):
         # Darken background
@@ -157,17 +144,20 @@ class MenuController:
         box_width = 400
         box_height = 300
         box_rect = pygame.Rect(self.screen_width // 2 - box_width // 2, self.screen_height // 2 - box_height // 2, box_width, box_height)
-        pygame.draw.rect(screen, (30, 30, 30), box_rect)
-        pygame.draw.rect(screen, (200, 200, 200), box_rect, 2)
+        pygame.draw.rect(screen, (26, 26, 26), box_rect)
+        pygame.draw.rect(screen, (232, 232, 232), box_rect, 2)
         
-        title_surf = self.menu_font.render(title, True, (255, 255, 255))
-        screen.blit(title_surf, (box_rect.x + 20, box_rect.y + 20))
+        title_center = (box_rect.x + 20 + self.menu_font.size(title)[0] // 2, box_rect.y + 20 + self.menu_font.size(title)[1] // 2)
+        draw_text_with_outline(screen, title, self.menu_font, (255, 215, 0), title_center)
         
         y_offset = 80
         for line in lines:
-            line_surf = self.small_font.render(line, True, (200, 200, 200))
-            screen.blit(line_surf, (box_rect.x + 20, box_rect.y + y_offset))
+            line_size = self.small_font.size(line)
+            line_center = (box_rect.x + 20 + line_size[0] // 2, box_rect.y + y_offset + line_size[1] // 2)
+            draw_text_with_outline(screen, line, self.small_font, (232, 232, 232), line_center)
             y_offset += 30
             
-        close_surf = self.small_font.render("Click anywhere to close", True, (150, 150, 150))
-        screen.blit(close_surf, (box_rect.x + 20, box_rect.bottom - 40))
+        close_text = "Click anywhere to close"
+        close_size = self.small_font.size(close_text)
+        close_center = (box_rect.x + 20 + close_size[0] // 2, box_rect.bottom - 40 + close_size[1] // 2)
+        draw_text_with_outline(screen, close_text, self.small_font, (150, 150, 150), close_center)
