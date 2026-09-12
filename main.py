@@ -299,7 +299,7 @@ async def main():
                 current_state = GameState.GAME_OVER
 
             # --- HUD ---
-            hud_controller.draw(screen, len(active_boids), player.souls, current_survival_time, current_threat_level)
+            hud_controller.draw(screen, player, len(active_boids), current_survival_time, current_threat_level)
             
         elif current_state == GameState.SHOP:
             render_system.update(entities, 0)
