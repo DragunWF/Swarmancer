@@ -4,7 +4,7 @@
 # Overrides the initial threat level (Default: 1, Max: 10).
 # Modifying this instantly triggers higher-tier enemies at launch.
 # Example: 3 spawns Boomers, 5 spawns Laser Drones.
-DEBUG_START_THREAT_LEVEL = 5
+DEBUG_START_THREAT_LEVEL = 1
 
 # Overrides the starting currency (Default: 0).
 # Useful for testing the Dark Altar shop purchasing flow immediately.
