@@ -1,4 +1,61 @@
 import math
+import random
+from entities.particles import Particle
+
+class ParticleEmitter:
+    @staticmethod
+    def emit(effect_type: str, x: float, y: float) -> list:
+        particles = []
+        if effect_type == "skeleton_shatter":
+            # 5-8 bone-white, 1-2 necrotic cyan
+            for _ in range(random.randint(5, 8)):
+                angle = random.uniform(0, 2 * math.pi)
+                speed = random.uniform(50, 150)
+                vx, vy = math.cos(angle) * speed, math.sin(angle) * speed
+                particles.append(Particle(x, y, vx, vy, color=(245, 245, 220), drag=0.05, duration=random.uniform(0.4, 0.7), scale=random.uniform(2.0, 4.0)))
+            for _ in range(random.randint(1, 2)):
+                angle = random.uniform(0, 2 * math.pi)
+                speed = random.uniform(50, 150)
+                vx, vy = math.cos(angle) * speed, math.sin(angle) * speed
+                particles.append(Particle(x, y, vx, vy, color=(0, 255, 255), drag=0.05, duration=random.uniform(0.4, 0.7), scale=random.uniform(3.0, 5.0)))
+                
+        elif effect_type == "vanguard_pop":
+            # chaotic burst of sunbaked tan and sweat-stained yellow
+            for _ in range(random.randint(8, 12)):
+                color = random.choice([(210, 180, 140), (255, 219, 88)])
+                angle = random.uniform(0, 2 * math.pi)
+                speed = random.uniform(80, 200)
+                vx, vy = math.cos(angle) * speed, math.sin(angle) * speed
+                particles.append(Particle(x, y, vx, vy, color=color, drag=0.05, duration=random.uniform(0.3, 0.6)))
+
+        elif effect_type == "sun_wizard_teleport":
+            # high-velocity solar-gold and bright white
+            for _ in range(random.randint(10, 15)):
+                color = random.choice([(255, 215, 0), (255, 255, 255)])
+                angle = random.uniform(0, 2 * math.pi)
+                speed = random.uniform(200, 400)
+                vx, vy = math.cos(angle) * speed, math.sin(angle) * speed
+                particles.append(Particle(x, y, vx, vy, color=color, drag=0.01, duration=random.uniform(0.5, 0.8)))
+
+        elif effect_type == "sun_wizard_death":
+            # drift up, near-zero vx, vy negative, very low drag
+            for _ in range(random.randint(10, 15)):
+                color = random.choice([(255, 215, 0), (255, 255, 255)])
+                vx = random.uniform(-10, 10)
+                vy = random.uniform(-30, -80)
+                particles.append(Particle(x, y, vx, vy, color=color, drag=0.99, duration=random.uniform(1.0, 1.5)))
+
+        elif effect_type == "sapper_detonation":
+            # dense radial blast of deep copper, charred brown, and blazing solar-gold sparks with heavy drag
+            for _ in range(random.randint(20, 30)):
+                color = random.choice([(184, 115, 51), (92, 64, 51), (255, 215, 0)])
+                angle = random.uniform(0, 2 * math.pi)
+                speed = random.uniform(150, 300)
+                vx, vy = math.cos(angle) * speed, math.sin(angle) * speed
+                particles.append(Particle(x, y, vx, vy, color=color, drag=0.80, duration=random.uniform(0.6, 1.2), scale=random.uniform(3.0, 6.0)))
+
+        return particles
+
 
 class ParticleSystem:
     def update(self, entities, dt):

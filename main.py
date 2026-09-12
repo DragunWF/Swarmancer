@@ -11,8 +11,8 @@ from systems.movement_system import MovementSystem
 from systems.render_system import RenderSystem
 from systems.collision_system import CollisionSystem
 from systems.spawner_system import SpawnerSystem
-from systems.particle_system import ParticleSystem
-from entities.particles import ShatterParticle
+from systems.particle_system import ParticleSystem, ParticleEmitter
+
 from utils.state import GameState
 from ui.shop_controller import ShopController
 from ui.menu_controller import MenuController
@@ -56,10 +56,8 @@ async def main():
     # External closures needed for systems
     def on_resource_collected(resource):
         # Spawn ShatterParticles
-        for _ in range(35):
-            angle = random.uniform(0, 2 * math.pi)
-            speed = random.uniform(300, 700)
-            entities.append(ShatterParticle(resource.transform.x, resource.transform.y, speed, angle))
+        if on_particle_spawned:
+            on_particle_spawned("skeleton_shatter", resource.transform.x, resource.transform.y)
 
         # Spawn boids slightly offset from the grave based on yield amount
         has_archers = player and getattr(player.state, 'has_skeletal_archers', False)
@@ -72,10 +70,8 @@ async def main():
 
     def on_currency_collected(amount, x, y):
         # Spawn ShatterParticles for currency
-        for _ in range(35):
-            angle = random.uniform(0, 2 * math.pi)
-            speed = random.uniform(300, 700)
-            entities.append(ShatterParticle(x, y, speed, angle))
+        if on_particle_spawned:
+            on_particle_spawned("skeleton_shatter", x, y)
             
         if player:
             player.souls += amount
@@ -83,17 +79,22 @@ async def main():
     def on_entity_spawned(entity):
         entities.append(entity)
         
+    def on_particle_spawned(effect_type, x, y):
+        particles = ParticleEmitter.emit(effect_type, x, y)
+        entities.extend(particles)
+        
     # Initialize Systems
     behavior_system = BehaviorSystem()
     movement_system = MovementSystem()
     collision_system = CollisionSystem(
         on_resource_collected=on_resource_collected,
         on_currency_collected=on_currency_collected,
-        on_entity_spawned=on_entity_spawned
+        on_entity_spawned=on_entity_spawned,
+        on_particle_spawned=on_particle_spawned
     )
     particle_system = ParticleSystem()
     render_system = RenderSystem()
-    spawner_system = SpawnerSystem(SCREEN_WIDTH, SCREEN_HEIGHT)
+    spawner_system = SpawnerSystem(SCREEN_WIDTH, SCREEN_HEIGHT, on_particle_spawned=on_particle_spawned)
     combat_system = CombatSystem()
     
     systems = [spawner_system, behavior_system, combat_system, movement_system, collision_system, particle_system, render_system]

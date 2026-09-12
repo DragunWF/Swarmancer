@@ -5,10 +5,11 @@ from entities.powerups import CursedChalice
 from entities.powerups import SoulPickup
 
 class CollisionSystem:
-    def __init__(self, on_resource_collected=None, on_currency_collected=None, on_entity_spawned=None):
+    def __init__(self, on_resource_collected=None, on_currency_collected=None, on_entity_spawned=None, on_particle_spawned=None):
         self.on_resource_collected = on_resource_collected
         self.on_currency_collected = on_currency_collected
         self.on_entity_spawned = on_entity_spawned
+        self.on_particle_spawned = on_particle_spawned
 
     def _try_drop_soul(self, x, y):
         if not self.on_entity_spawned:
@@ -91,6 +92,9 @@ class CollisionSystem:
                     enemy.marked_for_deletion = True
                     boid.marked_for_deletion = True
                     self._try_drop_soul(enemy.transform.x, enemy.transform.y)
+                    if self.on_particle_spawned:
+                        self.on_particle_spawned("skeleton_shatter", boid.transform.x, boid.transform.y)
+                        self.on_particle_spawned("vanguard_pop", enemy.transform.x, enemy.transform.y)
                     
                     # Bone Shrapnel: Secondary micro-collision damage check
                     if has_bone_shrapnel:
@@ -107,6 +111,8 @@ class CollisionSystem:
                             if dist_shrapnel_sq < shrapnel_radius * shrapnel_radius:
                                 other_enemy.marked_for_deletion = True
                                 self._try_drop_soul(other_enemy.transform.x, other_enemy.transform.y)
+                                if self.on_particle_spawned:
+                                    self.on_particle_spawned("vanguard_pop", other_enemy.transform.x, other_enemy.transform.y)
                             
                     break # One enemy pops exactly one boid
 
@@ -125,6 +131,13 @@ class CollisionSystem:
                     enemy.marked_for_deletion = True
                     proj.marked_for_deletion = True
                     self._try_drop_soul(enemy.transform.x, enemy.transform.y)
+                    if self.on_particle_spawned:
+                        if getattr(enemy, 'enemy_type', None) == 'laser_drone':
+                            self.on_particle_spawned("sun_wizard_death", enemy.transform.x, enemy.transform.y)
+                        elif getattr(enemy, 'enemy_type', None) == 'boomer':
+                            self.on_particle_spawned("sapper_detonation", enemy.transform.x, enemy.transform.y)
+                        else:
+                            self.on_particle_spawned("vanguard_pop", enemy.transform.x, enemy.transform.y)
                     break
 
         # --- Boomer AoE Detonation ---
@@ -163,6 +176,8 @@ class CollisionSystem:
             boomer.has_detonated = True
             boomer.marked_for_deletion = True
             self._try_drop_soul(boomer.transform.x, boomer.transform.y)
+            if self.on_particle_spawned:
+                self.on_particle_spawned("sapper_detonation", boomer.transform.x, boomer.transform.y)
             blast_radius_sq = boomer.blast_radius * boomer.blast_radius
 
             potential_blast_boids = spatial_hash.query_radius(boomer.transform.x, boomer.transform.y, boomer.blast_radius)
@@ -174,6 +189,8 @@ class CollisionSystem:
                 dist_sq = dx * dx + dy * dy
                 if dist_sq < blast_radius_sq:
                     boid.marked_for_deletion = True
+                    if self.on_particle_spawned:
+                        self.on_particle_spawned("skeleton_shatter", boid.transform.x, boid.transform.y)
 
 
         # --- LaserDrone Beam Hit Detection ---
@@ -194,4 +211,6 @@ class CollisionSystem:
                 vertical_dist = abs(boid.transform.y - drone.transform.y)
                 if vertical_dist < drone.beam_width:
                     boid.marked_for_deletion = True
+                    if self.on_particle_spawned:
+                        self.on_particle_spawned("skeleton_shatter", boid.transform.x, boid.transform.y)
 
