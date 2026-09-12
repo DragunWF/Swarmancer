@@ -92,7 +92,7 @@ async def main():
         on_entity_spawned=on_entity_spawned,
         on_particle_spawned=on_particle_spawned
     )
-    particle_system = ParticleSystem()
+    particle_system = ParticleSystem(on_particle_spawned=on_particle_spawned)
     render_system = RenderSystem()
     spawner_system = SpawnerSystem(SCREEN_WIDTH, SCREEN_HEIGHT, on_particle_spawned=on_particle_spawned)
     combat_system = CombatSystem()
