@@ -47,8 +47,8 @@ class AssetLoader:
         # Load static pickups
         static_pickups = {
             "skeleton-spawn": ("skeleton_spawn_static", scale),
-            "soul-drop": ("soul_drop_static", scale * 2.5),
-            "chalice": ("chalice_static", scale * 4.0)
+            "soul-drop": ("soul_drop_static", scale),
+            "chalice": ("chalice_static", scale * 1.25)
         }
         
         for filename, (ref_key, pickup_scale) in static_pickups.items():
