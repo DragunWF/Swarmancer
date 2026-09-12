@@ -40,7 +40,7 @@
 
 ## 5. UI Flow & State Management
 
-- **HUD Elements:** In-game visual indicators including dynamic countdown timers floating above Boomers (fuse) and Laser Drones (lifespan) to clearly communicate threat urgency. Also features anchored minimalist text for Swarm, Souls, and Timer, floating diegetic text on pickup, a pulsating red danger vignette when swarm count is critical, and a Command Orb to visually track the Scatter ability cooldown.
+- **HUD Elements:** In-game visual indicators including dynamic countdown timers floating above Boomers (fuse) and Laser Drones (lifespan) to clearly communicate threat urgency. Also features anchored minimalist text for Swarm, Souls, and Timer, floating diegetic text on pickup, a pulsating red danger vignette when swarm count is critical, and a Minimalist Action Bar to visually track the Scatter ability cooldown alongside dynamic text hints.
 - **Main Menu:** Contains options to Play, view Controls, and adjust Settings. Displays the current highest survival time and the game's menu background image (`menu-background.png`).
 - **Settings:** Provides individual volume sliders/increments for master sound effects and background music.
 - **Game Over Screen:** Halts all gameplay physics and enemy spawning. Compares the current run's survival time against the high score, updates it if necessary, and allows the player to restart.
