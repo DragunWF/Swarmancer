@@ -1,6 +1,6 @@
 import pygame
 import os
-from settings import SCREEN_WIDTH, SCREEN_HEIGHT
+from settings import SCREEN_WIDTH, SCREEN_HEIGHT, GLOBAL_SPRITE_SCALE
 
 class AssetLoader:
     _instance = None
@@ -13,8 +13,9 @@ class AssetLoader:
             cls._instance._initialized = False
         return cls._instance
 
-    def initialize(self, scale: float = 1.0):
+    def initialize(self):
         """Loads and pre-caches assets to prevent disk I/O during gameplay."""
+        scale = GLOBAL_SPRITE_SCALE
         if self._initialized:
             return
             

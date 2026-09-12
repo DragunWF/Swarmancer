@@ -3,6 +3,7 @@ from components.physics import Physics
 from components.graphics import Graphics
 from components.collider import Collider
 import random
+from settings import GLOBAL_SPRITE_SCALE
 
 class Boid:
     def __init__(self, x: float, y: float, max_speed: float = 350.0):
@@ -13,5 +14,5 @@ class Boid:
         self.physics.velocity.x = random.uniform(-20, 20)
         self.physics.velocity.y = random.uniform(-20, 20)
             
-        self.graphics = Graphics(color=(220, 220, 220), scale=3.0, sprite_ref="skeleton")
-        self.collider = Collider(radius=3.0)
+        self.graphics = Graphics(color=(220, 220, 220), scale=3.0 * GLOBAL_SPRITE_SCALE, sprite_ref="skeleton")
+        self.collider = Collider(radius=3.0 * GLOBAL_SPRITE_SCALE)

@@ -3,6 +3,7 @@ from components.physics import Physics
 from components.graphics import Graphics
 from components.collider import Collider
 from components.timers import AimingTimer, FuseTimer, LifespanTimer
+from settings import GLOBAL_SPRITE_SCALE
 
 class Grunt:
     def __init__(self, x: float, y: float):
@@ -10,8 +11,8 @@ class Grunt:
         # Slower max_speed than Boid (350.0) so they can be kited.
         self.physics = Physics(max_speed=150.0, mass=1.5)
         # Red-ish color, slightly larger scale than boid
-        self.graphics = Graphics(sprite_ref="grunt", color=(220, 50, 50), scale=4.0)
-        self.collider = Collider(radius=4.0)
+        self.graphics = Graphics(sprite_ref="grunt", color=(220, 50, 50), scale=4.0 * GLOBAL_SPRITE_SCALE)
+        self.collider = Collider(radius=4.0 * GLOBAL_SPRITE_SCALE)
         
         self.is_enemy = True
         self.enemy_type = 'grunt'
@@ -23,9 +24,9 @@ class Boomer:
         # Very slow, heavy sapper — easily kited but devastating on contact
         self.physics = Physics(max_speed=60.0, mass=3.0)
         # Stocky orange silhouette — visually distinct from the smaller Grunt
-        self.graphics = Graphics(sprite_ref="dwarf_sapper", color=(200, 120, 40), scale=7.0)
+        self.graphics = Graphics(sprite_ref="dwarf_sapper", color=(200, 120, 40), scale=7.0 * GLOBAL_SPRITE_SCALE)
         # is_trigger=True signals collision_system to run AoE logic, not 1-to-1 pop
-        self.collider = Collider(radius=7.0, is_trigger=True)
+        self.collider = Collider(radius=7.0 * GLOBAL_SPRITE_SCALE, is_trigger=True)
         # Fuse: self-detonates after 5s regardless of contact; ticked by behavior_system
         self.fuse_timer = FuseTimer(duration=5.0)
 
@@ -46,7 +47,7 @@ class LaserDrone:
         self.transform = Transform(x, y)
         # No Physics component — stationary by design; behavior_system tracking loop skips it
         # Bright gold wizard-tower appearance
-        self.graphics = Graphics(sprite_ref="sun_wizard", color=(220, 220, 100), scale=8.0)
+        self.graphics = Graphics(sprite_ref="sun_wizard", color=(220, 220, 100), scale=8.0 * GLOBAL_SPRITE_SCALE)
         # Telegraph timer controls the charge → fire → reset cycle; ticked by behavior_system
         self.aiming_timer = AimingTimer(charge_duration=2.5, fire_duration=0.5)
         # Destroys the drone after a set time so they don't accumulate forever

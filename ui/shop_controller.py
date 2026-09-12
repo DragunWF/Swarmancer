@@ -106,7 +106,7 @@ class ShopController:
                         screen.blit(text_surface, (btn["rect"].centerx - text_surface.get_width() // 2, y_offset))
                         y_offset += 30
 
-    def handle_event(self, event: pygame.event.Event) -> int | str | None:
+    def handle_event(self, event: pygame.event.Event):
         """
         Handles events and returns the selected upgrade ID if clicked, 'CONTINUE' if continue clicked, else None.
         """
