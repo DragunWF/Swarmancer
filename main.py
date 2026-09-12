@@ -1,6 +1,7 @@
 import asyncio
 import pygame
 import random
+import math
 from settings import SCREEN_WIDTH, SCREEN_HEIGHT, FPS, BG_COLOR
 from entities.player import Player
 from entities.boid import Boid
@@ -11,7 +12,7 @@ from systems.render_system import RenderSystem
 from systems.collision_system import CollisionSystem
 from systems.spawner_system import SpawnerSystem
 from systems.particle_system import ParticleSystem
-from entities.particles import SiphonParticle
+from entities.particles import ShatterParticle
 from utils.state import GameState
 from ui.shop_controller import ShopController
 from ui.menu_controller import MenuController
@@ -52,10 +53,12 @@ async def main():
     victory_souls = 0              # Captured at the moment of victory for display
     
     # External closures needed for systems
-    def on_resource_collected(resource, boid):
-        # Spawn SiphonParticles
-        for _ in range(5):
-            entities.append(SiphonParticle(resource.transform.x, resource.transform.y, boid))
+    def on_resource_collected(resource):
+        # Spawn ShatterParticles
+        for _ in range(15):
+            angle = random.uniform(0, 2 * math.pi)
+            speed = random.uniform(200, 500)
+            entities.append(ShatterParticle(resource.transform.x, resource.transform.y, speed, angle))
 
         # Spawn boids slightly offset from the grave based on yield amount
         has_archers = player and getattr(player.state, 'has_skeletal_archers', False)
@@ -66,10 +69,12 @@ async def main():
                 new_boid.graphics.sprite_ref = "skeleton_archer"
             entities.append(new_boid)
 
-    def on_currency_collected(amount, boid, x, y):
-        # Spawn SiphonParticles for currency
-        for _ in range(3):
-            entities.append(SiphonParticle(x, y, boid))
+    def on_currency_collected(amount, x, y):
+        # Spawn ShatterParticles for currency
+        for _ in range(15):
+            angle = random.uniform(0, 2 * math.pi)
+            speed = random.uniform(200, 500)
+            entities.append(ShatterParticle(x, y, speed, angle))
             
         if player:
             player.souls += amount
