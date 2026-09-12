@@ -221,3 +221,20 @@ The game presents a structured 10-minute survival arc, where a global Threat Lev
 - The game arena utilizes a static 2D pixel art background (`background.jpg`) as the foundational floor layer.
 - The background sits seamlessly behind all active ECS entities, particles, and UI elements without impacting collision physics.
 - **User Story:** **As a player**, I want to see a detailed, thematic arena background, **so that** the game world feels cohesive and immersive rather than an empty black void.
+
+# Epic 7: Developer Sandbox & Playtest Configuration
+
+The game includes a centralized configuration file (`config.py`) to streamline playtesting by allowing developers to easily manipulate initial game states. This eliminates the need to wait for the organic escalation of the game loop to test mid-to-late game mechanics.
+
+## Feature 1: Debug Configuration Overrides
+
+- `DEBUG_START_THREAT_LEVEL`: Overrides the initial threat level (Default: 1, Max: 10). Modifying this instantly triggers higher-tier enemies at launch.
+- `DEBUG_START_SOULS`: Overrides the starting currency (Default: 0).
+- `DEBUG_START_SWARM_COUNT`: Overrides the initial size of the player's swarm (Default: 50).
+- `DEBUG_START_UPGRADES`: A list of upgrades the player spawns with (Default: []). Supported values: "skeletal_archers", "grave_robbers_yield", "evasion_mastery", "bone_shrapnel", "necrotic_momentum".
+
+## Feature 2: Initialization Logic
+
+- `main.py` reads these constants when launching a new game session (`GameState.PLAYING`).
+- If `DEBUG_START_THREAT_LEVEL > 1`, the survival timer is offset correctly to match the threshold of that threat level, and the system automatically advances the `next_shop_milestone_index` pointer so past shop phases do not trigger out of order.
+- Active `DEBUG_START_UPGRADES` are applied immediately to the `PlayerState` on start and removed from the shop's available pool.
