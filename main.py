@@ -20,6 +20,7 @@ from ui.pause_controller import PauseController
 from components.combat import RangedAttack
 from systems.combat_system import CombatSystem
 from utils.asset_loader import AssetLoader
+from config import DEBUG_START_THREAT_LEVEL, DEBUG_START_SOULS, DEBUG_START_SWARM_COUNT, DEBUG_START_UPGRADES
 
 # Explicit time thresholds (seconds) for Threat Levels 2 through 10
 THREAT_THRESHOLDS = [20.0, 45.0, 75.0, 120.0, 180.0, 255.0, 330.0, 420.0, 510.0]
@@ -116,23 +117,63 @@ async def main():
         player_x = SCREEN_WIDTH / 2
         player_y = SCREEN_HEIGHT / 2
         player = Player(player_x, player_y)
+        player.souls = DEBUG_START_SOULS
         entities.append(player)
 
         current_boid_max_speed = 350.0
         Resource.yield_amount = 3
         shop_controller.available_upgrades = shop_controller.all_upgrades.copy()
         shop_controller.refresh_upgrades()
-        current_threat_level = 1
+        
+        current_threat_level = DEBUG_START_THREAT_LEVEL
+        if current_threat_level > 1:
+            offset_idx = min(current_threat_level - 2, len(THREAT_THRESHOLDS) - 1)
+            current_survival_time = THREAT_THRESHOLDS[offset_idx]
+        else:
+            current_survival_time = 0.0
+            
         next_shop_milestone_index = 0
+        while next_shop_milestone_index < len(SHOP_MILESTONES) and current_survival_time >= SHOP_MILESTONES[next_shop_milestone_index]:
+            next_shop_milestone_index += 1
+            
         victory_souls = 0
 
-        for _ in range(50):
+        for _ in range(DEBUG_START_SWARM_COUNT):
             boid = Boid(player_x + random.uniform(-60, 60), player_y + random.uniform(-60, 60), max_speed=current_boid_max_speed)
             entities.append(boid)
+            
+        upgrade_map = {
+            "skeletal_archers": 0,
+            "grave_robbers_yield": 1,
+            "evasion_mastery": 2,
+            "bone_shrapnel": 3,
+            "necrotic_momentum": 4
+        }
+        for upgrade_name in DEBUG_START_UPGRADES:
+            upgrade_id = upgrade_map.get(upgrade_name)
+            if upgrade_id is not None:
+                if upgrade_id == 0:
+                    player.state.has_skeletal_archers = True
+                    boids = [e for e in entities if isinstance(e, Boid) and not hasattr(e, 'ranged_attack')]
+                    upgrade_count = min(10, len(boids))
+                    if upgrade_count > 0:
+                        for b in random.sample(boids, upgrade_count):
+                            b.ranged_attack = RangedAttack(fire_rate=1.0, attack_range=150.0, projectile_speed=300.0)
+                            b.graphics.sprite_ref = "skeleton_archer"
+                elif upgrade_id == 1:
+                    Resource.yield_amount += 1
+                elif upgrade_id == 2:
+                    player.scatter_timer.cooldown_duration = max(1.0, player.scatter_timer.cooldown_duration - 0.5)
+                elif upgrade_id == 3:
+                    setattr(player.state, 'has_bone_shrapnel', True)
+                elif upgrade_id == 4:
+                    current_boid_max_speed += 50.0
+                    for b in [e for e in entities if isinstance(e, Boid)]:
+                        b.physics.max_speed = current_boid_max_speed
+                shop_controller.remove_upgrade(upgrade_id)
 
         resource_timer = 0.0
         shop_timer = 0.0
-        current_survival_time = 0.0
 
     running = True
     while running:
