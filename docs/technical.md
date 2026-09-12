@@ -35,6 +35,7 @@ Systems iterate over the entity pool every frame (60 FPS), targeting only entiti
 - **Movement System (`movement_system.py`):** Iterates over `Transform` + `Physics` signatures to update spatial coordinates.
 - **Collision System (`collision_system.py`):** Evaluates squared distance overlaps between `Collider` components. Handles combat attrition and currency spawning.
 - **Particle System (`particle_system.py`):** Manages the `LifespanTimer` of visual effects and updates `Graphics.alpha` to fade objects.
+- **Particle Trigger Hooks:** `CollisionSystem` and `SpawnerSystem` receive an `on_particle_spawned(effect_type, x, y)` callback to trigger lightweight vector generation via a decoupled `ParticleEmitter` factory. The factory utilizes native `math.cos` and `math.sin` functions to generate allocation-free directional velocity vectors, maintaining the 60 FPS standard in WebAssembly.
 - **Render System (`render_system.py`):** Draws pixel art, primitive shapes, and UI overlays (including dynamic timer texts for enemies) to the Pygame display surface.
 
 ## 5. Optimization Layer (`utils/`)

@@ -99,6 +99,7 @@ Establish the underlying hybrid Entity-Component-System (ECS) engine and spatial
 - **As a developer**, I want to query spatial neighbors through a SpatialHash grid, **so that** distance calculations for hundreds of swarm entities remain performant without checking every entity against every other entity.
 - **As a developer**, I want collision checks to evaluate squared distance values, **so that** the computational overhead of square root calculations is avoided during runtime.
 - **As a player**, I want entity deaths to spawn fading particle pops managed by a particle system, **so that** combat impacts feel visually clear and responsive.
+- **As a player**, I want to see distinctly colored and physics-driven particle bursts for Skeleton Shatters, Crusader Vanguard Pops, Sun Wizard Teleportations, and Dwarf Sapper Detonations, **so that** specific combat events provide immediate, readable visual feedback.
 
 # Epic 4: Swarm Upgrades & Progression
 

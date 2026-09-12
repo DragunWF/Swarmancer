@@ -32,6 +32,12 @@
   - **Behavior:** Stationary stone wizard towers that telegraph an attack before firing. They have a 15-second lifespan before they expire.
   - **Interaction:** Fires a wide, holy light laser beam with a 100-pixel total band (50px half-width) centered on the drone's position. This attack destroys any minion caught in its path, specifically punishing loose, spread-out formations.
 
+## 4b. Visual Feedback (Particle Effects)
+- **Skeleton Shatter:** Destroyed minions emit bleached bone-white and necrotic cyan pixels.
+- **Crusader Vanguard Pop:** Destroyed Grunts emit a chaotic burst of sunbaked tan and sweat-stained yellow pixels.
+- **Sun Wizard Teleportation:** Laser Drones emit a high-velocity solar-gold burst upon instantiation, and a vertical drifting alpha-fade upon death.
+- **Dwarf Sapper Detonation:** Boomers emit a dense radial blast of deep copper, charred brown, and blazing solar-gold sparks with heavy drag to simulate lingering smoke.
+
 ## 5. UI Flow & State Management
 
 - **HUD Elements:** In-game visual indicators including dynamic countdown timers floating above Boomers (fuse) and Laser Drones (lifespan) to clearly communicate threat urgency.
