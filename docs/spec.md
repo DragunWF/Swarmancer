@@ -145,6 +145,7 @@ The player navigates through distinct game states (Menu, Gameplay, Settings) bef
 ## Feature 1: Main Menu & Navigation
 
 - The application initializes into a Main Menu state upon launch.
+- The main menu renders a dedicated scaled background image (`menu-background.png`).
 - The menu contains clearly labeled buttons: "Play", "Controls", and "Settings".
 - Clicking "Play" transitions the application into the active Gameplay state, resetting the survival timer and swarm count.
 - Clicking "Controls" opens an overlay detailing the left-click (Dense) and right-click (Scatter) inputs.
