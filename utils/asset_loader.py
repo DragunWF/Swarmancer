@@ -44,6 +44,17 @@ class AssetLoader:
                     
                     self._sprites[f"{ref}_{d}"] = scaled_img
                     
+        # Load static pickups
+        pickup_path = os.path.join("sprites", "pickups", "skeleton-spawn.png")
+        if os.path.exists(pickup_path):
+            img = pygame.image.load(pickup_path).convert_alpha()
+            if scale != 1.0:
+                w, h = img.get_size()
+                scaled_img = pygame.transform.scale(img, (int(w * scale), int(h * scale)))
+            else:
+                scaled_img = img
+            self._sprites["skeleton_spawn_static"] = scaled_img
+                    
         self._initialized = True
 
     def get_sprite(self, sprite_ref: str, direction: str) -> pygame.Surface:
