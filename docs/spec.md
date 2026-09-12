@@ -184,6 +184,13 @@ The player navigates through distinct game states (Menu, Gameplay, Settings) bef
 - **As a player**, I want to adjust the sound effects and music volume within the pause screen, **so that** I can balance the audio to my preference.
 - **As a player**, I want a confirmation dialog to appear when selecting the Main Menu button, **so that** I do not accidentally erase my current survival run.
 
+## Feature 5: Active Gameplay HUD & Visual Feedback
+
+- **Minimalist HUD Anchors:** The HUD displays pure text without icons. Swarm Count is anchored top-left, Souls top-right, and Survival Timer top-center.
+- **Advanced Rendering:** HUD elements use 1px outlines and drop shadows for high contrast against the background.
+- **Diegetic Floating Text:** Collecting currency drops spawns a "+[amount]" text entity that floats upward and fades out.
+- **Danger Vignette:** A faint red pulsing vignette appears at the screen edges when the swarm count drops below 15.
+
 # Epic 6: Pacing, Escalation & Victory
 
 The game presents a structured 10-minute survival arc, where a global Threat Level (1–10) escalates every 60 seconds, automatically injecting new enemy types into the spawn pool, tightening shop intervals, and culminating in a Victory state when the player survives all 10 levels.
