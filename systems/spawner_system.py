@@ -1,5 +1,7 @@
+import math
 import random
 from entities.enemies import Grunt, Boomer, LaserDrone
+from entities.particles import TeleportParticle
 
 class SpawnerSystem:
     def __init__(self, screen_width, screen_height):
@@ -92,3 +94,9 @@ class SpawnerSystem:
         x = random.uniform(margin, self.screen_width - margin)
         y = random.uniform(margin, self.screen_height - margin)
         entities.append(LaserDrone(x, y))
+        
+        # Teleportation particle burst
+        for _ in range(25):
+            angle = random.uniform(0, math.pi * 2)
+            speed = random.uniform(100.0, 300.0)
+            entities.append(TeleportParticle(x, y, speed, angle))

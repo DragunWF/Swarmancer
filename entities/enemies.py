@@ -23,7 +23,7 @@ class Boomer:
         # Very slow, heavy sapper — easily kited but devastating on contact
         self.physics = Physics(max_speed=60.0, mass=3.0)
         # Stocky orange silhouette — visually distinct from the smaller Grunt
-        self.graphics = Graphics(color=(200, 120, 40), scale=7.0)
+        self.graphics = Graphics(sprite_ref="dwarf_sapper", color=(200, 120, 40), scale=7.0)
         # is_trigger=True signals collision_system to run AoE logic, not 1-to-1 pop
         self.collider = Collider(radius=7.0, is_trigger=True)
         # Fuse: self-detonates after 5s regardless of contact; ticked by behavior_system
@@ -46,7 +46,7 @@ class LaserDrone:
         self.transform = Transform(x, y)
         # No Physics component — stationary by design; behavior_system tracking loop skips it
         # Bright gold wizard-tower appearance
-        self.graphics = Graphics(color=(220, 220, 100), scale=8.0)
+        self.graphics = Graphics(sprite_ref="sun_wizard", color=(220, 220, 100), scale=8.0)
         # Telegraph timer controls the charge → fire → reset cycle; ticked by behavior_system
         self.aiming_timer = AimingTimer(charge_duration=2.5, fire_duration=0.5)
         # Destroys the drone after a set time so they don't accumulate forever

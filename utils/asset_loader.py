@@ -24,7 +24,7 @@ class AssetLoader:
             bg_img = pygame.image.load(bg_path).convert()
             self._background = pygame.transform.smoothscale(bg_img, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
-        sprite_refs = ["skeleton", "skeleton_archer", "grunt"]
+        sprite_refs = ["skeleton", "skeleton_archer", "grunt", "dwarf_sapper", "sun_wizard"]
         directions = ["east", "north-east", "north", "north-west", 
                       "west", "south-west", "south", "south-east"]
         

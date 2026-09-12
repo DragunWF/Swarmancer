@@ -33,7 +33,7 @@ class RenderSystem(System):
                         vy = entity.physics.velocity.y
                         direction = velocity_to_direction(vx, vy)
                     else:
-                        direction = "static"
+                        direction = "south"
                     
                     if scale_multiplier != 1.0:
                         sprite = AssetLoader().get_scaled_sprite(gfx.sprite_ref, direction, scale_multiplier)

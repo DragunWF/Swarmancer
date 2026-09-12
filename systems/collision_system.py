@@ -1,6 +1,8 @@
 import random
 import math
 from utils.spatial_hash import SpatialHash
+from entities.powerups import CursedChalice
+from entities.powerups import SoulPickup
 
 class CollisionSystem:
     def __init__(self, on_resource_collected=None, on_currency_collected=None, on_entity_spawned=None):
@@ -13,10 +15,8 @@ class CollisionSystem:
             return
         roll = random.random()
         if roll < 0.01:
-            from entities.powerups import CursedChalice
             self.on_entity_spawned(CursedChalice(x, y))
         elif roll < 0.20:
-            from entities.powerups import SoulPickup
             self.on_entity_spawned(SoulPickup(x, y))
 
     def update(self, entities, dt):

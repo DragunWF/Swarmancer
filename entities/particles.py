@@ -22,3 +22,14 @@ class ShatterParticle:
         # High drag value ensures it decelerates rapidly (multiplied per second)
         self.kinetics = ParticleKinetics(vx=vx, vy=vy, drag=0.01)
         self.marked_for_deletion = False
+
+class TeleportParticle:
+    def __init__(self, x: float, y: float, speed: float, angle: float):
+        self.transform = Transform(x, y)
+        self.graphics = Graphics(color=(255, 250, 150), scale=random.uniform(2.0, 4.0), sprite_ref=None)
+        self.lifespan_timer = LifespanTimer(duration=random.uniform(0.5, 0.8))
+        
+        vx = math.cos(angle) * speed
+        vy = math.sin(angle) * speed
+        self.kinetics = ParticleKinetics(vx=vx, vy=vy, drag=0.01)
+        self.marked_for_deletion = False
