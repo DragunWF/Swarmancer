@@ -8,10 +8,12 @@ from components.kinetics import ParticleKinetics
 class ShatterParticle:
     def __init__(self, x: float, y: float, speed: float, angle: float):
         self.transform = Transform(x, y)
-        self.graphics = Graphics(color=(0, 255, 255), scale=2.0, sprite_ref=None)
         
-        # Short burst lifespan
-        self.lifespan_timer = LifespanTimer(duration=random.uniform(0.3, 0.5))
+        # Varied, larger scale for more prominent pixels
+        self.graphics = Graphics(color=(0, 255, 255), scale=random.uniform(3.0, 5.0), sprite_ref=None)
+        
+        # Slightly longer burst lifespan
+        self.lifespan_timer = LifespanTimer(duration=random.uniform(0.4, 0.7))
         
         # Calculate initial velocity vectors
         vx = math.cos(angle) * speed

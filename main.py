@@ -55,9 +55,9 @@ async def main():
     # External closures needed for systems
     def on_resource_collected(resource):
         # Spawn ShatterParticles
-        for _ in range(15):
+        for _ in range(35):
             angle = random.uniform(0, 2 * math.pi)
-            speed = random.uniform(200, 500)
+            speed = random.uniform(300, 700)
             entities.append(ShatterParticle(resource.transform.x, resource.transform.y, speed, angle))
 
         # Spawn boids slightly offset from the grave based on yield amount
@@ -71,9 +71,9 @@ async def main():
 
     def on_currency_collected(amount, x, y):
         # Spawn ShatterParticles for currency
-        for _ in range(15):
+        for _ in range(35):
             angle = random.uniform(0, 2 * math.pi)
-            speed = random.uniform(200, 500)
+            speed = random.uniform(300, 700)
             entities.append(ShatterParticle(x, y, speed, angle))
             
         if player:
