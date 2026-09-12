@@ -14,6 +14,7 @@ from systems.spawner_system import SpawnerSystem
 from systems.particle_system import ParticleSystem, ParticleEmitter
 
 from utils.state import GameState
+from ui.hud_controller import HUDController
 from ui.shop_controller import ShopController
 from ui.menu_controller import MenuController
 from ui.pause_controller import PauseController
@@ -75,6 +76,10 @@ async def main():
             
         if player:
             player.souls += amount
+            
+        # Spawn Floating Text
+        from entities.particles import FloatingText
+        entities.append(FloatingText(x, y, f"+{amount}"))
 
     def on_entity_spawned(entity):
         entities.append(entity)
@@ -100,12 +105,12 @@ async def main():
     systems = [spawner_system, behavior_system, combat_system, movement_system, collision_system, particle_system, render_system]
     
     # Controllers
+    hud_controller = HUDController(SCREEN_WIDTH, SCREEN_HEIGHT)
     shop_controller = ShopController(SCREEN_WIDTH, SCREEN_HEIGHT)
     menu_controller = MenuController(SCREEN_WIDTH, SCREEN_HEIGHT)
     pause_controller = PauseController(SCREEN_WIDTH, SCREEN_HEIGHT)
     
     current_state = GameState.MENU
-    hud_font = pygame.font.SysFont(None, 36)
     
     resource_timer = 0.0
     shop_timer = 0.0
@@ -294,13 +299,7 @@ async def main():
                 current_state = GameState.GAME_OVER
 
             # --- HUD ---
-            minutes = int(current_survival_time) // 60
-            seconds = int(current_survival_time) % 60
-            timer_text = hud_font.render(f"{minutes:02d}:{seconds:02d}  Threat Lv.{current_threat_level}", True, (255, 255, 255))
-            screen.blit(timer_text, (SCREEN_WIDTH // 2 - timer_text.get_width() // 2, 10))
-
-            souls_text = hud_font.render(f"Souls: {player.souls}", True, (255, 215, 0))
-            screen.blit(souls_text, (SCREEN_WIDTH // 2 - souls_text.get_width() // 2, 45))
+            hud_controller.draw(screen, len(active_boids), player.souls, current_survival_time, current_threat_level)
             
         elif current_state == GameState.SHOP:
             render_system.update(entities, 0)

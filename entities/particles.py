@@ -1,7 +1,7 @@
 import math
 import random
 from components.transform import Transform
-from components.graphics import Graphics
+from components.graphics import Graphics, TextGraphics
 from components.timers import LifespanTimer
 from components.kinetics import ParticleKinetics
 from settings import GLOBAL_SPRITE_SCALE
@@ -15,5 +15,15 @@ class Particle:
         self.lifespan_timer = LifespanTimer(duration=duration)
         self.kinetics = ParticleKinetics(vx=vx, vy=vy, drag=drag)
         self.fade = fade
+        self.is_particle = True
+        self.marked_for_deletion = False
+
+class FloatingText:
+    def __init__(self, x: float, y: float, text: str, color: tuple = (255, 215, 0), vx: float = 0.0, vy: float = -30.0, duration: float = 1.5):
+        self.transform = Transform(x, y)
+        self.graphics = TextGraphics(text=text, color=color, font_size=24)
+        self.lifespan_timer = LifespanTimer(duration=duration)
+        self.kinetics = ParticleKinetics(vx=vx, vy=vy, drag=0.95)
+        self.fade = True
         self.is_particle = True
         self.marked_for_deletion = False

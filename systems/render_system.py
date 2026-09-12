@@ -3,11 +3,13 @@ import pygame
 import math
 from utils.asset_loader import AssetLoader
 from utils.math_utils import velocity_to_direction
+from ui.ui_utils import draw_text_with_outline
 
 class RenderSystem(System):
     def __init__(self):
         pygame.font.init()
         self.font = pygame.font.SysFont(None, 20)
+        self.floating_font = pygame.font.SysFont(None, 24)
 
     def update(self, entities, dt):
         screen = pygame.display.get_surface()
@@ -27,7 +29,17 @@ class RenderSystem(System):
                     anim.time_elapsed += dt
                     scale_multiplier = 1.0 + (anim.amplitude * math.sin(anim.time_elapsed * anim.speed))
                 
-                if gfx.sprite_ref:
+                if type(gfx).__name__ == 'TextGraphics':
+                    if gfx.alpha < 255:
+                        temp_surf = pygame.Surface((150, 50), pygame.SRCALPHA)
+                        draw_text_with_outline(temp_surf, gfx.text, self.floating_font, gfx.color, (75, 25))
+                        temp_surf.set_alpha(gfx.alpha)
+                        screen.blit(temp_surf, temp_surf.get_rect(center=pos))
+                    else:
+                        draw_text_with_outline(screen, gfx.text, self.floating_font, gfx.color, pos)
+                    continue
+
+                if getattr(gfx, 'sprite_ref', None):
                     if hasattr(entity, 'physics'):
                         vx = entity.physics.velocity.x
                         vy = entity.physics.velocity.y
