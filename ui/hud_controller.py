@@ -43,42 +43,57 @@ class HUDController:
         timer_size = self.hud_font.size(timer_text)
         draw_text_with_outline(screen, timer_text, self.hud_font, (232, 232, 232), (self.screen_width // 2, 20 + timer_size[1]//2))
         
-        # 5. Command Orb
+        # 5. Action Bar
         if player and hasattr(player, 'scatter_timer'):
-            self._draw_command_orb(screen, player, current_survival_time)
+            self._draw_action_bar(screen, player, current_survival_time)
 
-    def _draw_command_orb(self, screen, player, current_survival_time):
-        radius = 30
+    def _draw_action_bar(self, screen, player, current_survival_time):
+        bar_width = 200
+        bar_height = 15
         x_center = self.screen_width // 2
-        y_center = self.screen_height - radius - 20
+        y_center = self.screen_height - bar_height - 20
         
-        st = player.scatter_timer
-        progress = 1.0 - (st.current_time / st.cooldown_duration) if st.cooldown_duration > 0 else 1.0
+        scatter_progress = 1.0
+        if hasattr(player, 'scatter_timer'):
+            st = player.scatter_timer
+            if st.cooldown_duration > 0:
+                scatter_progress = 1.0 - (st.current_time / st.cooldown_duration)
+                
+        dense_progress = 1.0
+        if hasattr(player, 'dense_timer'):
+            dt_timer = player.dense_timer
+            if dt_timer.cooldown_time > 0.0:
+                dense_progress = 1.0 - (dt_timer.cooldown_time / dt_timer.cooldown_duration)
+            elif dt_timer.active_time > 0.0:
+                dense_progress = 1.0 - (dt_timer.active_time / dt_timer.max_duration)
+                
+        progress = min(scatter_progress, dense_progress)
         progress = max(0.0, min(1.0, progress))
         
-        # 1. Base Dark Orb
-        base_orb = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
-        pygame.draw.circle(base_orb, (20, 20, 20, 200), (radius, radius), radius)
-        screen.blit(base_orb, (x_center - radius, y_center - radius))
+        # 1. Base Dark Bar with border
+        border_rect = pygame.Rect(x_center - bar_width // 2, y_center, bar_width, bar_height)
         
-        # 2. Liquid Fill (Necrotic Cyan)
-        if progress > 0.0:
-            fill_orb = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
-            pygame.draw.circle(fill_orb, (0, 255, 255, 255), (radius, radius), radius)
+        # We need a surface for the background to support alpha if we want
+        bg_surf = pygame.Surface((bar_width, bar_height), pygame.SRCALPHA)
+        bg_surf.fill((26, 26, 26, 200))
+        screen.blit(bg_surf, border_rect.topleft)
+        pygame.draw.rect(screen, (200, 200, 200), border_rect, 2)
+        
+        # 2. Horizontal Fill (Necrotic Cyan)
+        fill_width = int(bar_width * progress)
+        if fill_width > 0:
+            fill_rect = pygame.Rect(x_center - bar_width // 2, y_center, fill_width, bar_height)
+            pygame.draw.rect(screen, (0, 255, 255), fill_rect)
             
-            fill_h = int(radius * 2 * progress)
-            if fill_h > 0:
-                fill_rect = pygame.Rect(0, radius * 2 - fill_h, radius * 2, fill_h)
-                cropped_fill = fill_orb.subsurface(fill_rect)
-                screen.blit(cropped_fill, (x_center - radius, y_center - radius + (radius * 2 - fill_h)))
-                
         # 3. Pulse / Glow when ready
         if progress >= 1.0:
-            pulse_radius = radius + int(5 * math.sin(current_survival_time * 5.0))
-            glow_surf = pygame.Surface((pulse_radius * 2, pulse_radius * 2), pygame.SRCALPHA)
-            pygame.draw.circle(glow_surf, (0, 255, 255, 50), (pulse_radius, pulse_radius), pulse_radius)
-            screen.blit(glow_surf, (x_center - pulse_radius, y_center - pulse_radius))
+            pulse_margin = int(4 * math.sin(current_survival_time * 5.0) + 4)
+            if pulse_margin > 0:
+                glow_rect = pygame.Rect(x_center - bar_width // 2 - pulse_margin, y_center - pulse_margin, bar_width + pulse_margin * 2, bar_height + pulse_margin * 2)
+                glow_surf = pygame.Surface((glow_rect.width, glow_rect.height), pygame.SRCALPHA)
+                pygame.draw.rect(glow_surf, (0, 255, 255, 50), glow_surf.get_rect(), border_radius=4)
+                screen.blit(glow_surf, glow_rect.topleft)
             
-        # 4. Flanking Text
-        draw_text_with_outline(screen, "[LMB] Condense", self.hud_font, (232, 232, 232), (x_center - radius - 90, y_center))
-        draw_text_with_outline(screen, "Scatter [RMB]", self.hud_font, (232, 232, 232), (x_center + radius + 90, y_center))
+        # 4. Text Hints above the bar
+        text_color = (232, 232, 232) if progress >= 1.0 else (100, 100, 100)
+        draw_text_with_outline(screen, "[LMB] Condense  |  Scatter [RMB]", self.hud_font, text_color, (x_center, y_center - 20))
