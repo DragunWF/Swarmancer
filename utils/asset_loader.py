@@ -45,15 +45,22 @@ class AssetLoader:
                     self._sprites[f"{ref}_{d}"] = scaled_img
                     
         # Load static pickups
-        pickup_path = os.path.join("sprites", "pickups", "skeleton-spawn.png")
-        if os.path.exists(pickup_path):
-            img = pygame.image.load(pickup_path).convert_alpha()
-            if scale != 1.0:
-                w, h = img.get_size()
-                scaled_img = pygame.transform.scale(img, (int(w * scale), int(h * scale)))
-            else:
-                scaled_img = img
-            self._sprites["skeleton_spawn_static"] = scaled_img
+        static_pickups = {
+            "skeleton-spawn": ("skeleton_spawn_static", scale),
+            "soul-drop": ("soul_drop_static", scale * 2.5),
+            "chalice": ("chalice_static", scale * 4.0)
+        }
+        
+        for filename, (ref_key, pickup_scale) in static_pickups.items():
+            pickup_path = os.path.join("sprites", "pickups", f"{filename}.png")
+            if os.path.exists(pickup_path):
+                img = pygame.image.load(pickup_path).convert_alpha()
+                if pickup_scale != 1.0:
+                    w, h = img.get_size()
+                    scaled_img = pygame.transform.scale(img, (int(w * pickup_scale), int(h * pickup_scale)))
+                else:
+                    scaled_img = img
+                self._sprites[ref_key] = scaled_img
                     
         self._initialized = True
 

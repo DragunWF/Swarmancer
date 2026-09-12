@@ -17,7 +17,7 @@ class Resource:
 class SoulPickup:
     def __init__(self, x: float, y: float):
         self.transform = Transform(x, y)
-        self.graphics = Graphics(color=(0, 255, 255), scale=4.0) # cyan
+        self.graphics = Graphics(color=(0, 255, 255), scale=4.0, sprite_ref="soul_drop") # cyan
         self.collider = Collider(radius=8.0, is_trigger=True)
         self.lifespan_timer = LifespanTimer(duration=15.0)
         self.value = Value(soul_amount=1)
@@ -26,7 +26,7 @@ class SoulPickup:
 class CursedChalice:
     def __init__(self, x: float, y: float):
         self.transform = Transform(x, y)
-        self.graphics = Graphics(color=(218, 165, 32), scale=8.0) # goldenrod
+        self.graphics = Graphics(color=(218, 165, 32), scale=8.0, sprite_ref="chalice") # goldenrod
         self.collider = Collider(radius=12.0, is_trigger=True)
         self.lifespan_timer = LifespanTimer(duration=15.0)
         self.value = Value(soul_amount=50)
