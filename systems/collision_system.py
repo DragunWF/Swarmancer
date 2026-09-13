@@ -50,6 +50,7 @@ class CollisionSystem:
                 radius_sum = boid.collider.radius + resource.collider.radius
                 if distance_sq < radius_sum * radius_sum:
                     resource.marked_for_deletion = True
+                    AssetLoader().play_sound("pickup")
                     if self.on_resource_collected:
                         self.on_resource_collected(resource)
                     break # One boid can collect it
@@ -67,6 +68,7 @@ class CollisionSystem:
                 radius_sum = boid.collider.radius + pickup.collider.radius
                 if distance_sq < radius_sum * radius_sum:
                     pickup.marked_for_deletion = True
+                    AssetLoader().play_sound("pickup")
                     if self.on_currency_collected:
                         self.on_currency_collected(pickup.value.soul_amount, pickup.transform.x, pickup.transform.y)
                     break

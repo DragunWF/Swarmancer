@@ -86,7 +86,7 @@ class AssetLoader:
         
         # Load sounds
         try:
-            sound_files = ["dwarf_explosion", "laser_spell", "lose", "skeleton_pop", "ui_click", "ui_error", "win"]
+            sound_files = ["dwarf_explosion", "laser_spell", "lose", "skeleton_pop", "ui_click", "ui_error", "win", "pickup"]
             for sf in sound_files:
                 sf_path = os.path.join("audio", "sound", f"{sf}.wav")
                 if os.path.exists(sf_path):
