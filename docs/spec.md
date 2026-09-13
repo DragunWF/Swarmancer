@@ -120,7 +120,7 @@ The player can access a mid-run or end-of-run shop system to mutate the swarm, s
 - The UI displays current currency (e.g., Souls) and renders all available upgrades simultaneously in a persistent grid layout.
 - The player can purchase multiple upgrades during a single shop phase as long as they have sufficient Souls.
 - The shop remains open until the player explicitly clicks a "Continue" button.
-- Purchased upgrades are flagged and persistently rendered on the grid with a grayed-out tint and disabled interactions, instead of being removed from the pool, so the player can track what they have acquired.
+- Purchased upgrades are tracked by a persistent global state (`PlayerState.purchased_upgrade_ids`), and they are flagged and persistently rendered on the grid with a grayed-out tint and disabled interactions, instead of being removed from the pool, so the player can track what they have acquired.
 - Hovering the mouse over an upgrade's bounding box dynamically renders a floating tooltip containing its specific description and cost.
 
 ## Feature 2: Specialized Swarm Units
