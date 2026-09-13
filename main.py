@@ -231,7 +231,7 @@ async def main():
                         for b in random.sample(boids, upgrade_count):
                             b.plague_caster = PlagueCaster(cooldown=3.0, blast_radius=80.0, attack_range=150.0, projectile_speed=300.0)
                             b.graphics.color = (0, 255, 150) # Tinge them green
-                shop_controller.remove_upgrade(upgrade_id)
+                player.state.purchased_upgrade_ids.add(upgrade_id)
 
         resource_timer = 0.0
         shop_timer = 0.0
@@ -268,7 +268,7 @@ async def main():
                     reset_game()
                     if DEBUG_OPEN_SHOP_AT_START:
                         current_state = GameState.SHOP
-                        shop_controller.refresh_upgrades()
+                        shop_controller.refresh_upgrades(player.state.purchased_upgrade_ids)
                     else:
                         current_state = GameState.PLAYING
                 elif action == "MAIN_MENU":
@@ -321,6 +321,7 @@ async def main():
                                 
                         # Flag the upgrade as purchased (gray-out) instead of
                         # removing it.  The shop remains open for further purchases.
+                        player.state.purchased_upgrade_ids.add(selected_upgrade)
                         for upg in shop_controller.available_upgrades:
                             if upg["id"] == selected_upgrade:
                                 upg["is_purchased"] = True
@@ -376,8 +377,8 @@ async def main():
                     shop_warning_shown = False
                     current_state = GameState.SHOP
                     # Reset is_purchased flags for upgrades still in the pool
-                    # so each visit starts with a clean visual state.
-                    shop_controller.refresh_upgrades()
+                    # so each visit starts with the correct persistent visual state.
+                    shop_controller.refresh_upgrades(player.state.purchased_upgrade_ids)
                     shop_timer = 0.0
                     player.souls += 20  # Passive stipend as per Functional Spec
 

@@ -102,14 +102,16 @@ class ShopController:
     # Public API
     # ------------------------------------------------------------------
 
-    def refresh_upgrades(self) -> None:
-        """Called each time the shop opens.  Resets purchase flags for the
-        current `available_upgrades` pool without re-randomising the list."""
+    def refresh_upgrades(self, purchased_ids: set[int] = None) -> None:
+        """Called each time the shop opens.  Sets purchase flags based on persistent state."""
+        if purchased_ids is None:
+            purchased_ids = set()
+            
         # Preserve which upgrades have been permanently removed from the pool
-        # across sessions (handled by remove_upgrade), but reset is_purchased
-        # visual flags so the grid is drawn fresh each visit.
+        # across sessions (handled by remove_upgrade), but update is_purchased
+        # visual flags so the grid reflects the persistent inventory.
         for upg in self.available_upgrades:
-            upg["is_purchased"] = False
+            upg["is_purchased"] = upg["id"] in purchased_ids
         self._compute_layout()
 
     def remove_upgrade(self, upgrade_id: int) -> None:

@@ -4,3 +4,4 @@ class PlayerState:
         self.has_bone_shrapnel = False
         self.has_skeletal_archers = False
         self.has_plague_wizard = False
+        self.purchased_upgrade_ids = set()
