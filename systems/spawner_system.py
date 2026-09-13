@@ -31,8 +31,8 @@ class SpawnerSystem:
 
     def _get_marksman_spawn_rate(self, threat_level):
         """Returns the Marksman spawn rate (seconds). Introduced at Threat Level 6."""
-        if threat_level < 10: return 20.0
-        return 12.0
+        if threat_level < 10: return 6.0
+        return 4.0
 
     def update(self, entities, dt, threat_level=1):
         # --- Grunt Spawning (always active) ---

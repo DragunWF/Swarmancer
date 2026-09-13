@@ -38,3 +38,4 @@ class SolarGoldBolt:
         self.lifespan_timer = LifespanTimer(duration=3.0)
 
         self.projectile_type = 'solar_gold_bolt'
+        self.is_enemy = True

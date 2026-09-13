@@ -140,6 +140,29 @@ class CollisionSystem:
                             self.on_particle_spawned("vanguard_pop", enemy.transform.x, enemy.transform.y)
                     break
 
+        # --- Enemy Projectile Hit Detection ---
+        enemy_projectiles = [e for e in entities if getattr(e, 'projectile_type', None) == 'solar_gold_bolt']
+        for proj in enemy_projectiles:
+            if getattr(proj, 'marked_for_deletion', False):
+                continue
+            
+            max_radius = proj.collider.radius + 15.0
+            potential_boids = spatial_hash.query_radius(proj.transform.x, proj.transform.y, max_radius)
+            
+            for boid in potential_boids:
+                if getattr(boid, 'marked_for_deletion', False):
+                    continue
+                dx = proj.transform.x - boid.transform.x
+                dy = proj.transform.y - boid.transform.y
+                distance_sq = dx * dx + dy * dy
+                radius_sum = proj.collider.radius + boid.collider.radius
+                if distance_sq < radius_sum * radius_sum:
+                    proj.marked_for_deletion = True
+                    boid.marked_for_deletion = True
+                    if self.on_particle_spawned:
+                        self.on_particle_spawned("skeleton_shatter", boid.transform.x, boid.transform.y)
+                    break
+
         # --- Boomer AoE Detonation ---
         # Triggers when: (a) the Boomer's contact radius touches any boid, OR
         # (b) behavior_system has set fuse_expired = True after the fuse duration elapses.
