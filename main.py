@@ -21,7 +21,7 @@ from ui.pause_controller import PauseController
 from components.combat import RangedAttack
 from systems.combat_system import CombatSystem
 from utils.asset_loader import AssetLoader
-from config import DEBUG_START_THREAT_LEVEL, DEBUG_START_SOULS, DEBUG_START_SWARM_COUNT, DEBUG_START_UPGRADES
+from config import DEBUG_START_THREAT_LEVEL, DEBUG_START_SOULS, DEBUG_START_SWARM_COUNT, DEBUG_START_UPGRADES, DEBUG_OPEN_SHOP_AT_START
 
 # Explicit time thresholds (seconds) for Threat Levels 2 through 10
 THREAT_THRESHOLDS = [20.0, 45.0, 75.0, 120.0, 180.0, 255.0, 330.0, 420.0, 510.0]
@@ -203,7 +203,11 @@ async def main():
                 action = menu_controller.handle_event(event, current_state)
                 if action == "PLAY":
                     reset_game()
-                    current_state = GameState.PLAYING
+                    if DEBUG_OPEN_SHOP_AT_START:
+                        current_state = GameState.SHOP
+                        shop_controller.refresh_upgrades()
+                    else:
+                        current_state = GameState.PLAYING
                 elif action == "MAIN_MENU":
                     current_state = GameState.MENU
                     

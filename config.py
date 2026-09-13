@@ -14,6 +14,10 @@ DEBUG_START_SOULS = 0
 # Allows scaling up/down for swarm density tests.
 DEBUG_START_SWARM_COUNT = 50
 
+# Opens the shop as soon as the player loads into the game
+# This is used for testing the shop functionality
+DEBUG_OPEN_SHOP_AT_START = True
+
 # A list of upgrades the player spawns with (Default: []).
 # Supported values:
 #   - "skeletal_archers"
