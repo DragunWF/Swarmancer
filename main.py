@@ -129,8 +129,12 @@ async def main():
 
         current_boid_max_speed = 350.0
         Resource.yield_amount = 3
-        shop_controller.available_upgrades = shop_controller.all_upgrades.copy()
-        shop_controller.refresh_upgrades()
+        # Rebuild available_upgrades with is_purchased flags reset to False.
+        # We never remove items mid-run; purchases are tracked via the flag.
+        shop_controller.available_upgrades = [
+            {**upg, "is_purchased": False} for upg in shop_controller.all_upgrades
+        ]
+        shop_controller._compute_layout()
         
         current_threat_level = DEBUG_START_THREAT_LEVEL
         if current_threat_level > 1:
@@ -236,8 +240,12 @@ async def main():
                             for b in [e for e in entities if isinstance(e, Boid)]:
                                 b.physics.max_speed = current_boid_max_speed
                                 
-                        shop_controller.remove_upgrade(selected_upgrade)
-                        current_state = GameState.PLAYING
+                        # Flag the upgrade as purchased (gray-out) instead of
+                        # removing it.  The shop remains open for further purchases.
+                        for upg in shop_controller.available_upgrades:
+                            if upg["id"] == selected_upgrade:
+                                upg["is_purchased"] = True
+                                break
                     elif upgrade_data:
                         print("Not enough souls!")
                             
@@ -284,6 +292,8 @@ async def main():
                     next_shop_milestone_index += 1
                     shop_warning_shown = False
                     current_state = GameState.SHOP
+                    # Reset is_purchased flags for upgrades still in the pool
+                    # so each visit starts with a clean visual state.
                     shop_controller.refresh_upgrades()
                     shop_timer = 0.0
                     player.souls += 20  # Passive stipend as per Functional Spec
