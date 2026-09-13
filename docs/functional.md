@@ -55,8 +55,12 @@
 - **Upgrade - Evasion Mastery:** Reduces the standard 3-second cooldown on the scatter evasion (Right Click), allowing players to utilize repulsion physics more frequently against stationary stone wizard towers.
 - **Upgrade - Bone Shrapnel:** Adds a secondary micro-collision damage check when Grunts pop during a 1-to-1 collision with the swarm, damaging nearby enemies.
 - **Upgrade - Necrotic Momentum:** Increases the maximum speed limits of the swarm, allowing them to condense and shrink into a tight ball much faster.
-- **Single-Purchase System:** Upgrades are strictly single-purchase. Once acquired, an upgrade is permanently removed from the available pool and cannot be selected in future shop phases.
-- **Dormant State:** When the available upgrade pool reaches zero, the shop UI renders a "The Dark Altar is Dormant" message with a single "Continue" button to seamlessly resume the active game loop.
+- **Persistent Grid Layout:** The Dark Altar renders all available upgrades simultaneously in a structured grid, replacing the previous randomized 3-card draw. The full upgrade pool is always visible so players can plan their build holistically.
+- **Multi-Purchase System:** Upgrades are strictly single-purchase per item, but players may purchase any number of different upgrades in a single shop phase provided they have sufficient Souls.
+- **Gray-Out State:** Once acquired, an upgrade is flagged as `is_purchased`. It remains visible on the grid to show build progress but is rendered with a grayed-out tint and an "ACQUIRED" label, and its click interaction is permanently disabled.
+- **Hover Tooltips:** Hovering the cursor over an unpurchased upgrade dynamically renders a floating tooltip detailing its name, description, and Souls cost. The cost is colored red when the player cannot afford it.
+- **Manual Continuation:** The shop phase does not close automatically upon purchase. A persistent "Continue" button is always rendered, and the shop remains open until the player explicitly clicks it.
+- **Dormant State:** When all upgrades have been purchased, the title changes to "The Dark Altar is Dormant" and only the "Continue" button is active.
 
 ## 7. Threat Level Escalation
 

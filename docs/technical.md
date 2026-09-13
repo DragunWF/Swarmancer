@@ -47,7 +47,7 @@ Systems iterate over the entity pool every frame (60 FPS), targeting only entiti
 ## 6. UI Layer (`ui/`)
 
 - **MenuController (`menu_controller.py`):** Handles static UI drawing and state signals for the Main Menu and Game Over screens. Uses primitive Pygame shapes for placeholders.
-- **ShopController (`shop_controller.py`):** Manages rendering the Dark Altar overlay, item selection logic, and player currency validation during shop phases. Maintains a dynamic list (`available_upgrades`) to track single-purchase constraints.
+- **ShopController (`shop_controller.py`):** Manages rendering the Dark Altar overlay, multi-purchase logic, and player currency validation. Upgrades are displayed in a responsive grid layout (up to 3 columns) calculated by `_compute_layout()`. Each upgrade dict carries an `is_purchased` boolean flag; purchased items are rendered with a gray-out tint overlay and are skipped by click-detection logic. Mouse position is polled via `pygame.mouse.get_pos()` on every `draw()` call; collision against pre-computed `pygame.Rect` card bounds triggers a floating tooltip rendered above all other UI elements. A "Continue" button is always rendered at the bottom of the grid and is the sole exit path for the shop phase.
 
 ## 7. Deployment & Packaging
 
@@ -61,7 +61,7 @@ Systems iterate over the entity pool every frame (60 FPS), targeting only entiti
 - **Evasion Mastery:** Reduce the 3.0 second cooldown threshold on the `ScatterTimer` component attached to the Player entity.
 - **Bone Shrapnel:** Add a secondary micro-collision damage check to the ECS logic in `collision_system.py` when Grunts and minions pop during a 1-to-1 collision.
 - **Necrotic Momentum:** Increase the `max_speed` limit within the `Physics` component so the boids can condense significantly faster.
-- **Single-Purchase Logic:** Upon a successful purchase in `main.py`, the selected upgrade is permanently removed from `shop_controller.available_upgrades`. If `available_upgrades` is empty, a dormant state with a single "Continue" button is rendered.
+- **Multi-Purchase & Gray-Out Logic:** Upon a successful purchase in `main.py`, the selected upgrade's `is_purchased` flag is set to `True` inside the `available_upgrades` list. The upgrade is never removed from the collection. During rendering, `ShopController.draw()` evaluates `is_purchased` for each card: flagged items receive a semi-transparent dark surface blit (gray-out tint) and an "ACQUIRED" label, and are excluded from click-detection iteration. The shop state remains active until the player clicks "Continue", at which point `handle_event` returns the string `"CONTINUE"` and `main.py` transitions to `GameState.PLAYING`. Calling `refresh_upgrades()` at the start of each new shop visit resets all `is_purchased` flags to `False` without re-randomising the pool.
 
 ## 9. Pacing & Threat Level Architecture
 

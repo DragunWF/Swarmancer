@@ -108,8 +108,11 @@ The player can access a mid-run or end-of-run shop system to mutate the swarm, s
 ## Feature 1: The Dark Altar (Shop UI)
 
 - The game pauses and overlays a shop interface at designated survival intervals.
-- The UI displays current currency (e.g., Souls) and three randomized upgrade choices.
-- Selecting an upgrade immediately applies the associated ECS components to the active swarm pool.
+- The UI displays current currency (e.g., Souls) and renders all available upgrades simultaneously in a persistent grid layout.
+- The player can purchase multiple upgrades during a single shop phase as long as they have sufficient Souls.
+- The shop remains open until the player explicitly clicks a "Continue" button.
+- Purchased upgrades are flagged and persistently rendered on the grid with a grayed-out tint and disabled interactions, instead of being removed from the pool, so the player can track what they have acquired.
+- Hovering the mouse over an upgrade's bounding box dynamically renders a floating tooltip containing its specific description and cost.
 
 ## Feature 2: Specialized Swarm Units
 
@@ -126,6 +129,11 @@ The player can access a mid-run or end-of-run shop system to mutate the swarm, s
 ## User Stories
 
 - **As a player**, I want to spend my accumulated resources at a shop interface, **so that** I can purchase permanent upgrades that help me survive longer.
+- **As a player**, I want to see all available upgrades in a grid layout, **so that** I can plan my build progression across the entire pool rather than relying on randomized draws.
+- **As a player**, I want to purchase multiple upgrades in a single shop phase, **so that** I can spend accumulated Souls efficiently in one visit.
+- **As a player**, I want purchased upgrades to remain visible but grayed out on the grid, **so that** I can easily track what I have already acquired during the run.
+- **As a player**, I want a "Continue" button to manually exit the shop, **so that** I control when to return to the combat phase.
+- **As a player**, I want to see a tooltip when hovering over an upgrade, **so that** I understand its effects and cost before spending my Souls.
 - **As a player**, I want to purchase Skeletal Archers that fire projectiles automatically, **so that** my swarm can deal damage without risking direct 1-to-1 collision attrition.
 - **As a developer**, I want upgrades to dynamically attach new components to existing entities, **so that** the shop seamlessly integrates with the established ECS architecture without requiring hardcoded subclass changes.
 - **As a player**, I want destroyed enemies to drop temporary Souls, **so that** I am incentivized to maneuver my swarm aggressively into combat zones.
@@ -135,7 +143,7 @@ The player can access a mid-run or end-of-run shop system to mutate the swarm, s
 - **As a player**, I want to purchase Evasion Mastery, **so that** the cooldown on my scatter evasion is reduced, allowing me to dodge Laser Drone beams more frequently.
 - **As a player**, I want to purchase Bone Shrapnel, **so that** my minions deal secondary area damage when they pop against charging peasant militia.
 - **As a player**, I want to purchase Necrotic Momentum, **so that** my swarm's maximum speed increases, letting them condense into a tight ball much faster.
-- **As a player**, I want upgrade items to disappear from the shop pool after I purchase them, **so that** I am forced to diversify my build instead of stacking the same upgrade repeatedly.
+- **As a player**, I want upgrade items to be grayed out after I purchase them, **so that** I can see my build history and am prevented from re-purchasing the same upgrade.
 - **As a player**, I want the shop to display a "The Dark Altar is Dormant" message with a continue button when all upgrades are purchased, **so that** the shop phase resolves smoothly when the pool is empty.
 
 # Epic 5: User Interface & Game State Management
