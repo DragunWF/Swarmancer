@@ -53,6 +53,7 @@ async def main():
     current_threat_level = 1
     next_shop_milestone_index = 0  # Pointer into SHOP_MILESTONES
     victory_souls = 0              # Captured at the moment of victory for display
+    shop_warning_shown = False     # Tracks if the pre-shop warning has been shown
     
     # External closures needed for systems
     def on_resource_collected(resource):
@@ -117,7 +118,7 @@ async def main():
 
     def reset_game():
         nonlocal player, resource_timer, shop_timer, current_survival_time, current_boid_max_speed
-        nonlocal current_threat_level, next_shop_milestone_index, victory_souls
+        nonlocal current_threat_level, next_shop_milestone_index, victory_souls, shop_warning_shown
         entities.clear()
 
         player_x = SCREEN_WIDTH / 2
@@ -139,6 +140,7 @@ async def main():
             current_survival_time = 0.0
             
         next_shop_milestone_index = 0
+        shop_warning_shown = False
         while next_shop_milestone_index < len(SHOP_MILESTONES) and current_survival_time >= SHOP_MILESTONES[next_shop_milestone_index]:
             next_shop_milestone_index += 1
             
@@ -266,15 +268,25 @@ async def main():
                 current_state = GameState.VICTORY
 
             # --- Automatic Shop Milestone Trigger ---
-            # Opens the Dark Altar at the end of each even Threat Level (2:00, 4:00, 6:00, 8:00).
+            # Opens the Dark Altar at the exact start times of Threat Levels 4, 6, 8, and 10.
             # The index guard ensures each milestone fires exactly once per run.
-            if (next_shop_milestone_index < len(SHOP_MILESTONES)
-                    and current_survival_time >= SHOP_MILESTONES[next_shop_milestone_index]):
-                next_shop_milestone_index += 1
-                current_state = GameState.SHOP
-                shop_controller.refresh_upgrades()
-                shop_timer = 0.0
-                player.souls += 20  # Passive stipend as per Functional Spec
+            if next_shop_milestone_index < len(SHOP_MILESTONES):
+                target_time = SHOP_MILESTONES[next_shop_milestone_index]
+                
+                # Pre-Shop Warning
+                if not shop_warning_shown and current_survival_time >= target_time - 3.0:
+                    shop_warning_shown = True
+                    from entities.particles import FloatingText
+                    warning_text = FloatingText(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 4, "The Dark Altar Approaches...", color=(255, 100, 100), duration=2.5)
+                    entities.append(warning_text)
+                    
+                if current_survival_time >= target_time:
+                    next_shop_milestone_index += 1
+                    shop_warning_shown = False
+                    current_state = GameState.SHOP
+                    shop_controller.refresh_upgrades()
+                    shop_timer = 0.0
+                    player.souls += 20  # Passive stipend as per Functional Spec
 
             # --- Grave Spawn Rate (tightens at Threat Level 6+) ---
             grave_rate = _GRAVE_RATE_EARLY if current_threat_level < 6 else _GRAVE_RATE_LATE
