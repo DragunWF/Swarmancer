@@ -144,12 +144,14 @@ async def main():
     
     resource_timer = 0.0
     shop_timer = 0.0
+    dying_start_ticks = 0  # Timestamp (ms) when DYING state was entered
 
     def reset_game():
         nonlocal player, resource_timer, shop_timer, current_survival_time, current_boid_max_speed
         nonlocal current_threat_level, next_shop_milestone_index, victory_souls, shop_warning_shown
-        nonlocal current_track_index
+        nonlocal current_track_index, dying_start_ticks
         entities.clear()
+        dying_start_ticks = 0
         
         if PLAYLIST:
             current_track_index = 0
@@ -246,7 +248,7 @@ async def main():
                 # Only automatically load and play the next track if we are in an active state.
                 # When pygame.mixer.music.stop() is called on game over, it triggers this event,
                 # and without this check, it would instantly restart music on the Game Over screen.
-                if current_state in (GameState.PLAYING, GameState.PAUSED, GameState.SHOP):
+                if current_state in (GameState.PLAYING, GameState.PAUSED, GameState.SHOP, GameState.DYING):
                     current_track_index += 1
                     if current_track_index >= len(PLAYLIST):
                         current_track_index = 1  # Loop back to oasis_quest.ogg (Index 1)
@@ -395,17 +397,41 @@ async def main():
             # Cleanup deleted entities
             entities = [e for e in entities if not getattr(e, 'marked_for_deletion', False)]
 
-            # Check for Game Over condition
+            # Check for Game Over condition — transition to DYING for slow-mo cinematic
             active_boids = [e for e in entities if isinstance(e, Boid)]
             if len(active_boids) == 0:
                 high_score = max(high_score, current_survival_time)
-                current_state = GameState.GAME_OVER
-                AssetLoader().play_sound("lose")
-                if PLAYLIST: pygame.mixer.music.stop()
+                dying_start_ticks = pygame.time.get_ticks()
+                current_state = GameState.DYING
+                # lose.wav is intentionally deferred to GAME_OVER transition
 
             # --- HUD ---
             hud_controller.draw(screen, player, len(active_boids), current_survival_time, current_threat_level)
             
+        elif current_state == GameState.DYING:
+            # Run ECS at 10% speed for the cinematic time-dilation effect.
+            # survival_time is NOT incremented — the high score reflects the exact moment of wipeout.
+            dilated_dt = dt * 0.1
+
+            for system in systems:
+                if system is spawner_system or system is behavior_system:
+                    system.update(entities, dilated_dt, threat_level=current_threat_level)
+                else:
+                    system.update(entities, dilated_dt)
+
+            # Cleanup entities (particles can still play out in slow-motion)
+            entities = [e for e in entities if not getattr(e, 'marked_for_deletion', False)]
+
+            # HUD drawn with frozen swarm count of 0 and the final survival time
+            active_boids = [e for e in entities if isinstance(e, Boid)]
+            hud_controller.draw(screen, player, len(active_boids), current_survival_time, current_threat_level)
+
+            # Non-blocking 2-second real-time check (pygame.time.get_ticks() differential)
+            if pygame.time.get_ticks() - dying_start_ticks >= 2000:
+                current_state = GameState.GAME_OVER
+                AssetLoader().play_sound("lose")
+                if PLAYLIST: pygame.mixer.music.stop()
+
         elif current_state == GameState.SHOP:
             render_system.update(entities, 0)
             shop_controller.draw(screen, player.souls)
