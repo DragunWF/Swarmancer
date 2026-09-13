@@ -85,6 +85,7 @@ class ShopController:
             {"id": 2, "name": "Evasion Mastery",      "desc": "Lower scatter cooldown to rapidly escape a stationary stone wizard tower.",        "cost": 15},
             {"id": 3, "name": "Bone Shrapnel",        "desc": "Minions shatter upon death, dealing splash damage to the charging peasant militia.","cost": 20},
             {"id": 4, "name": "Necrotic Momentum",    "desc": "Increase top speed so the swarm can condense and evade dwarf sapper bombs faster.","cost": 20},
+            {"id": 5, "name": "Plague Wizard",        "desc": "Mutate units to cast plague bombs that detonate into toxic AoE blasts upon hitting an enemy.","cost": 25},
         ]
 
         # Each entry in available_upgrades is a dict copy with an extra

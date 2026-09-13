@@ -19,6 +19,7 @@ from ui.shop_controller import ShopController
 from ui.menu_controller import MenuController
 from ui.pause_controller import PauseController
 from components.combat import RangedAttack
+from components.combat import PlagueCaster
 from systems.combat_system import CombatSystem
 from utils.asset_loader import AssetLoader
 from config import DEBUG_START_THREAT_LEVEL, DEBUG_START_SOULS, DEBUG_START_SWARM_COUNT, DEBUG_START_UPGRADES, DEBUG_OPEN_SHOP_AT_START
@@ -63,11 +64,19 @@ async def main():
 
         # Spawn boids slightly offset from the grave based on yield amount
         has_archers = player and getattr(player.state, 'has_skeletal_archers', False)
+        has_plague = player and getattr(player.state, 'has_plague_wizard', False)
         for i in range(resource.yield_amount):
             new_boid = Boid(resource.transform.x + random.uniform(-20, 20), resource.transform.y + random.uniform(-20, 20), max_speed=current_boid_max_speed)
+            
+            # Apply Ranged mutations randomly
             if has_archers and (i == 0 or random.random() < 0.25):
                 new_boid.ranged_attack = RangedAttack(fire_rate=1.0, attack_range=150.0, projectile_speed=300.0)
                 new_boid.graphics.sprite_ref = "skeleton_archer"
+            elif has_plague and random.random() < 0.25:
+                from components.combat import PlagueCaster
+                new_boid.plague_caster = PlagueCaster(cooldown=3.0, blast_radius=80.0, attack_range=150.0, projectile_speed=300.0)
+                new_boid.graphics.color = (0, 255, 150) # Tinge them green
+                
             entities.append(new_boid)
 
     def on_currency_collected(amount, x, y):
@@ -159,7 +168,8 @@ async def main():
             "grave_robbers_yield": 1,
             "evasion_mastery": 2,
             "bone_shrapnel": 3,
-            "necrotic_momentum": 4
+            "necrotic_momentum": 4,
+            "plague_wizard": 5
         }
         for upgrade_name in DEBUG_START_UPGRADES:
             upgrade_id = upgrade_map.get(upgrade_name)
@@ -182,6 +192,14 @@ async def main():
                     current_boid_max_speed += 50.0
                     for b in [e for e in entities if isinstance(e, Boid)]:
                         b.physics.max_speed = current_boid_max_speed
+                elif upgrade_id == 5:
+                    player.state.has_plague_wizard = True
+                    boids = [e for e in entities if isinstance(e, Boid) and not hasattr(e, 'plague_caster') and not hasattr(e, 'ranged_attack')]
+                    upgrade_count = min(10, len(boids))
+                    if upgrade_count > 0:
+                        for b in random.sample(boids, upgrade_count):
+                            b.plague_caster = PlagueCaster(cooldown=3.0, blast_radius=80.0, attack_range=150.0, projectile_speed=300.0)
+                            b.graphics.color = (0, 255, 150) # Tinge them green
                 shop_controller.remove_upgrade(upgrade_id)
 
         resource_timer = 0.0
@@ -243,6 +261,15 @@ async def main():
                             current_boid_max_speed += 50.0
                             for b in [e for e in entities if isinstance(e, Boid)]:
                                 b.physics.max_speed = current_boid_max_speed
+                        elif selected_upgrade == 5:
+                            # Plague Wizard
+                            player.state.has_plague_wizard = True
+                            boids = [e for e in entities if isinstance(e, Boid) and not hasattr(e, 'plague_caster') and not hasattr(e, 'ranged_attack')]
+                            upgrade_count = min(10, len(boids))
+                            if upgrade_count > 0:
+                                for b in random.sample(boids, upgrade_count):
+                                    b.plague_caster = PlagueCaster(cooldown=3.0, blast_radius=80.0, attack_range=150.0, projectile_speed=300.0)
+                                    b.graphics.color = (0, 255, 150) # Tinge them green
                                 
                         # Flag the upgrade as purchased (gray-out) instead of
                         # removing it.  The shop remains open for further purchases.

@@ -55,6 +55,15 @@ class ParticleEmitter:
                 vx, vy = math.cos(angle) * speed, math.sin(angle) * speed
                 particles.append(Particle(x, y, vx, vy, color=color, drag=0.80, duration=random.uniform(0.6, 1.2), scale=random.uniform(4.0, 7.0)))
 
+        elif effect_type == "plague_detonation":
+            # dense one-time burst of emerald green and arcane cyan particles
+            for _ in range(random.randint(30, 50)):
+                color = random.choice([(80, 200, 120), (0, 255, 255)])
+                angle = random.uniform(0, 2 * math.pi)
+                speed = random.uniform(150, 350)
+                vx, vy = math.cos(angle) * speed, math.sin(angle) * speed
+                particles.append(Particle(x, y, vx, vy, color=color, drag=0.85, duration=random.uniform(0.5, 1.0), scale=random.uniform(3.0, 5.0)))
+
         return particles
 
 

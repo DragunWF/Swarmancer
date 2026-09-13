@@ -131,13 +131,36 @@ class CollisionSystem:
                     enemy.marked_for_deletion = True
                     proj.marked_for_deletion = True
                     self._try_drop_soul(enemy.transform.x, enemy.transform.y)
-                    if self.on_particle_spawned:
-                        if getattr(enemy, 'enemy_type', None) == 'laser_drone':
-                            self.on_particle_spawned("sun_wizard_death", enemy.transform.x, enemy.transform.y)
-                        elif getattr(enemy, 'enemy_type', None) == 'boomer':
-                            self.on_particle_spawned("sapper_detonation", enemy.transform.x, enemy.transform.y)
-                        else:
+                    
+                    if getattr(proj, 'projectile_type', None) == 'plague_bomb':
+                        if self.on_particle_spawned:
+                            self.on_particle_spawned("plague_detonation", proj.transform.x, proj.transform.y)
                             self.on_particle_spawned("vanguard_pop", enemy.transform.x, enemy.transform.y)
+                            
+                        # AoE Detonation
+                        blast_radius_sq = proj.blast_radius * proj.blast_radius
+                        potential_blast_enemies = spatial_hash.query_radius(proj.transform.x, proj.transform.y, proj.blast_radius)
+                        for blast_enemy in potential_blast_enemies:
+                            if getattr(blast_enemy, 'marked_for_deletion', False) or not getattr(blast_enemy, 'is_enemy', False) or getattr(blast_enemy, 'enemy_type', None) != 'grunt':
+                                continue
+                            if blast_enemy == enemy:
+                                continue # Already popped
+                                
+                            dx_b = proj.transform.x - blast_enemy.transform.x
+                            dy_b = proj.transform.y - blast_enemy.transform.y
+                            if (dx_b * dx_b + dy_b * dy_b) < blast_radius_sq:
+                                blast_enemy.marked_for_deletion = True
+                                self._try_drop_soul(blast_enemy.transform.x, blast_enemy.transform.y)
+                                if self.on_particle_spawned:
+                                    self.on_particle_spawned("vanguard_pop", blast_enemy.transform.x, blast_enemy.transform.y)
+                    else:
+                        if self.on_particle_spawned:
+                            if getattr(enemy, 'enemy_type', None) == 'laser_drone':
+                                self.on_particle_spawned("sun_wizard_death", enemy.transform.x, enemy.transform.y)
+                            elif getattr(enemy, 'enemy_type', None) == 'boomer':
+                                self.on_particle_spawned("sapper_detonation", enemy.transform.x, enemy.transform.y)
+                            else:
+                                self.on_particle_spawned("vanguard_pop", enemy.transform.x, enemy.transform.y)
                     break
 
         # --- Enemy Projectile Hit Detection ---

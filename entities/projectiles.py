@@ -39,3 +39,19 @@ class SolarGoldBolt:
 
         self.projectile_type = 'solar_gold_bolt'
         self.is_enemy = True
+
+class PlagueBomb:
+    def __init__(self, x: float, y: float, velocity_x: float, velocity_y: float, blast_radius: float = 80.0):
+        self.transform = Transform(x, y)
+        self.physics = Physics(max_speed=600.0, mass=0.1)
+        self.physics.velocity.x = velocity_x
+        self.physics.velocity.y = velocity_y
+        # Emerald green / arcane cyan tint
+        self.graphics = Graphics(color=(0, 255, 150), scale=3.0 * GLOBAL_SPRITE_SCALE)
+        # Use collider for impact detection
+        self.collider = Collider(radius=3.0 * GLOBAL_SPRITE_SCALE, is_trigger=True)
+        self.lifespan_timer = LifespanTimer(duration=3.0)
+        self.blast_radius = blast_radius
+
+        self.projectile_type = 'plague_bomb'
+        self.is_enemy = False

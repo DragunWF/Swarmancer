@@ -8,7 +8,7 @@ DEBUG_START_THREAT_LEVEL = 7
 
 # Overrides the starting currency (Default: 0).
 # Useful for testing the Dark Altar shop purchasing flow immediately.
-DEBUG_START_SOULS = 0
+DEBUG_START_SOULS = 1000
 
 # Overrides the initial size of the player's swarm (Default: 50).
 # Allows scaling up/down for swarm density tests.
@@ -16,7 +16,7 @@ DEBUG_START_SWARM_COUNT = 200
 
 # Opens the shop as soon as the player loads into the game
 # This is used for testing the shop functionality
-DEBUG_OPEN_SHOP_AT_START = False
+DEBUG_OPEN_SHOP_AT_START = True
 
 # A list of upgrades the player spawns with (Default: []).
 # Supported values:
@@ -25,5 +25,6 @@ DEBUG_OPEN_SHOP_AT_START = False
 #   - "evasion_mastery"
 #   - "bone_shrapnel"
 #   - "necrotic_momentum"
+#   - "plague_wizard"
 # Example: DEBUG_START_UPGRADES = ["skeletal_archers", "necrotic_momentum"]
 DEBUG_START_UPGRADES = []

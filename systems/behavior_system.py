@@ -29,7 +29,7 @@ class BehaviorSystem(System):
             elif hasattr(entity, 'physics') and hasattr(entity, 'transform'):
                 if getattr(entity, 'is_enemy', False):
                     enemies.append(entity)
-                elif entity.__class__.__name__ != 'Projectile':
+                elif entity.__class__.__name__ not in ('Projectile', 'PlagueBomb'):
                     boids.append(entity)
 
         if not player:
