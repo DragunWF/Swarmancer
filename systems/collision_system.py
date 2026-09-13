@@ -21,10 +21,10 @@ class CollisionSystem:
             self.on_entity_spawned(SoulPickup(x, y))
 
     def update(self, entities, dt):
-        boids = [e for e in entities if hasattr(e, 'collider') and hasattr(e, 'physics') and not getattr(e, 'is_enemy', False) and e.__class__.__name__ != 'Projectile']
+        boids = [e for e in entities if hasattr(e, 'collider') and hasattr(e, 'physics') and not getattr(e, 'is_enemy', False) and e.__class__.__name__ not in ('Projectile', 'PlagueBomb')]
         resources = [e for e in entities if hasattr(e, 'collider') and hasattr(e, 'graphics') and hasattr(e, 'transform') and e.__class__.__name__ == 'Resource']
         enemies = [e for e in entities if getattr(e, 'is_enemy', False) and hasattr(e, 'collider')]
-        projectiles = [e for e in entities if e.__class__.__name__ == 'Projectile']
+        projectiles = [e for e in entities if e.__class__.__name__ in ('Projectile', 'PlagueBomb')]
         player = next((e for e in entities if getattr(e, 'is_player', False)), None)
         has_bone_shrapnel = player and getattr(player.state, 'has_bone_shrapnel', False)
 
@@ -139,9 +139,8 @@ class CollisionSystem:
                             
                         # AoE Detonation
                         blast_radius_sq = proj.blast_radius * proj.blast_radius
-                        potential_blast_enemies = spatial_hash.query_radius(proj.transform.x, proj.transform.y, proj.blast_radius)
-                        for blast_enemy in potential_blast_enemies:
-                            if getattr(blast_enemy, 'marked_for_deletion', False) or not getattr(blast_enemy, 'is_enemy', False) or getattr(blast_enemy, 'enemy_type', None) != 'grunt':
+                        for blast_enemy in enemies:
+                            if getattr(blast_enemy, 'marked_for_deletion', False) or getattr(blast_enemy, 'enemy_type', None) != 'grunt':
                                 continue
                             if blast_enemy == enemy:
                                 continue # Already popped

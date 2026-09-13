@@ -56,13 +56,21 @@ class ParticleEmitter:
                 particles.append(Particle(x, y, vx, vy, color=color, drag=0.80, duration=random.uniform(0.6, 1.2), scale=random.uniform(4.0, 7.0)))
 
         elif effect_type == "plague_detonation":
-            # 3-5 expanding miasma clouds
-            for _ in range(random.randint(3, 5)):
+            # chaotic burst of primitive particles
+            for _ in range(random.randint(60, 80)):
+                color = random.choice([(80, 200, 120), (0, 255, 255), (100, 255, 150)])
                 angle = random.uniform(0, 2 * math.pi)
-                speed = random.uniform(10, 40)
+                speed = random.uniform(200, 500)
                 vx, vy = math.cos(angle) * speed, math.sin(angle) * speed
-                # scale is natively 1.0 (40x40 cache) and will expand slightly
-                particles.append(Particle(x, y, vx, vy, color=(0,0,0), drag=0.85, duration=random.uniform(0.6, 1.0), scale=1.0, sprite_ref="miasma_cloud", expansion_rate=random.uniform(0.5, 1.5)))
+                particles.append(Particle(x, y, vx, vy, color=color, drag=0.85, duration=random.uniform(0.4, 0.9), scale=random.uniform(3.0, 6.0)))
+                
+            # 8-12 expanding miasma clouds
+            for _ in range(random.randint(8, 12)):
+                angle = random.uniform(0, 2 * math.pi)
+                speed = random.uniform(10, 60)
+                vx, vy = math.cos(angle) * speed, math.sin(angle) * speed
+                # scale is natively 1.0 (40x40 cache) and will expand
+                particles.append(Particle(x, y, vx, vy, color=(0,0,0), drag=0.85, duration=random.uniform(0.6, 1.2), scale=1.0, sprite_ref="miasma_cloud", expansion_rate=random.uniform(0.5, 2.0)))
                 
             # 1 quick shockwave ring confirming the 80-radius blast area
             # Starts at scale 1.0 (which is 160x160 natively cached radius 80 ring) and expands outwards to 1.3
