@@ -125,9 +125,10 @@ The player can access a mid-run or end-of-run shop system to mutate the swarm, s
 
 ## Feature 2: Specialized Swarm Units
 
-- The engine supports equipping a `RangedAttack` component to a subset of the swarm.
+- The engine supports equipping a `RangedAttack` or `PlagueCaster` component to a subset of the swarm.
 - These units independently calculate line-of-sight and fire projectiles at the nearest standard enemy.
 - Ranged units maintain standard Boids AI rules (cohesion, alignment, separation) while firing.
+- `PlagueCaster` units fire Plague Bombs that trigger AoE detonations upon hitting an enemy, severely damaging dense clusters of standard enemies.
 
 ## Feature 3: Currency Acquisition (Souls)
 
@@ -152,6 +153,7 @@ The player can access a mid-run or end-of-run shop system to mutate the swarm, s
 - **As a player**, I want to purchase Evasion Mastery, **so that** the cooldown on my scatter evasion is reduced, allowing me to dodge Laser Drone beams more frequently.
 - **As a player**, I want to purchase Bone Shrapnel, **so that** my minions deal secondary area damage when they pop against charging peasant militia.
 - **As a player**, I want to purchase Necrotic Momentum, **so that** my swarm's maximum speed increases, letting them condense into a tight ball much faster.
+- **As a player**, I want to purchase Plague Wizard, **so that** a subset of my minions fire toxic projectiles that explode on impact, destroying clusters of enemies simultaneously.
 - **As a player**, I want upgrade items to be grayed out after I purchase them, **so that** I can see my build history and am prevented from re-purchasing the same upgrade.
 - **As a player**, I want the shop to display a "The Dark Altar is Dormant" message with a continue button when all upgrades are purchased, **so that** the shop phase resolves smoothly when the pool is empty.
 
@@ -261,7 +263,7 @@ The game includes a centralized configuration file (`config.py`) to streamline p
 - `DEBUG_START_THREAT_LEVEL`: Overrides the initial threat level (Default: 1, Max: 10). Modifying this instantly triggers higher-tier enemies at launch.
 - `DEBUG_START_SOULS`: Overrides the starting currency (Default: 0).
 - `DEBUG_START_SWARM_COUNT`: Overrides the initial size of the player's swarm (Default: 50).
-- `DEBUG_START_UPGRADES`: A list of upgrades the player spawns with (Default: []). Supported values: "skeletal_archers", "grave_robbers_yield", "evasion_mastery", "bone_shrapnel", "necrotic_momentum".
+- `DEBUG_START_UPGRADES`: A list of upgrades the player spawns with (Default: []). Supported values: "skeletal_archers", "grave_robbers_yield", "evasion_mastery", "bone_shrapnel", "necrotic_momentum", "plague_wizard".
 
 ## Feature 2: Initialization Logic
 
