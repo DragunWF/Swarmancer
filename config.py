@@ -18,6 +18,9 @@ DEBUG_START_SWARM_COUNT = 50
 # This is used for testing the shop functionality
 DEBUG_OPEN_SHOP_AT_START = False
 
+# Starts the win screen in 5 seconds to test the UI
+DEBUG_OPEN_WIN_SCREEN_AT_START = False
+
 # A list of upgrades the player spawns with (Default: []).
 # Supported values:
 #   - "skeletal_archers"

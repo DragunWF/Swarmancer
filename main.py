@@ -22,7 +22,7 @@ from components.combat import RangedAttack
 from components.combat import PlagueCaster
 from systems.combat_system import CombatSystem
 from utils.asset_loader import AssetLoader
-from config import DEBUG_START_THREAT_LEVEL, DEBUG_START_SOULS, DEBUG_START_SWARM_COUNT, DEBUG_START_UPGRADES, DEBUG_OPEN_SHOP_AT_START
+from config import DEBUG_START_THREAT_LEVEL, DEBUG_START_SOULS, DEBUG_START_SWARM_COUNT, DEBUG_START_UPGRADES, DEBUG_OPEN_SHOP_AT_START, DEBUG_OPEN_WIN_SCREEN_AT_START
 
 # Explicit time thresholds (seconds) for Threat Levels 2 through 10
 THREAT_THRESHOLDS = [20.0, 45.0, 75.0, 120.0, 180.0, 255.0, 330.0, 420.0, 510.0]
@@ -352,7 +352,7 @@ async def main():
             current_threat_level = sum(current_survival_time >= t for t in THREAT_THRESHOLDS) + 1
 
             # --- Victory Check (10 minutes) ---
-            if current_survival_time >= VICTORY_DURATION:
+            if current_survival_time >= (5.0 if DEBUG_OPEN_WIN_SCREEN_AT_START else VICTORY_DURATION):
                 victory_souls = player.souls
                 high_score = max(high_score, current_survival_time)
                 current_state = GameState.VICTORY
