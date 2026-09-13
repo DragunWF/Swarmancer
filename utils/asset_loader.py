@@ -146,6 +146,10 @@ class AssetLoader:
         if sound_id in self._sounds:
             self._sounds[sound_id].play()
 
+    def get_sfx_volume(self) -> float:
+        """Returns the current master SFX volume."""
+        return self._sfx_volume
+
     def set_sfx_volume(self, volume: float) -> None:
         """Sets the volume (0.0 to 1.0) for all loaded SFX."""
         self._sfx_volume = max(0.0, min(1.0, volume))

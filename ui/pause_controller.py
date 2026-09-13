@@ -1,5 +1,6 @@
 import pygame
 from utils.asset_loader import AssetLoader
+from ui.ui_utils import draw_slider
 
 class PauseController:
     def __init__(self, screen_width, screen_height):
@@ -107,29 +108,6 @@ class PauseController:
         text_rect = text_surf.get_rect(center=rect.center)
         screen.blit(text_surf, text_rect)
 
-    def draw_slider(self, screen, rect, label, volume):
-        # Draw label
-        label_surf = self.small_font.render(label, True, (255, 255, 255))
-        screen.blit(label_surf, (rect.x, rect.y - 25))
-        
-        # Draw background track
-        pygame.draw.rect(screen, (50, 50, 50), rect)
-        
-        # Draw filled track
-        fill_rect = pygame.Rect(rect.x, rect.y, int(rect.width * volume), rect.height)
-        pygame.draw.rect(screen, (100, 150, 255), fill_rect)
-        
-        # Draw outline
-        pygame.draw.rect(screen, (200, 200, 200), rect, 2)
-        
-        # Draw handle
-        handle_x = rect.x + int(rect.width * volume)
-        pygame.draw.circle(screen, (255, 255, 255), (handle_x, rect.centery), 12)
-        
-        # Draw percentage text
-        pct_surf = self.small_font.render(f"{int(volume * 100)}%", True, (200, 200, 200))
-        screen.blit(pct_surf, (rect.right + 15, rect.centery - pct_surf.get_height() // 2))
-
     def draw(self, screen):
         # Dark overlay
         overlay = pygame.Surface((self.screen_width, self.screen_height), pygame.SRCALPHA)
@@ -146,8 +124,8 @@ class PauseController:
         self.draw_button(screen, self.menu_button, "Main Menu")
         
         # Sliders
-        self.draw_slider(screen, self.sfx_slider, "SFX Volume", self.sfx_volume)
-        self.draw_slider(screen, self.music_slider, "Music Volume", self.music_volume)
+        draw_slider(screen, self.sfx_slider, "SFX Volume", self.sfx_volume, self.small_font)
+        draw_slider(screen, self.music_slider, "Music Volume", self.music_volume, self.small_font)
         
         # Confirmation Dialog
         if self.show_confirmation:

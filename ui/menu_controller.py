@@ -1,7 +1,7 @@
 import pygame
 from utils.state import GameState
 from utils.asset_loader import AssetLoader
-from ui.ui_utils import draw_text_with_outline, draw_polished_button
+from ui.ui_utils import draw_text_with_outline, draw_polished_button, draw_slider
 
 # Y-position of the victory "Main Menu" button — used by both draw and handle_event
 _VICTORY_MENU_BTN_Y = 380
@@ -31,18 +31,70 @@ class MenuController:
         self.show_controls = False
         self.show_settings = False
         
-        # Audio volumes (placeholder logic for Settings)
-        self.master_volume = 1.0
+        # Audio Sliders for Settings Overlay
+        slider_width = 250
+        slider_x = screen_width // 2 - slider_width // 2
+        self.sfx_slider = pygame.Rect(slider_x, screen_height // 2 - 30, slider_width, 20)
+        self.music_slider = pygame.Rect(slider_x, screen_height // 2 + 50, slider_width, 20)
+        
+        self.sfx_volume = AssetLoader().get_sfx_volume()
         self.music_volume = 1.0
+        try:
+            self.music_volume = pygame.mixer.music.get_volume()
+        except:
+            pass
+            
+        self.dragging_sfx = False
+        self.dragging_music = False
+        
+        # Settings Box Definition
+        self.settings_box = pygame.Rect(self.screen_width // 2 - 200, self.screen_height // 2 - 150, 400, 300)
+
+    def _update_volume(self, mouse_x, slider_type):
+        slider = self.sfx_slider if slider_type == 'sfx' else self.music_slider
+        relative_x = mouse_x - slider.x
+        percentage = max(0.0, min(1.0, relative_x / slider.width))
+        
+        if slider_type == 'sfx':
+            self.sfx_volume = percentage
+            AssetLoader().set_sfx_volume(self.sfx_volume)
+        else:
+            self.music_volume = percentage
+            try:
+                pygame.mixer.music.set_volume(self.music_volume)
+            except pygame.error:
+                pass
 
     def handle_event(self, event, current_state):
+        if self.show_settings:
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                mouse_pos = event.pos
+                if self.sfx_slider.collidepoint(mouse_pos):
+                    self.dragging_sfx = True
+                    self._update_volume(mouse_pos[0], 'sfx')
+                elif self.music_slider.collidepoint(mouse_pos):
+                    self.dragging_music = True
+                    self._update_volume(mouse_pos[0], 'music')
+                elif not self.settings_box.collidepoint(mouse_pos):
+                    self.show_settings = False
+                return None
+            elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+                self.dragging_sfx = False
+                self.dragging_music = False
+                return None
+            elif event.type == pygame.MOUSEMOTION:
+                if self.dragging_sfx:
+                    self._update_volume(event.pos[0], 'sfx')
+                elif self.dragging_music:
+                    self._update_volume(event.pos[0], 'music')
+                return None
+
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             mouse_pos = event.pos
             
-            if self.show_controls or self.show_settings:
-                # Any click closes the overlays for now
+            if self.show_controls:
+                # Any click closes the controls overlay
                 self.show_controls = False
-                self.show_settings = False
                 return None
                 
             if current_state == GameState.MENU:
@@ -56,6 +108,12 @@ class MenuController:
                 elif self.settings_button.collidepoint(mouse_pos):
                     AssetLoader().play_sound("ui_click")
                     self.show_settings = True
+                    # Sync volumes when opening settings
+                    self.sfx_volume = AssetLoader().get_sfx_volume()
+                    try:
+                        self.music_volume = pygame.mixer.music.get_volume()
+                    except:
+                        pass
                     return None
                     
             elif current_state == GameState.GAME_OVER:
@@ -101,7 +159,7 @@ class MenuController:
         if self.show_controls:
             self._draw_overlay(screen, "Controls", ["Move: Mouse", "Dense State: Hold Left Click", "Scatter: Right Click (3s Cooldown)", "Pause: P Key"])
         elif self.show_settings:
-            self._draw_overlay(screen, "Settings", ["Master Volume: [Placeholder]", "Music Volume: [Placeholder]"])
+            self._draw_settings_overlay(screen)
 
     def draw_game_over(self, screen, final_time, high_score):
         self._draw_dimming_overlay(screen)
@@ -166,4 +224,26 @@ class MenuController:
         close_text = "Click anywhere to close"
         close_size = self.small_font.size(close_text)
         close_center = (box_rect.x + 20 + close_size[0] // 2, box_rect.bottom - 40 + close_size[1] // 2)
+        draw_text_with_outline(screen, close_text, self.small_font, (150, 150, 150), close_center)
+
+    def _draw_settings_overlay(self, screen):
+        # Darken background
+        overlay = pygame.Surface((self.screen_width, self.screen_height), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 200))
+        screen.blit(overlay, (0, 0))
+        
+        # Draw Box
+        pygame.draw.rect(screen, (26, 26, 26), self.settings_box)
+        pygame.draw.rect(screen, (232, 232, 232), self.settings_box, 2)
+        
+        title = "Settings"
+        title_center = (self.settings_box.x + 20 + self.menu_font.size(title)[0] // 2, self.settings_box.y + 20 + self.menu_font.size(title)[1] // 2)
+        draw_text_with_outline(screen, title, self.menu_font, (255, 215, 0), title_center)
+        
+        draw_slider(screen, self.sfx_slider, "SFX Volume", self.sfx_volume, self.small_font)
+        draw_slider(screen, self.music_slider, "Music Volume", self.music_volume, self.small_font)
+            
+        close_text = "Click outside to close"
+        close_size = self.small_font.size(close_text)
+        close_center = (self.settings_box.x + 20 + close_size[0] // 2, self.settings_box.bottom - 40 + close_size[1] // 2)
         draw_text_with_outline(screen, close_text, self.small_font, (150, 150, 150), close_center)

@@ -49,3 +49,29 @@ def draw_polished_button(screen, rect, text, font):
     
     # Draw text with outline
     draw_text_with_outline(screen, text, font, text_color, rect.center)
+
+def draw_slider(screen, rect, label, volume, small_font):
+    """
+    Draws an interactive slider.
+    """
+    # Draw label
+    label_surf = small_font.render(label, True, (255, 255, 255))
+    screen.blit(label_surf, (rect.x, rect.y - 25))
+    
+    # Draw background track
+    pygame.draw.rect(screen, (50, 50, 50), rect)
+    
+    # Draw filled track
+    fill_rect = pygame.Rect(rect.x, rect.y, int(rect.width * volume), rect.height)
+    pygame.draw.rect(screen, (100, 150, 255), fill_rect)
+    
+    # Draw outline
+    pygame.draw.rect(screen, (200, 200, 200), rect, 2)
+    
+    # Draw handle
+    handle_x = rect.x + int(rect.width * volume)
+    pygame.draw.circle(screen, (255, 255, 255), (handle_x, rect.centery), 12)
+    
+    # Draw percentage text
+    pct_surf = small_font.render(f"{int(volume * 100)}%", True, (200, 200, 200))
+    screen.blit(pct_surf, (rect.right + 15, rect.centery - pct_surf.get_height() // 2))
