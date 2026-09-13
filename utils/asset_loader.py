@@ -12,6 +12,9 @@ class AssetLoader:
             cls._instance._background = None
             cls._instance._menu_background = None
             cls._instance._sounds = {}
+            cls._instance._relative_volumes = {
+                "skeleton_pop": 0.35  # Slightly lower volume for constant popping
+            }
             cls._instance._sfx_volume = 1.0
             cls._instance._initialized = False
         return cls._instance
@@ -91,7 +94,8 @@ class AssetLoader:
                 sf_path = os.path.join("audio", "sound", f"{sf}.wav")
                 if os.path.exists(sf_path):
                     self._sounds[sf] = pygame.mixer.Sound(sf_path)
-                    self._sounds[sf].set_volume(self._sfx_volume)
+                    rel_vol = self._relative_volumes.get(sf, 1.0)
+                    self._sounds[sf].set_volume(self._sfx_volume * rel_vol)
         except Exception as e:
             print(f"Warning: Audio system failed to initialize sounds: {e}")
                     
@@ -145,5 +149,6 @@ class AssetLoader:
     def set_sfx_volume(self, volume: float) -> None:
         """Sets the volume (0.0 to 1.0) for all loaded SFX."""
         self._sfx_volume = max(0.0, min(1.0, volume))
-        for snd in self._sounds.values():
-            snd.set_volume(self._sfx_volume)
+        for sound_id, snd in self._sounds.items():
+            rel_vol = self._relative_volumes.get(sound_id, 1.0)
+            snd.set_volume(self._sfx_volume * rel_vol)
