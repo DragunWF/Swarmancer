@@ -3,6 +3,7 @@ import math
 from utils.spatial_hash import SpatialHash
 from entities.powerups import CursedChalice
 from entities.powerups import SoulPickup
+from utils.asset_loader import AssetLoader
 
 class CollisionSystem:
     def __init__(self, on_resource_collected=None, on_currency_collected=None, on_entity_spawned=None, on_particle_spawned=None):
@@ -92,6 +93,7 @@ class CollisionSystem:
                     enemy.marked_for_deletion = True
                     boid.marked_for_deletion = True
                     self._try_drop_soul(enemy.transform.x, enemy.transform.y)
+                    AssetLoader().play_sound("skeleton_pop")
                     if self.on_particle_spawned:
                         self.on_particle_spawned("skeleton_shatter", boid.transform.x, boid.transform.y)
                         self.on_particle_spawned("vanguard_pop", enemy.transform.x, enemy.transform.y)
@@ -111,6 +113,7 @@ class CollisionSystem:
                             if dist_shrapnel_sq < shrapnel_radius * shrapnel_radius:
                                 other_enemy.marked_for_deletion = True
                                 self._try_drop_soul(other_enemy.transform.x, other_enemy.transform.y)
+                                AssetLoader().play_sound("skeleton_pop")
                                 if self.on_particle_spawned:
                                     self.on_particle_spawned("vanguard_pop", other_enemy.transform.x, other_enemy.transform.y)
                             
@@ -133,6 +136,7 @@ class CollisionSystem:
                     self._try_drop_soul(enemy.transform.x, enemy.transform.y)
                     
                     if getattr(proj, 'projectile_type', None) == 'plague_bomb':
+                        AssetLoader().play_sound("dwarf_explosion")
                         if self.on_particle_spawned:
                             self.on_particle_spawned("plague_detonation", proj.transform.x, proj.transform.y)
                             self.on_particle_spawned("vanguard_pop", enemy.transform.x, enemy.transform.y)
@@ -150,9 +154,11 @@ class CollisionSystem:
                             if (dx_b * dx_b + dy_b * dy_b) < blast_radius_sq:
                                 blast_enemy.marked_for_deletion = True
                                 self._try_drop_soul(blast_enemy.transform.x, blast_enemy.transform.y)
+                                AssetLoader().play_sound("skeleton_pop")
                                 if self.on_particle_spawned:
                                     self.on_particle_spawned("vanguard_pop", blast_enemy.transform.x, blast_enemy.transform.y)
                     else:
+                        AssetLoader().play_sound("skeleton_pop")
                         if self.on_particle_spawned:
                             if getattr(enemy, 'enemy_type', None) == 'laser_drone':
                                 self.on_particle_spawned("sun_wizard_death", enemy.transform.x, enemy.transform.y)
@@ -181,6 +187,7 @@ class CollisionSystem:
                 if distance_sq < radius_sum * radius_sum:
                     proj.marked_for_deletion = True
                     boid.marked_for_deletion = True
+                    AssetLoader().play_sound("skeleton_pop")
                     if self.on_particle_spawned:
                         self.on_particle_spawned("skeleton_shatter", boid.transform.x, boid.transform.y)
                     break
@@ -221,6 +228,7 @@ class CollisionSystem:
             boomer.has_detonated = True
             boomer.marked_for_deletion = True
             self._try_drop_soul(boomer.transform.x, boomer.transform.y)
+            AssetLoader().play_sound("dwarf_explosion")
             if self.on_particle_spawned:
                 self.on_particle_spawned("sapper_detonation", boomer.transform.x, boomer.transform.y)
             blast_radius_sq = boomer.blast_radius * boomer.blast_radius
@@ -234,6 +242,7 @@ class CollisionSystem:
                 dist_sq = dx * dx + dy * dy
                 if dist_sq < blast_radius_sq:
                     boid.marked_for_deletion = True
+                    AssetLoader().play_sound("skeleton_pop")
                     if self.on_particle_spawned:
                         self.on_particle_spawned("skeleton_shatter", boid.transform.x, boid.transform.y)
 
@@ -256,6 +265,7 @@ class CollisionSystem:
                 vertical_dist = abs(boid.transform.y - drone.transform.y)
                 if vertical_dist < drone.beam_width:
                     boid.marked_for_deletion = True
+                    AssetLoader().play_sound("skeleton_pop")
                     if self.on_particle_spawned:
                         self.on_particle_spawned("skeleton_shatter", boid.transform.x, boid.transform.y)
 

@@ -47,22 +47,28 @@ class MenuController:
                 
             if current_state == GameState.MENU:
                 if self.play_button.collidepoint(mouse_pos):
+                    AssetLoader().play_sound("ui_click")
                     return "PLAY"
                 elif self.controls_button.collidepoint(mouse_pos):
+                    AssetLoader().play_sound("ui_click")
                     self.show_controls = True
                     return None
                 elif self.settings_button.collidepoint(mouse_pos):
+                    AssetLoader().play_sound("ui_click")
                     self.show_settings = True
                     return None
                     
             elif current_state == GameState.GAME_OVER:
                 if self.restart_button.collidepoint(mouse_pos):
+                    AssetLoader().play_sound("ui_click")
                     return "PLAY"
                 elif self.menu_button.collidepoint(mouse_pos):
+                    AssetLoader().play_sound("ui_click")
                     return "MAIN_MENU"
 
             elif current_state == GameState.VICTORY:
                 if self.victory_menu_button.collidepoint(mouse_pos):
+                    AssetLoader().play_sound("ui_click")
                     return "MAIN_MENU"
                     
         return None

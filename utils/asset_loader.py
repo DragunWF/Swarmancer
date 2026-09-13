@@ -11,6 +11,8 @@ class AssetLoader:
             cls._instance._sprites = {}
             cls._instance._background = None
             cls._instance._menu_background = None
+            cls._instance._sounds = {}
+            cls._instance._sfx_volume = 1.0
             cls._instance._initialized = False
         return cls._instance
 
@@ -81,6 +83,17 @@ class AssetLoader:
         cloud_surf = pygame.Surface((cloud_radius * 2, cloud_radius * 2), pygame.SRCALPHA)
         pygame.draw.circle(cloud_surf, (0, 255, 200, 150), (cloud_radius, cloud_radius), cloud_radius)
         self._sprites["miasma_cloud_static"] = cloud_surf
+        
+        # Load sounds
+        try:
+            sound_files = ["dwarf_explosion", "laser_spell", "lose", "skeleton_pop", "ui_click", "ui_error", "win"]
+            for sf in sound_files:
+                sf_path = os.path.join("audio", "sound", f"{sf}.wav")
+                if os.path.exists(sf_path):
+                    self._sounds[sf] = pygame.mixer.Sound(sf_path)
+                    self._sounds[sf].set_volume(self._sfx_volume)
+        except Exception as e:
+            print(f"Warning: Audio system failed to initialize sounds: {e}")
                     
         self._initialized = True
 
@@ -123,3 +136,14 @@ class AssetLoader:
     def get_menu_background(self) -> pygame.Surface:
         """Retrieves the cached main menu background surface."""
         return self._menu_background
+
+    def play_sound(self, sound_id: str) -> None:
+        """Plays a loaded sound non-blockingly."""
+        if sound_id in self._sounds:
+            self._sounds[sound_id].play()
+
+    def set_sfx_volume(self, volume: float) -> None:
+        """Sets the volume (0.0 to 1.0) for all loaded SFX."""
+        self._sfx_volume = max(0.0, min(1.0, volume))
+        for snd in self._sounds.values():
+            snd.set_volume(self._sfx_volume)

@@ -2,6 +2,7 @@ from systems.system import System
 from pygame.math import Vector2
 from utils.spatial_hash import SpatialHash
 from entities.projectiles import SolarGoldBolt
+from utils.asset_loader import AssetLoader
 import pygame
 import random
 import math
@@ -292,6 +293,7 @@ class BehaviorSystem(System):
                     # Threshold reached — begin firing
                     at.is_firing = True
                     at.elapsed = 0.0
+                    AssetLoader().play_sound("laser_spell")
             else:
                 # Active firing phase: count down beam duration
                 at.fire_elapsed += dt

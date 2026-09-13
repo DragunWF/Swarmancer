@@ -51,6 +51,7 @@ async def main():
     current_track_index = 0
     try:
         pygame.mixer.init()
+        pygame.mixer.set_num_channels(16)
         pygame.mixer.music.set_endevent(TRACK_END_EVENT)
         pygame.mixer.music.load(PLAYLIST[current_track_index])
         # Game starts in MENU, so we don't play() here.
@@ -271,10 +272,12 @@ async def main():
             elif current_state == GameState.SHOP:
                 selected_upgrade = shop_controller.handle_event(event)
                 if selected_upgrade == "CONTINUE":
+                    AssetLoader().play_sound("ui_click")
                     current_state = GameState.PLAYING
                 elif selected_upgrade is not None:
                     upgrade_data = next((u for u in shop_controller.all_upgrades if u["id"] == selected_upgrade), None)
                     if upgrade_data and player.souls >= upgrade_data["cost"]:
+                        AssetLoader().play_sound("ui_click")
                         player.souls -= upgrade_data["cost"]
                         
                         if selected_upgrade == 0:
@@ -317,6 +320,7 @@ async def main():
                                 upg["is_purchased"] = True
                                 break
                     elif upgrade_data:
+                        AssetLoader().play_sound("ui_error")
                         print("Not enough souls!")
                             
             elif current_state == GameState.PAUSED:
@@ -345,6 +349,7 @@ async def main():
                 victory_souls = player.souls
                 high_score = max(high_score, current_survival_time)
                 current_state = GameState.VICTORY
+                AssetLoader().play_sound("win")
                 if PLAYLIST: pygame.mixer.music.stop()
 
             # --- Automatic Shop Milestone Trigger ---
@@ -391,6 +396,7 @@ async def main():
             if len(active_boids) == 0:
                 high_score = max(high_score, current_survival_time)
                 current_state = GameState.GAME_OVER
+                AssetLoader().play_sound("lose")
                 if PLAYLIST: pygame.mixer.music.stop()
 
             # --- HUD ---

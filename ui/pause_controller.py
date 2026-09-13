@@ -1,4 +1,5 @@
 import pygame
+from utils.asset_loader import AssetLoader
 
 class PauseController:
     def __init__(self, screen_width, screen_height):
@@ -45,16 +46,20 @@ class PauseController:
         if self.show_confirmation:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if self.yes_button.collidepoint(event.pos):
+                    AssetLoader().play_sound("ui_click")
                     self.show_confirmation = False
                     return "MAIN_MENU"
                 elif self.no_button.collidepoint(event.pos):
+                    AssetLoader().play_sound("ui_click")
                     self.show_confirmation = False
             return None
 
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if self.continue_button.collidepoint(event.pos):
+                AssetLoader().play_sound("ui_click")
                 return "RESUME"
             elif self.menu_button.collidepoint(event.pos):
+                AssetLoader().play_sound("ui_click")
                 self.show_confirmation = True
             elif self.sfx_slider.collidepoint(event.pos):
                 self.dragging_sfx = True
@@ -87,7 +92,7 @@ class PauseController:
         
         if slider_type == 'sfx':
             self.sfx_volume = percentage
-            # Placeholder for future SFX manager updates
+            AssetLoader().set_sfx_volume(self.sfx_volume)
         else:
             self.music_volume = percentage
             try:
