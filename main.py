@@ -75,7 +75,7 @@ async def main():
             elif has_plague and random.random() < 0.25:
                 from components.combat import PlagueCaster
                 new_boid.plague_caster = PlagueCaster(cooldown=3.0, blast_radius=80.0, attack_range=150.0, projectile_speed=300.0)
-                new_boid.graphics.color = (0, 255, 150) # Tinge them green
+                new_boid.graphics.sprite_ref = "plague_wizard"
                 
             entities.append(new_boid)
 
@@ -269,7 +269,7 @@ async def main():
                             if upgrade_count > 0:
                                 for b in random.sample(boids, upgrade_count):
                                     b.plague_caster = PlagueCaster(cooldown=3.0, blast_radius=80.0, attack_range=150.0, projectile_speed=300.0)
-                                    b.graphics.color = (0, 255, 150) # Tinge them green
+                                    b.graphics.sprite_ref = "plague_wizard"
                                 
                         # Flag the upgrade as purchased (gray-out) instead of
                         # removing it.  The shop remains open for further purchases.
