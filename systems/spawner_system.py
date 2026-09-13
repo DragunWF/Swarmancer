@@ -1,6 +1,6 @@
 import math
 import random
-from entities.enemies import Grunt, Boomer, LaserDrone
+from entities.enemies import Grunt, Boomer, LaserDrone, InquisitionMarksman
 
 
 class SpawnerSystem:
@@ -12,6 +12,7 @@ class SpawnerSystem:
         self.spawn_timer = 0.0
         self.boomer_spawn_timer = 0.0
         self.drone_spawn_timer = 0.0
+        self.marksman_spawn_timer = 0.0
 
     def _get_grunt_spawn_rate(self, threat_level):
         """Returns the Grunt spawn rate (seconds)."""
@@ -27,6 +28,11 @@ class SpawnerSystem:
     def _get_drone_spawn_rate(self, threat_level):
         if threat_level < 10: return 15.0
         return 8.0
+
+    def _get_marksman_spawn_rate(self, threat_level):
+        """Returns the Marksman spawn rate (seconds). Introduced at Threat Level 6."""
+        if threat_level < 10: return 20.0
+        return 12.0
 
     def update(self, entities, dt, threat_level=1):
         # --- Grunt Spawning (always active) ---
@@ -51,6 +57,14 @@ class SpawnerSystem:
             if self.drone_spawn_timer >= drone_rate:
                 self.drone_spawn_timer = 0.0
                 self.spawn_laser_drone(entities)
+
+        # --- InquisitionMarksman Spawning (Threat Level 6+) ---
+        if threat_level >= 6:
+            marksman_rate = self._get_marksman_spawn_rate(threat_level)
+            self.marksman_spawn_timer += dt
+            if self.marksman_spawn_timer >= marksman_rate:
+                self.marksman_spawn_timer = 0.0
+                self.spawn_marksman(entities)
 
     def _random_edge_position(self):
         """Returns a random (x, y) just outside one of the four screen edges."""
@@ -99,3 +113,8 @@ class SpawnerSystem:
         # Teleportation particle burst
         if self.on_particle_spawned:
             self.on_particle_spawned("sun_wizard_teleport", x, y)
+
+    def spawn_marksman(self, entities):
+        # Edge spawn — the Marksman approaches from the arena boundary and halts at range.
+        x, y = self._random_edge_position()
+        entities.append(InquisitionMarksman(x, y))

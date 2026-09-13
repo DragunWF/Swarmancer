@@ -1,6 +1,7 @@
 from systems.system import System
 from pygame.math import Vector2
 from utils.spatial_hash import SpatialHash
+from entities.projectiles import SolarGoldBolt
 import pygame
 import random
 import math
@@ -216,7 +217,10 @@ class BehaviorSystem(System):
             boid.physics.acceleration += total_steer / boid.physics.mass
 
         # Enemy Tracking Logic
+        # Marksmen are excluded here — they receive dedicated optimal-distance AI below.
         for enemy in enemies:
+            if getattr(enemy, 'enemy_type', None) == 'marksman':
+                continue
             enemy_pos = Vector2(enemy.transform.x, enemy.transform.y)
             to_target = target_pos - enemy_pos
             if to_target.length_squared() > 0:
@@ -296,6 +300,83 @@ class BehaviorSystem(System):
                     at.is_firing = False
                     at.fire_elapsed = 0.0
                     at.elapsed = 0.0
+
+        # --- InquisitionMarksman Optimal-Distance AI & Firing ---
+        # Sole responsibilities:
+        #   1. Drive the Marksman toward the swarm until within halt radius.
+        #   2. Zero velocity/acceleration when halted — it must never charge melee range.
+        #   3. Increment AimingTimer only while halted; fire a SolarGoldBolt at peak.
+        new_projectiles = []
+        for entity in entities:
+            if getattr(entity, 'enemy_type', None) != 'marksman':
+                continue
+            if getattr(entity, 'marked_for_deletion', False):
+                continue
+            if not hasattr(entity, 'aiming_timer') or not hasattr(entity, 'physics'):
+                continue
+
+            entity_pos = Vector2(entity.transform.x, entity.transform.y)
+            to_target = target_pos - entity_pos
+            dist_sq = to_target.length_squared()
+
+            if dist_sq > entity.near_distance_sq:
+                # --- Approach Phase ---
+                # Still outside halt radius: steer toward player like a standard enemy.
+                entity.is_halted = False
+                if dist_sq > 0:
+                    desired = to_target.normalize() * entity.physics.max_speed
+                    steer = desired - entity.physics.velocity
+                    if steer.length_squared() > self.max_force ** 2:
+                        steer.scale_to_length(self.max_force)
+                    entity.physics.acceleration += steer / entity.physics.mass
+                # Reset the aiming timer while still moving — the Marksman must be
+                # fully stationary before it can telegraph a shot.
+                entity.aiming_timer.elapsed = 0.0
+                entity.aiming_timer.is_firing = False
+                entity.aiming_timer.fire_elapsed = 0.0
+            else:
+                # --- Halt Phase ---
+                # Within near_distance: slam velocity and acceleration to zero.
+                # This guarantees the Marksman never drifts into melee range via momentum.
+                entity.physics.velocity.x = 0.0
+                entity.physics.velocity.y = 0.0
+                entity.physics.acceleration.x = 0.0
+                entity.physics.acceleration.y = 0.0
+                entity.is_halted = True
+
+                at = entity.aiming_timer
+                if not at.is_firing:
+                    # Telegraph phase: accumulate charge time
+                    at.elapsed += dt
+                    if at.elapsed >= at.charge_duration:
+                        # Peak reached — instantiate the bolt
+                        at.is_firing = True
+                        at.elapsed = 0.0
+
+                        # Calculate direction from Marksman to current target
+                        if dist_sq > 0:
+                            fire_dir = to_target.normalize()
+                        else:
+                            fire_dir = Vector2(1, 0)  # Fallback: fire right if exactly overlapping
+
+                        bolt_speed = 600.0
+                        bolt = SolarGoldBolt(
+                            entity.transform.x,
+                            entity.transform.y,
+                            fire_dir.x * bolt_speed,
+                            fire_dir.y * bolt_speed,
+                        )
+                        new_projectiles.append(bolt)
+                else:
+                    # Flash phase: brief visual window before cycle resets
+                    at.fire_elapsed += dt
+                    if at.fire_elapsed >= at.fire_duration:
+                        at.is_firing = False
+                        at.fire_elapsed = 0.0
+                        at.elapsed = 0.0
+
+        # Flush spawned bolts into the world entity list
+        entities.extend(new_projectiles)
 
         # --- LifespanTimer Tick ---
         # Marks entities for deletion once their lifespan expires
