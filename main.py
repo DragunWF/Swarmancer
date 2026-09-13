@@ -243,14 +243,18 @@ async def main():
                 running = False
                 
             if PLAYLIST and event.type == TRACK_END_EVENT:
-                current_track_index += 1
-                if current_track_index >= len(PLAYLIST):
-                    current_track_index = 1  # Loop back to oasis_quest.ogg (Index 1)
-                try:
-                    pygame.mixer.music.load(PLAYLIST[current_track_index])
-                    pygame.mixer.music.play()
-                except Exception as e:
-                    print(f"Warning: Could not load track {current_track_index}: {e}")
+                # Only automatically load and play the next track if we are in an active state.
+                # When pygame.mixer.music.stop() is called on game over, it triggers this event,
+                # and without this check, it would instantly restart music on the Game Over screen.
+                if current_state in (GameState.PLAYING, GameState.PAUSED, GameState.SHOP):
+                    current_track_index += 1
+                    if current_track_index >= len(PLAYLIST):
+                        current_track_index = 1  # Loop back to oasis_quest.ogg (Index 1)
+                    try:
+                        pygame.mixer.music.load(PLAYLIST[current_track_index])
+                        pygame.mixer.music.play()
+                    except Exception as e:
+                        print(f"Warning: Could not load track {current_track_index}: {e}")
                     
             if current_state == GameState.PLAYING and event.type == pygame.KEYDOWN and event.key == pygame.K_p:
                 current_state = GameState.PAUSED
