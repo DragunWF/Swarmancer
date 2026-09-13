@@ -211,6 +211,18 @@ The player navigates through distinct game states (Menu, Gameplay, Settings) bef
 - **Danger Vignette:** A faint red pulsing vignette appears at the screen edges when the swarm count drops below 15.
 - **Minimalist Action Bar:** A sleek horizontal progress bar anchored at the bottom-center. It tracks the Scatter ability cooldown with a horizontal liquid fill, pulsing when ready. It is positioned directly beneath dynamic text hints (`[LMB] Condense  |  Scatter [RMB]`) that snap to full brightness when the cooldown completes.
 
+## Feature 6: Event-Driven Background Music Playlist
+
+- The game features a dynamic background music playlist utilizing the Pygame mixer.
+- The playlist sequentially loops through 4 tracks located in `/audio/music/`:
+  1. `desert_dawn.ogg` (Index 0)
+  2. `oasis_quest.ogg` (Index 1)
+  3. `desert_dash.ogg` (Index 2)
+  4. `desert_storm.ogg` (Index 3)
+- Upon completion of `desert_storm.ogg` (Index 3), the playlist pointer loops back to `oasis_quest.ogg` (Index 1) and continues cycling (1-2-3-1-2-3). Index 0 acts strictly as the intro track for the start of the run.
+- Transitions are event-driven (`pygame.mixer.music.set_endevent`) and handled within the main game loop (`pygame.event.get()`), avoiding threading or blocking queues to maintain strict WebAssembly (Pygbag) compatibility.
+- Music playback persists seamlessly when the game transitions into `PAUSE` or `SHOP` states.
+
 # Epic 6: Pacing, Escalation & Victory
 
 The game presents a structured 10-minute survival arc, where a global Threat Level (1–10) escalates every 60 seconds, automatically injecting new enemy types into the spawn pool, tightening shop intervals, and culminating in a Victory state when the player survives all 10 levels.
