@@ -35,8 +35,8 @@ Systems iterate over the entity pool every frame (60 FPS), targeting only entiti
 
 - **Behavior System (`behavior_system.py`):** Reads mouse inputs, calculates Boids AI rules, and updates enemy telegraph timers.
   - _Standard Enemy Tracking:_ Steers Grunt and Boomer entities toward the player cursor each frame. Marksmen are explicitly excluded from this generic loop.
-  - _Optimal-Distance AI (Marksman):_ Evaluates squared distance between each `InquisitionMarksman` and the cursor. If `dist_sq > near_distance_sq`, steers normally and resets the `AimingTimer`. If `dist_sq <= near_distance_sq`, zeroes velocity and acceleration completely (halt), then increments `AimingTimer.elapsed`.
-  - _Projectile Firing (Marksman):_ When `AimingTimer.elapsed >= charge_duration`, instantiates a `SolarGoldBolt` aimed at the cursor and appends it to the world entity list via `entities.extend(new_projectiles)`. Resets `AimingTimer` to begin the next cycle.
+  - _Optimal-Distance AI (Marksman):_ Evaluates squared distance between each `InquisitionMarksman` and the cursor. If `dist_sq > near_distance_sq`, steers normally. If `dist_sq <= near_distance_sq`, zeroes velocity and acceleration completely (halt).
+  - _Projectile Firing (Marksman):_ `AimingTimer.elapsed` continuously increments regardless of distance or movement. When `AimingTimer.elapsed >= charge_duration`, instantiates a `SolarGoldBolt` aimed at the cursor and appends it to the world entity list via `entities.extend(new_projectiles)`. Resets `AimingTimer` to begin the next cycle.
 - **Movement System (`movement_system.py`):** Iterates over `Transform` + `Physics` signatures to update spatial coordinates.
 - **Collision System (`collision_system.py`):** Evaluates squared distance overlaps between `Collider` components. Handles combat attrition and currency spawning.
 - **Particle System (`particle_system.py`):** Manages the `LifespanTimer` of visual effects and updates `Graphics.alpha` to fade objects.

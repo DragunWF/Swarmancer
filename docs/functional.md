@@ -33,7 +33,7 @@
   - **Interaction:** Fires a wide, holy light laser beam with a 100-pixel total band (50px half-width) centered on the drone's position. This attack destroys any minion caught in its path, specifically punishing loose, spread-out formations.
 - **Inquisition Marksman (The Sniper):**
   - **Behavior:** Advanced ranged crusader that tracks the player's cursor at moderate speed (110 px/s) but halts completely at a 180-pixel optimal distance radius. It will never charge into the swarm's melee range.
-  - **Projectile Firing:** While halted, the `AimingTimer` charges over 3 seconds. On peak, a fast linear solar-gold bolt (600 px/s) is fired directly at the swarm, then the timer resets to begin the next firing cycle.
+  - **Projectile Firing:** The `AimingTimer` charges continuously over 3 seconds regardless of movement. On peak, a fast linear solar-gold bolt (600 px/s) is fired directly at the swarm (even if the Marksman is outside of optimal range or moving), then the timer resets to begin the next firing cycle.
   - **Interaction:** A standard 1-to-1 Collider (no AoE trigger) — a minion that directly contacts the Marksman destroys both entities, matching the Grunt counterplay. The fired bolt also destroys a single minion on contact.
 
 ## 4b. Visual Feedback (Particle Effects)
