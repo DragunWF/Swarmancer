@@ -56,13 +56,17 @@ class ParticleEmitter:
                 particles.append(Particle(x, y, vx, vy, color=color, drag=0.80, duration=random.uniform(0.6, 1.2), scale=random.uniform(4.0, 7.0)))
 
         elif effect_type == "plague_detonation":
-            # dense one-time burst of emerald green and arcane cyan particles
-            for _ in range(random.randint(30, 50)):
-                color = random.choice([(80, 200, 120), (0, 255, 255)])
+            # 3-5 expanding miasma clouds
+            for _ in range(random.randint(3, 5)):
                 angle = random.uniform(0, 2 * math.pi)
-                speed = random.uniform(150, 350)
+                speed = random.uniform(10, 40)
                 vx, vy = math.cos(angle) * speed, math.sin(angle) * speed
-                particles.append(Particle(x, y, vx, vy, color=color, drag=0.85, duration=random.uniform(0.5, 1.0), scale=random.uniform(3.0, 5.0)))
+                # scale is natively 1.0 (40x40 cache) and will expand slightly
+                particles.append(Particle(x, y, vx, vy, color=(0,0,0), drag=0.85, duration=random.uniform(0.6, 1.0), scale=1.0, sprite_ref="miasma_cloud", expansion_rate=random.uniform(0.5, 1.5)))
+                
+            # 1 quick shockwave ring confirming the 80-radius blast area
+            # Starts at scale 1.0 (which is 160x160 natively cached radius 80 ring) and expands outwards to 1.3
+            particles.append(Particle(x, y, 0, 0, color=(0,0,0), drag=1.0, duration=0.3, scale=1.0, sprite_ref="plague_ring", expansion_rate=1.0))
 
         return particles
 
@@ -86,10 +90,13 @@ class ParticleSystem:
                     if getattr(entity, 'enemy_type', None) == 'laser_drone':
                         if self.on_particle_spawned:
                             self.on_particle_spawned("sun_wizard_death", entity.transform.x, entity.transform.y)
-                elif getattr(entity, 'is_particle', False) and getattr(entity, 'fade', True):
-                    # Update graphics alpha to fade out
-                    # Alpha should go from 255 to 0 as life_ratio goes from 1.0 to 0.0
-                    entity.graphics.alpha = max(0, int(255 * life_ratio))
+                elif getattr(entity, 'is_particle', False):
+                    if getattr(entity, 'fade', True):
+                        # Update graphics alpha to fade out
+                        # Alpha should go from 255 to 0 as life_ratio goes from 1.0 to 0.0
+                        entity.graphics.alpha = max(0, int(255 * life_ratio))
+                    if hasattr(entity, 'expansion_rate') and entity.expansion_rate != 0.0:
+                        entity.graphics.scale_multiplier += entity.expansion_rate * dt
 
             # Particle Kinetics Logic
             if hasattr(entity, 'kinetics') and hasattr(entity, 'transform'):

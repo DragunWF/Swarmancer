@@ -7,11 +7,13 @@ from components.kinetics import ParticleKinetics
 from settings import GLOBAL_SPRITE_SCALE
 
 class Particle:
-    def __init__(self, x: float, y: float, vx: float, vy: float, color: tuple, drag: float = 0.9, duration: float = 0.5, scale: float = None, fade: bool = True):
+    def __init__(self, x: float, y: float, vx: float, vy: float, color: tuple, drag: float = 0.9, duration: float = 0.5, scale: float = None, fade: bool = True, sprite_ref: str = None, expansion_rate: float = 0.0):
         self.transform = Transform(x, y)
         if scale is None:
             scale = random.uniform(2.0, 4.0) * GLOBAL_SPRITE_SCALE
-        self.graphics = Graphics(color=color, scale=scale, sprite_ref=None)
+        self.graphics = Graphics(color=color, scale=scale, sprite_ref=sprite_ref)
+        self.graphics.scale_multiplier = 1.0
+        self.expansion_rate = expansion_rate
         self.lifespan_timer = LifespanTimer(duration=duration)
         self.kinetics = ParticleKinetics(vx=vx, vy=vy, drag=drag)
         self.fade = fade

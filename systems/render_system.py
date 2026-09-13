@@ -19,15 +19,22 @@ class RenderSystem(System):
         screen_width = screen.get_width()
 
         for entity in entities:
+            if getattr(entity, 'projectile_type', None) == 'plague_bomb':
+                pos = (int(entity.transform.x), int(entity.transform.y))
+                ring = AssetLoader().get_sprite("plague_ring", "south")
+                if ring:
+                    screen.blit(ring, ring.get_rect(center=pos))
+
+        for entity in entities:
             if hasattr(entity, 'graphics') and hasattr(entity, 'transform'):
                 gfx = entity.graphics
                 pos = (int(entity.transform.x), int(entity.transform.y))
                 
-                scale_multiplier = 1.0
+                scale_multiplier = getattr(gfx, 'scale_multiplier', 1.0)
                 if hasattr(entity, 'pulsing_animation'):
                     anim = entity.pulsing_animation
                     anim.time_elapsed += dt
-                    scale_multiplier = 1.0 + (anim.amplitude * math.sin(anim.time_elapsed * anim.speed))
+                    scale_multiplier *= 1.0 + (anim.amplitude * math.sin(anim.time_elapsed * anim.speed))
                 
                 if type(gfx).__name__ == 'TextGraphics':
                     if gfx.alpha < 255:

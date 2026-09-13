@@ -68,6 +68,19 @@ class AssetLoader:
                 else:
                     scaled_img = img
                 self._sprites[ref_key] = scaled_img
+                
+        # Generate Plague Wizard VFX surfaces (cache them statically)
+        # 1. plague_ring_static (Hollow green ring, 160x160 matching blast_radius 80)
+        ring_radius = 80
+        ring_surf = pygame.Surface((ring_radius * 2, ring_radius * 2), pygame.SRCALPHA)
+        pygame.draw.circle(ring_surf, (0, 255, 150, 200), (ring_radius, ring_radius), ring_radius, 2)
+        self._sprites["plague_ring_static"] = ring_surf
+        
+        # 2. miasma_cloud_static (Fuzzy/semi-transparent cloud, 40x40 matching typical radius 20)
+        cloud_radius = 20
+        cloud_surf = pygame.Surface((cloud_radius * 2, cloud_radius * 2), pygame.SRCALPHA)
+        pygame.draw.circle(cloud_surf, (0, 255, 200, 150), (cloud_radius, cloud_radius), cloud_radius)
+        self._sprites["miasma_cloud_static"] = cloud_surf
                     
         self._initialized = True
 
