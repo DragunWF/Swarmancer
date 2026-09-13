@@ -39,6 +39,25 @@ _GRAVE_RATE_LATE = 5.0    # Levels 5–10
 
 async def main():
     pygame.init()
+    
+    # Audio Playlist Setup
+    TRACK_END_EVENT = pygame.USEREVENT + 1
+    PLAYLIST = [
+        "audio/music/desert_dawn.ogg",
+        "audio/music/oasis_quest.ogg",
+        "audio/music/desert_dash.ogg",
+        "audio/music/desert_storm.ogg"
+    ]
+    current_track_index = 0
+    try:
+        pygame.mixer.init()
+        pygame.mixer.music.set_endevent(TRACK_END_EVENT)
+        pygame.mixer.music.load(PLAYLIST[current_track_index])
+        # Game starts in MENU, so we don't play() here.
+    except Exception as e:
+        print(f"Warning: Audio system failed to initialize: {e}")
+        PLAYLIST = []
+
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Swarmancer")
     AssetLoader().initialize()
@@ -128,7 +147,16 @@ async def main():
     def reset_game():
         nonlocal player, resource_timer, shop_timer, current_survival_time, current_boid_max_speed
         nonlocal current_threat_level, next_shop_milestone_index, victory_souls, shop_warning_shown
+        nonlocal current_track_index
         entities.clear()
+        
+        if PLAYLIST:
+            current_track_index = 0
+            try:
+                pygame.mixer.music.load(PLAYLIST[current_track_index])
+                pygame.mixer.music.play()
+            except Exception:
+                pass
 
         player_x = SCREEN_WIDTH / 2
         player_y = SCREEN_HEIGHT / 2
@@ -213,6 +241,16 @@ async def main():
             if event.type == pygame.QUIT:
                 running = False
                 
+            if PLAYLIST and event.type == TRACK_END_EVENT:
+                current_track_index += 1
+                if current_track_index >= len(PLAYLIST):
+                    current_track_index = 1  # Loop back to oasis_quest.ogg (Index 1)
+                try:
+                    pygame.mixer.music.load(PLAYLIST[current_track_index])
+                    pygame.mixer.music.play()
+                except Exception as e:
+                    print(f"Warning: Could not load track {current_track_index}: {e}")
+                    
             if current_state == GameState.PLAYING and event.type == pygame.KEYDOWN and event.key == pygame.K_p:
                 current_state = GameState.PAUSED
                 continue
@@ -228,6 +266,7 @@ async def main():
                         current_state = GameState.PLAYING
                 elif action == "MAIN_MENU":
                     current_state = GameState.MENU
+                    if PLAYLIST: pygame.mixer.music.stop()
                     
             elif current_state == GameState.SHOP:
                 selected_upgrade = shop_controller.handle_event(event)
@@ -286,6 +325,7 @@ async def main():
                     current_state = GameState.PLAYING
                 elif action == "MAIN_MENU":
                     current_state = GameState.MENU
+                    if PLAYLIST: pygame.mixer.music.stop()
         bg = AssetLoader().get_background()
         if bg:
             screen.blit(bg, (0, 0))
@@ -305,6 +345,7 @@ async def main():
                 victory_souls = player.souls
                 high_score = max(high_score, current_survival_time)
                 current_state = GameState.VICTORY
+                if PLAYLIST: pygame.mixer.music.stop()
 
             # --- Automatic Shop Milestone Trigger ---
             # Opens the Dark Altar at the exact start times of Threat Levels 4, 6, 8, and 10.
@@ -350,6 +391,7 @@ async def main():
             if len(active_boids) == 0:
                 high_score = max(high_score, current_survival_time)
                 current_state = GameState.GAME_OVER
+                if PLAYLIST: pygame.mixer.music.stop()
 
             # --- HUD ---
             hud_controller.draw(screen, player, len(active_boids), current_survival_time, current_threat_level)
