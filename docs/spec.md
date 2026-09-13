@@ -135,6 +135,7 @@ The player can access a mid-run or end-of-run shop system to mutate the swarm, s
 - Enemies have a calculated probability to drop a temporary Soul entity upon destruction.
 - The game loop automatically awards a passive Soul stipend at 30-second survival milestones.
 - Rare "Cursed Chalice" powerups spawn periodically, granting a massive currency boost rather than swarm replenishment.
+- Collecting open glowing graves, dropped Souls, or Cursed Chalices triggers the `pickup.wav` sound effect.
 
 ## User Stories
 
@@ -243,7 +244,7 @@ The player navigates through distinct game states (Menu, Gameplay, Settings) bef
 
 - The game features non-blocking `.wav` sound effects pre-loaded into a centralized `AssetLoader` dictionary.
 - The Pygame mixer is initialized with `pygame.mixer.set_num_channels(16)` to ensure overlapping sounds (e.g., rapid pops and explosions) do not cut each other off.
-- Seven distinct `.wav` assets are utilized:
+- Eight distinct `.wav` assets are utilized:
   1. `skeleton_pop`: Triggered in `CollisionSystem` on 1-to-1 attrition and projectile hits.
   2. `dwarf_explosion`: Triggered in `CollisionSystem` during Boomer AoE and PlagueBomb detonations.
   3. `laser_spell`: Triggered in `BehaviorSystem` when a Laser Drone's `AimingTimer` reaches its firing threshold.
@@ -251,7 +252,8 @@ The player navigates through distinct game states (Menu, Gameplay, Settings) bef
   5. `lose`: Triggered in `main.py` when transitioning to the `GAME_OVER` state.
   6. `ui_click`: Triggered across `menu_controller.py`, `shop_controller.py`, and `pause_controller.py` on successful button interactions or upgrade purchases.
   7. `ui_error`: Triggered in `main.py` when attempting to purchase an upgrade with insufficient Souls in the Dark Altar.
-- The `AssetLoader` provides a `set_sfx_volume(volume)` method dynamically linked to the SFX slider in `pause_controller.py`, actively updating the playback volume for all 7 loaded sounds simultaneously.
+  8. `pickup`: Triggered in `CollisionSystem` when successfully consuming glowing graves, Souls, or Cursed Chalices.
+- The `AssetLoader` provides a `set_sfx_volume(volume)` method dynamically linked to the SFX slider in `pause_controller.py`, actively updating the playback volume for all 8 loaded sounds simultaneously.
 
 # Epic 6: Pacing, Escalation & Victory
 
