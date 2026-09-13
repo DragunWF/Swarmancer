@@ -4,7 +4,7 @@
 
 - **Objective:** Survive endless waves of enemies for as long as possible.
 - **Health System:** The player does not have a traditional health bar; the total swarm count acts directly as the player's health.
-- **Loss Condition:** A "Game Over" state triggers the moment the swarm count reaches zero.
+- **Loss Condition:** When the swarm count reaches zero, the game first enters a `DYING` state that runs the ECS loop at 10% speed for 2 real-time seconds, creating a cinematic slow-motion effect. After the 2-second window elapses (checked non-blockingly via `pygame.time.get_ticks()`), the game transitions to a "Game Over" state, plays `lose.wav`, and halts gameplay.
 - **Progression:** The game difficulty scales over time by increasing enemy spawn rates and occasionally pausing for a shop phase where players spend collected resources on upgrades.
 
 ## 2. Input Mapping & Mechanics
@@ -47,7 +47,7 @@
 - **HUD Elements:** In-game visual indicators including dynamic countdown timers floating above Boomers (fuse) and Laser Drones (lifespan) to clearly communicate threat urgency. Also features anchored minimalist text for Swarm, Souls, and Timer, floating diegetic text on pickup, a pulsating red danger vignette when swarm count is critical, and a Minimalist Action Bar to visually track the Scatter ability cooldown alongside dynamic text hints.
 - **Main Menu:** Contains options to Play, view Controls, and adjust Settings. Displays the current highest survival time and the game's menu background image (`menu-background.png`).
 - **Settings:** Provides individual volume sliders/increments for master sound effects and background music.
-- **Game Over Screen:** Halts all gameplay physics and enemy spawning. Compares the current run's survival time against the high score, updates it if necessary, and allows the player to restart.
+- **Game Over Screen:** Preceded by a 2-second `DYING` state: the moment the last boid is lost, the game enters slow-motion (ECS at 10% `dt`) for 2 real-time seconds using a non-blocking `pygame.time.get_ticks()` differential. Once elapsed, `lose.wav` fires and the Game Over screen appears, halting all gameplay physics and enemy spawning. Compares the current run's survival time against the high score, updates it if necessary, and allows the player to restart. The high score is captured at the exact moment of wipeout, not at the end of the cinematic buffer.
 
 ## 6. The Shop Economy & Progression
 

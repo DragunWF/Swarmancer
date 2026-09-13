@@ -203,6 +203,22 @@ The player navigates through distinct game states (Menu, Gameplay, Settings) bef
 - **As a player**, I want to adjust the sound effects and music volume within the pause screen, **so that** I can balance the audio to my preference.
 - **As a player**, I want a confirmation dialog to appear when selecting the Main Menu button, **so that** I do not accidentally erase my current survival run.
 
+## Feature 8: Time Dilation Death Transition (`DYING` State)
+
+- When the player's swarm count reaches zero during the `PLAYING` state, the game does **not** immediately transition to `GAME_OVER`.
+- Instead, it transitions to a new `DYING` state and records the exact real-time timestamp via `pygame.time.get_ticks()`.
+- While in `DYING`, the ECS loop (`MovementSystem`, `BehaviorSystem`, `ParticleSystem`, `RenderSystem`, `SpawnerSystem`, `CombatSystem`, `CollisionSystem`) continues to execute, but the `dt` value passed to all systems is multiplied by `0.1`, creating an extreme slow-motion effect.
+- The survival timer is **not** incremented during `DYING`; the high score records the exact moment of wipeout, not the 2-second cinematic buffer.
+- After exactly 2000 milliseconds of **real** elapsed time (checked non-blockingly via `pygame.time.get_ticks()` differential), the game transitions to `GAME_OVER`, plays `lose.wav`, and stops the music.
+- No blocking calls (`time.sleep`, `pygame.time.wait`, or polling while-loops) are used. The check conforms strictly to the WebAssembly/Pygbag async main loop requirement.
+
+## User Stories
+
+- **As a player**, I want the game to enter a dramatic slow-motion state the moment my last minion falls, **so that** the final defeat feels cinematic rather than abrupt.
+- **As a player**, I want the slow-motion effect to last exactly 2 real-time seconds before the Game Over screen appears, **so that** the transition feels deliberate and not jarring.
+- **As a player**, I want the lose sound effect to play only when the Game Over screen actually appears, **so that** the audio underscores the final transition rather than the moment of wipeout.
+- **As a developer**, I want the 2-second `DYING` window to rely on a `pygame.time.get_ticks()` differential check, **so that** the WebAssembly async main loop is never blocked by a sleep or wait call.
+
 ## Feature 5: Active Gameplay HUD & Visual Feedback
 
 - **Minimalist HUD Anchors:** The HUD displays pure text without icons. Swarm Count is anchored top-left, Souls top-right, and Survival Timer top-center.
