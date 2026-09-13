@@ -31,8 +31,10 @@ class RenderSystem(System):
                 
                 if type(gfx).__name__ == 'TextGraphics':
                     if gfx.alpha < 255:
-                        temp_surf = pygame.Surface((150, 50), pygame.SRCALPHA)
-                        draw_text_with_outline(temp_surf, gfx.text, self.floating_font, gfx.color, (75, 25))
+                        text_width, text_height = self.floating_font.size(gfx.text)
+                        pad = 10
+                        temp_surf = pygame.Surface((text_width + pad * 2, text_height + pad * 2), pygame.SRCALPHA)
+                        draw_text_with_outline(temp_surf, gfx.text, self.floating_font, gfx.color, ((text_width + pad * 2) // 2, (text_height + pad * 2) // 2))
                         temp_surf.set_alpha(gfx.alpha)
                         screen.blit(temp_surf, temp_surf.get_rect(center=pos))
                     else:
