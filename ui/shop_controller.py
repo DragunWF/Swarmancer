@@ -6,9 +6,9 @@ from utils.state import GameState
 # ---------------------------------------------------------------------------
 _COLS = 3               # Grid columns
 _CARD_W = 200           # Card width  (px)
-_CARD_H = 280           # Card height (px)
-_CARD_PAD = 30          # Horizontal padding between cards
-_CARD_ROW_PAD = 30      # Vertical padding between rows
+_CARD_H = 240           # Card height (px)
+_CARD_PAD = 20          # Horizontal padding between cards
+_CARD_ROW_PAD = 20      # Vertical padding between rows
 
 # Tooltip dimensions
 _TIP_W = 260
@@ -339,8 +339,8 @@ class ShopController:
             y = grid_top  + row * (_CARD_H + _CARD_ROW_PAD)
             self._card_rects.append(pygame.Rect(x, y, _CARD_W, _CARD_H))
 
-        # Continue button centred below the grid
-        btn_y = grid_top + grid_h + 18
+        # Continue button centred below the grid, clamped to bottom of screen
+        btn_y = min(grid_top + grid_h + 18, self.screen_height - 60)
         self._continue_rect = pygame.Rect(
             self.screen_width // 2 - 110,
             btn_y,
