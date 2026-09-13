@@ -58,4 +58,3 @@ class LaserDrone:
         # Half-width of the laser beam band in pixels — collision_system reads this exclusively
         # Reduced from 80 to 50 (100px total band) for a tighter, fairer punishment window
         self.beam_width = 50.0
-
