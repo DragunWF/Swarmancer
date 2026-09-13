@@ -219,7 +219,7 @@ class BehaviorSystem(System):
         # Enemy Tracking Logic
         # Marksmen are excluded here — they receive dedicated optimal-distance AI below.
         for enemy in enemies:
-            if getattr(enemy, 'enemy_type', None) == 'marksman':
+            if getattr(enemy, 'enemy_type', None) == 'marksman' or getattr(enemy, 'projectile_type', None) == 'solar_gold_bolt':
                 continue
             enemy_pos = Vector2(enemy.transform.x, enemy.transform.y)
             to_target = target_pos - enemy_pos
