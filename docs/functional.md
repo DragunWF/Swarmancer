@@ -31,6 +31,10 @@
 - **Wizard Towers (The Laser Drone):**
   - **Behavior:** Stationary stone wizard towers that telegraph an attack before firing. They have a 15-second lifespan before they expire.
   - **Interaction:** Fires a wide, holy light laser beam with a 100-pixel total band (50px half-width) centered on the drone's position. This attack destroys any minion caught in its path, specifically punishing loose, spread-out formations.
+- **Inquisition Marksman (The Sniper):**
+  - **Behavior:** Advanced ranged crusader that tracks the player's cursor at moderate speed (110 px/s) but halts completely at a 180-pixel optimal distance radius. It will never charge into the swarm's melee range.
+  - **Projectile Firing:** While halted, the `AimingTimer` charges over 3 seconds. On peak, a fast linear solar-gold bolt (600 px/s) is fired directly at the swarm, then the timer resets to begin the next firing cycle.
+  - **Interaction:** A standard 1-to-1 Collider (no AoE trigger) — a minion that directly contacts the Marksman destroys both entities, matching the Grunt counterplay. The fired bolt also destroys a single minion on contact.
 
 ## 4b. Visual Feedback (Particle Effects)
 - **Skeleton Shatter:** Destroyed minions emit bleached bone-white and necrotic cyan pixels.
@@ -73,7 +77,7 @@ The game operates on a non-linear 10-stage difficulty arc designed to compress t
 | 3 | 0:45 | Boomers introduced | - |
 | 4 | 1:15 | Boomer spawn rate increased | YES |
 | 5 | 2:00 | LaserDrones introduced | - |
-| 6 | 3:00 | Grave spawns throttled | YES |
+| 6 | 3:00 | Grave spawns throttled; **Inquisition Marksmen introduced** | YES |
 | 7 | 4:15 | Grunt velocity increased | - |
 | 8 | 5:30 | Grunts spawn in massive clusters | YES |
 | 9 | 7:00 | Elite tracking on LaserDrones | - |

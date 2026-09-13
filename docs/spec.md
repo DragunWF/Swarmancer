@@ -26,6 +26,13 @@ The player must manage a fluid swarm against escalating waves of enemies. The sw
 - The militia utilize basic tracking logic to rush the swarm.
 - Colliding with a peasant militia triggers a 1-to-1 popping effect.
 
+## Feature 4: Ranged Attrition (The Inquisition Marksman)
+
+- The game spawns advanced ranged crusaders known as Inquisition Marksmen at Threat Level 6+.
+- Marksmen track the swarm centroid/cursor at moderate speed (110 px/s), then halt completely once within 180 pixels to avoid entering melee range.
+- When halted, Marksmen telegraph a shot via their `AimingTimer` (3-second charge) and fire a fast, linear solar-gold bolt projectile targeting the swarm, then reset their firing cycle.
+- The Marksman itself retains the standard 1-to-1 sacrifice counterplay: direct minion contact destroys both entities, identical to the Grunt interaction.
+
 ## User Stories
 
 - **As a player**, I want my skeleton minions to constantly update their position toward my cursor using Boids AI rules, **so that** I can seamlessly steer the entire horde.
@@ -33,6 +40,8 @@ The player must manage a fluid swarm against escalating waves of enemies. The sw
 - **As a player**, I want charging peasant militia to destroy one of my skeletons upon contact, **so that** I must actively manage my attrition rate to prevent a game over.
 - **As a player**, I want to see minions face the direction they are moving using 8-directional skeleton sprites, **so that** the swarm feels alive and cohesive.
   - *Acceptance Criteria:* Minions moving in 8 cardinal/ordinal directions display the corresponding sprite. Stationary minions fallback to a default facing (e.g., South). Performance remains at 60 FPS with 300+ minions.
+- **As a player**, I want Inquisition Marksmen to halt at range and fire solar-gold bolts, **so that** I must simultaneously dodge crossfire and manage advancing melee enemies.
+- **As a player**, I want to sacrifice a minion by direct contact with a Marksman to destroy it, **so that** aggressive flanking is a viable counter-strategy against ranged threats.
 
 # Epic 2: Shape-Shifting Combat Mechanics
 

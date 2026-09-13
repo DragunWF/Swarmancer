@@ -25,13 +25,18 @@ Entities are OOP classes that act as initialization containers. They automatical
 - **Grunt (`enemies.py`):** The peasant militia. Contains `Transform`, `Physics` (tracking logic), `Graphics`, `Collider` (1-to-1 popping).
 - **Boomer (`enemies.py`):** The dwarf sapper. Contains `Transform`, `Physics` (slow speed), `Graphics`, `Collider` (contact trigger, `is_trigger=True`), `FuseTimer` (5s fuse). Carries `blast_radius` (randomized 80–150px per spawn), `fuse_proximity_radius` (200px — fuse triggers within this range of the player cursor), and `fuse_expired` flag (set by behavior_system, read by collision_system).
 - **LaserDrone (`enemies.py`):** The wizard tower. Contains `Transform` (static), `Graphics`, `AimingTimer` (controls telegraph state), `LifespanTimer` (15s duration). Carries `beam_width = 50.0` (100px total laser band).
+- **InquisitionMarksman (`enemies.py`):** The ranged advanced crusader. Contains `Transform`, `Physics` (`max_speed=110.0`, `mass=1.8`), `Graphics` (`sprite_ref="marksman"`, silver-blue tint), `Collider` (standard 1-to-1 radius, `is_trigger=False`), and `AimingTimer` (`charge_duration=3.0`, `fire_duration=0.1`). Carries `near_distance_sq` (pre-computed squared halt threshold of `180² = 32400`) and `is_halted` (bool, set by `behavior_system`).
 - **SoulPickup (`powerups.py`):** Dropped currency. Contains `Transform`, `Graphics`, `Collider`, `LifespanTimer`, `Value`.
+- **SolarGoldBolt (`projectiles.py`):** Linear projectile fired by the InquisitionMarksman. Contains `Transform`, `Physics` (`max_speed=600.0`, pre-set `velocity`), `Graphics` (solar-gold, scale `3.0×`), `Collider` (`is_trigger=True` — routes to 1-to-1 attrition in `collision_system`), `LifespanTimer` (3s, off-screen cleanup). Carries `projectile_type = 'solar_gold_bolt'`.
 
 ## 4. System Layer (`systems/`)
 
 Systems iterate over the entity pool every frame (60 FPS), targeting only entities possessing specific component signatures.
 
 - **Behavior System (`behavior_system.py`):** Reads mouse inputs, calculates Boids AI rules, and updates enemy telegraph timers.
+  - _Standard Enemy Tracking:_ Steers Grunt and Boomer entities toward the player cursor each frame. Marksmen are explicitly excluded from this generic loop.
+  - _Optimal-Distance AI (Marksman):_ Evaluates squared distance between each `InquisitionMarksman` and the cursor. If `dist_sq > near_distance_sq`, steers normally and resets the `AimingTimer`. If `dist_sq <= near_distance_sq`, zeroes velocity and acceleration completely (halt), then increments `AimingTimer.elapsed`.
+  - _Projectile Firing (Marksman):_ When `AimingTimer.elapsed >= charge_duration`, instantiates a `SolarGoldBolt` aimed at the cursor and appends it to the world entity list via `entities.extend(new_projectiles)`. Resets `AimingTimer` to begin the next cycle.
 - **Movement System (`movement_system.py`):** Iterates over `Transform` + `Physics` signatures to update spatial coordinates.
 - **Collision System (`collision_system.py`):** Evaluates squared distance overlaps between `Collider` components. Handles combat attrition and currency spawning.
 - **Particle System (`particle_system.py`):** Manages the `LifespanTimer` of visual effects and updates `Graphics.alpha` to fade objects.
@@ -73,6 +78,7 @@ Systems iterate over the entity pool every frame (60 FPS), targeting only entiti
   - At Level 8+, the `spawn_grunt` method loops multiple times, adding random coordinate offsets to create swarm clusters.
 - **Shop Trigger Logic:** Four milestone targets (`SHOP_MILESTONES = [75.0, 180.0, 330.0, 510.0]`) are tracked via a pointer in `main.py`. When `current_survival_time >= next_shop_milestone`, the loop enters `GameState.SHOP`.
 - **Grave Spawn Rate:** `resource_timer_threshold` in `main.py` is set to `3.0` for `threat_level < 6` and `5.0` for `threat_level >= 6`.
+- **InquisitionMarksman Spawn Rate:** `SpawnerSystem` introduces Marksmen at `threat_level >= 6` with a 20-second interval (`_get_marksman_spawn_rate`), reduced to 12 seconds at Level 10.
 - **Elite Laser Tracking:** `BehaviorSystem.update(entities, dt, threat_level)` performs Y-axis interpolation (`lerp` toward `target_pos.y`) for `laser_drone` entities during telegraphing when `threat_level >= 9`.
 
 ## 10. Victory State
