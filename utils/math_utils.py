@@ -33,3 +33,17 @@ def velocity_to_direction(vx: float, vy: float) -> str:
         return "south-east"
     else:
         return "east"
+
+def velocity_to_index(vx: float, vy: float) -> int:
+    """Maps a 2D velocity to a 0-7 index for 8-directional sprites (0=East, counter-clockwise)."""
+    if abs(vx) < 0.1 and abs(vy) < 0.1:
+        return 6  # South fallback
+    
+    # Pygame's Y axis goes down, negate vy
+    angle = math.degrees(math.atan2(-vy, vx))
+    if angle < 0:
+        angle += 360
+        
+    # 0-360 mapped to 0-7 index
+    return int((angle + 22.5) // 45) % 8
+

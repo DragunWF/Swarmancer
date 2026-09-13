@@ -31,7 +31,7 @@ class AssetLoader:
             menu_bg_img = pygame.image.load(menu_bg_path).convert()
             self._menu_background = pygame.transform.smoothscale(menu_bg_img, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
-        sprite_refs = ["skeleton", "skeleton_archer", "grunt", "dwarf_sapper", "sun_wizard"]
+        sprite_refs = ["skeleton", "skeleton_archer", "grunt", "dwarf_sapper", "sun_wizard", "marksman"]
         directions = ["east", "north-east", "north", "north-west", 
                       "west", "south-west", "south", "south-east"]
         

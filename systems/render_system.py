@@ -2,7 +2,7 @@ from systems.system import System
 import pygame
 import math
 from utils.asset_loader import AssetLoader
-from utils.math_utils import velocity_to_direction
+from utils.math_utils import velocity_to_direction, velocity_to_index
 from ui.ui_utils import draw_text_with_outline
 
 class RenderSystem(System):
@@ -45,7 +45,12 @@ class RenderSystem(System):
                     if hasattr(entity, 'physics'):
                         vx = entity.physics.velocity.x
                         vy = entity.physics.velocity.y
-                        direction = velocity_to_direction(vx, vy)
+                        if gfx.sprite_ref == "marksman":
+                            idx = velocity_to_index(vx, vy)
+                            directions = ["east", "north-east", "north", "north-west", "west", "south-west", "south", "south-east"]
+                            direction = directions[idx]
+                        else:
+                            direction = velocity_to_direction(vx, vy)
                     else:
                         direction = "south"
                     
