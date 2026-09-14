@@ -34,9 +34,11 @@ _COL_PURCH_LABEL    = (100, 100, 100)
 _COL_TOOLTIP_BG     = (20, 12, 35, 230)
 _COL_TOOLTIP_BORDER = (160, 100, 255)
 _COL_TOOLTIP_TEXT   = (230, 220, 255)
-_COL_CONTINUE_IDLE  = (40, 25, 60)
-_COL_CONTINUE_HOVER = (70, 45, 100)
-_COL_CONTINUE_BORDER= (180, 130, 255)
+_COL_CONTINUE_IDLE  = (28, 28, 28)
+_COL_CONTINUE_BORDER_IDLE = (230, 230, 230)
+_COL_CONTINUE_BORDER_HOVER = (255, 215, 0)
+_COL_CONTINUE_TEXT_IDLE = (230, 230, 230)
+_COL_CONTINUE_TEXT_HOVER = (255, 215, 0)
 _COL_WHITE          = (255, 255, 255)
 
 # Pip indicator colors (multi-tier upgrade progress markers)
@@ -236,7 +238,7 @@ class ShopController:
 
         # Title — show "Dormant" only when every upgrade is at max level
         has_any_available = any(u["current_level"] < u["max_level"] for u in self.available_upgrades)
-        title_str = "The Dark Altar" if has_any_available else "The Dark Altar is Dormant"
+        title_str = "Upgrade Shop" if has_any_available else "Upgrade Shop is Dormant"
         title_surf = self.font_title.render(title_str, True, _COL_TITLE)
         screen.blit(title_surf, (self.screen_width // 2 - title_surf.get_width() // 2, 40))
 
@@ -258,6 +260,14 @@ class ShopController:
 
         # Always-visible Continue button
         self._draw_continue_button(screen, mouse_pos)
+
+        # Pause hint
+        hint_surf = self.font_small.render("Press [P] to Pause during combat", True, _COL_WHITE)
+        shadow_surf = self.font_small.render("Press [P] to Pause during combat", True, (0, 0, 0))
+        hint_x = self._continue_rect.left - hint_surf.get_width() - 20
+        hint_y = self._continue_rect.centery - hint_surf.get_height() // 2
+        screen.blit(shadow_surf, (hint_x + 1, hint_y + 1))
+        screen.blit(hint_surf, (hint_x, hint_y))
 
         # Floating tooltip (drawn last so it sits on top)
         if hovered_upgrade is not None:
@@ -372,13 +382,14 @@ class ShopController:
 
     def _draw_continue_button(self, screen: pygame.Surface, mouse_pos: tuple[int, int]) -> None:
         hovering = self._continue_rect.collidepoint(mouse_pos)
-        fill   = _COL_CONTINUE_HOVER if hovering else _COL_CONTINUE_IDLE
-        border = _COL_CONTINUE_BORDER
+        fill   = _COL_CONTINUE_IDLE
+        border = _COL_CONTINUE_BORDER_HOVER if hovering else _COL_CONTINUE_BORDER_IDLE
 
         pygame.draw.rect(screen, fill,   self._continue_rect, border_radius=6)
         pygame.draw.rect(screen, border, self._continue_rect, width=2, border_radius=6)
 
-        label = self.font_name.render("Continue", True, _COL_WHITE)
+        text_color = _COL_CONTINUE_TEXT_HOVER if hovering else _COL_CONTINUE_TEXT_IDLE
+        label = self.font_name.render("[ Continue ]", True, text_color)
         screen.blit(label, (
             self._continue_rect.centerx - label.get_width()  // 2,
             self._continue_rect.centery - label.get_height() // 2,
@@ -482,9 +493,7 @@ class ShopController:
         grid_w = cols * _CARD_W + (cols - 1) * _CARD_PAD
         grid_h = rows * _CARD_H + (rows - 1) * _CARD_ROW_PAD
 
-        # Vertically centre the grid with room for title (≈130px) and
-        # the Continue button below (≈70px).
-        grid_top  = max(130, (self.screen_height - grid_h - 70) // 2)
+        grid_top  = max(130, (self.screen_height - grid_h) // 2 - 20)
         grid_left = (self.screen_width - grid_w) // 2
 
         self._card_rects = []
@@ -495,10 +504,11 @@ class ShopController:
             y = grid_top  + row * (_CARD_H + _CARD_ROW_PAD)
             self._card_rects.append(pygame.Rect(x, y, _CARD_W, _CARD_H))
 
-        # Continue button centred below the grid, clamped to bottom of screen
-        btn_y = min(grid_top + grid_h + 18, self.screen_height - 60)
+        # Continue button top right
+        btn_w = 140
+        btn_h = 40
         self._continue_rect = pygame.Rect(
-            self.screen_width // 2 - 110,
-            btn_y,
-            220, 50
+            self.screen_width - btn_w - 20,
+            20,
+            btn_w, btn_h
         )

@@ -392,7 +392,7 @@ async def main():
                 if not shop_warning_shown and current_survival_time >= target_time - 3.0:
                     shop_warning_shown = True
                     from entities.particles import FloatingText
-                    warning_text = FloatingText(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 4, "The Dark Altar Approaches...", color=(255, 100, 100), duration=2.5)
+                    warning_text = FloatingText(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 4, "The Upgrade Shop will open in a few seconds...", color=(255, 100, 100), duration=2.5)
                     entities.append(warning_text)
                     
                 if current_survival_time >= target_time:
