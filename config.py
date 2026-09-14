@@ -24,9 +24,9 @@ DEBUG_OPEN_WIN_SCREEN_AT_START = False
 # A list of upgrades the player spawns with (Default: []).
 # Supported values:
 #   - "skeletal_archers"
-#   - "grave_robbers_yield"
+#   - "grave_robbers_yield"   (can be listed multiple times, up to 3x, for tiers 1–3)
 #   - "evasion_mastery"
-#   - "bone_shrapnel"
+#   - "spectral_agility"
 #   - "necrotic_momentum"
 #   - "plague_wizard"
 # Example: DEBUG_START_UPGRADES = ["skeletal_archers", "necrotic_momentum"]
