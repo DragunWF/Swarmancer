@@ -81,7 +81,7 @@ The game operates on a non-linear 10-stage difficulty arc designed to compress t
 | 9 | 7:00 | Elite tracking on LaserDrones | - |
 | 10 | 8:30 | All spawn rates maximized | YES |
 
-- **Automatic Shop Intervals:** The Dark Altar shop triggers precisely at 75s, 180s, 330s, and 510s.
+- **Automatic Shop Intervals:** The Upgrade Shop triggers precisely at 75s, 180s, 330s, and 510s.
 - **Resource Starvation:** The time between glowing grave spawns increases from 3 seconds to 5 seconds at Level 6.
 - **Velocity Scaling (Level 7+):** Newly spawned Grunts have their Physics `max_speed` significantly elevated.
 - **Cluster Spawning (Level 8+):** Grunts spawn in groups of 3-5 simultaneously at a single edge location.

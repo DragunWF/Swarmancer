@@ -114,12 +114,12 @@ Establish the underlying hybrid Entity-Component-System (ECS) engine and spatial
 
 The player can access a mid-run or end-of-run shop system to mutate the swarm, spending collected resources to unlock specialized units and stat enhancements.
 
-## Feature 1: The Dark Altar (Shop UI)
+## Feature 1: Upgrade Shop (Shop UI)
 
 - The game pauses and overlays a shop interface at designated survival intervals.
 - The UI displays current currency (e.g., Souls) and renders all available upgrades simultaneously in a persistent grid layout.
 - The player can purchase multiple upgrades during a single shop phase as long as they have sufficient Souls.
-- The shop remains open until the player explicitly clicks a "Continue" button.
+- The shop remains open until the player explicitly clicks a "Continue" button anchored to the top-right of the header. A subtle hint ("Press [P] to Pause during combat") is positioned directly adjacent to this button. The grid has been shifted up slightly to utilize screen real-estate freed from the bottom.
 - **Tiered Upgrade Schema:** Each upgrade entry carries a `current_level` (default 0) and `max_level` integer. Purchased upgrades are not removed from the pool; they are re-purchaseable until `current_level == max_level`, at which point they are grayed out with a `"MAX LEVEL"` label and their click interaction is disabled.
 - **Tier-Suffix Naming Convention:** Card and tooltip names dynamically append a Roman numeral suffix to indicate the next tier (e.g., "Grave Robber's Yield", "Grave Robber's Yield II", "Grave Robber's Yield III"). Single-purchase upgrades (`max_level=1`) never display a suffix.
 - The authoritative tiered state is stored in `upgrade_levels: dict[int, int]` in `main.py` and synced into `ShopController` via `sync_levels()` on every shop open and every purchase.
@@ -158,7 +158,7 @@ The player can access a mid-run or end-of-run shop system to mutate the swarm, s
 - **As a player**, I want to purchase Necrotic Momentum, **so that** my swarm's absolute top speed increases, allowing them to outrun Grunt hordes and cross the arena faster.
 - **As a player**, I want to purchase Plague Wizard, **so that** a subset of my minions fire toxic projectiles that explode on impact, destroying clusters of enemies simultaneously.
 - **As a player**, I want upgrade items to be grayed out with a "MAX LEVEL" label after I purchase all tiers, **so that** I can see my build history and am prevented from spending Souls on an already-maxed upgrade.
-- **As a player**, I want the shop to display a "The Dark Altar is Dormant" message with a continue button when all upgrades are at max level, **so that** the shop phase resolves smoothly when the pool is exhausted.
+- **As a player**, I want the shop to display a "Upgrade Shop is Dormant" message with a continue button when all upgrades are at max level, **so that** the shop phase resolves smoothly when the pool is exhausted.
 
 # Epic 5: User Interface & Game State Management
 
@@ -276,7 +276,7 @@ The game presents a structured 10-minute survival arc, where a global Threat Lev
 
 ## Feature 2: Staggered Shop Intervals
 
-- The Dark Altar shop UI automatically triggers at the exact start times of Threat Levels 4 (1:15), 6 (3:00), 8 (5:30), and 10 (8:30).
+- The Upgrade Shop UI automatically triggers at the exact start times of Threat Levels 4 (1:15), 6 (3:00), 8 (5:30), and 10 (8:30).
 - Level 6 specifically begins resource starvation by throttling the spawn rate of glowing graves.
 - The shop trigger safely pauses the ECS physics loop and awards the passive Soul stipend.
 
