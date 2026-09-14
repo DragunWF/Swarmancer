@@ -228,7 +228,7 @@ The player navigates through distinct game states (Menu, Gameplay, Settings) bef
 - **Advanced Rendering:** HUD elements use 1px outlines and drop shadows for high contrast against the background.
 - **Diegetic Floating Text:** Collecting currency drops spawns a "+[amount]" text entity that floats upward and fades out.
 - **Danger Vignette:** A faint red pulsing vignette appears at the screen edges when the swarm count drops below 15.
-- **Minimalist Action Bar:** A sleek horizontal progress bar anchored at the bottom-center. It tracks the Scatter ability cooldown with a horizontal liquid fill, pulsing when ready. It is positioned directly beneath dynamic text hints (`[LMB] Condense  |  Scatter [RMB]`) that snap to full brightness when the cooldown completes.
+- **Minimalist Action Bar:** A sleek horizontal progress bar anchored at the bottom-center. It tracks the Scatter ability cooldown with a horizontal liquid fill, pulsing when ready. It is positioned directly beneath dynamic text hints (`[LMB] Condense  |  Scatter [RMB]`) that snap to full brightness when the cooldown completes. A static "Press [P] to Pause" hint is anchored directly above the ability hints, pre-rendered with a drop shadow for performance.
 
 ## Feature 6: Event-Driven Background Music Playlist
 
