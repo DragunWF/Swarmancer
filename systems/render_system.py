@@ -110,9 +110,8 @@ class RenderSystem(System):
 
             if hasattr(entity, 'fuse_timer') and entity.fuse_timer.elapsed > 0:
                 time_left = max(0.0, entity.fuse_timer.duration - entity.fuse_timer.elapsed)
-                text_surf = self.font.render(f"{time_left:.1f}s", True, (255, 150, 50))
-                text_rect = text_surf.get_rect(center=(pos[0], pos[1] - int(entity.graphics.scale) - 15))
-                screen.blit(text_surf, text_rect)
+                center_pos = (pos[0], pos[1] - int(entity.graphics.scale) - 15)
+                draw_text_with_outline(screen, f"{time_left:.1f}s", self.font, (255, 150, 50), center_pos)
 
         # --- LaserDrone Telegraph & Beam ---
         for entity in entities:
@@ -143,6 +142,5 @@ class RenderSystem(System):
 
             if hasattr(entity, 'lifespan_timer'):
                 time_left = max(0.0, entity.lifespan_timer.duration - entity.lifespan_timer.elapsed)
-                text_surf = self.font.render(f"{time_left:.1f}s", True, (200, 200, 200))
-                text_rect = text_surf.get_rect(center=(int(entity.transform.x), drone_y - int(entity.graphics.scale) - 15))
-                screen.blit(text_surf, text_rect)
+                center_pos = (int(entity.transform.x), drone_y - int(entity.graphics.scale) - 15)
+                draw_text_with_outline(screen, f"{time_left:.1f}s", self.font, (255, 255, 255), center_pos)
