@@ -16,6 +16,11 @@ class HUDController:
             pygame.draw.rect(self.vignette_surface, (255, 0, 0, alpha), 
                              (i, i, screen_width - 2*i, screen_height - 2*i), 2)
                              
+        # Pre-render pause hint
+        self.pause_font = pygame.font.SysFont(None, 24)
+        self.pause_text_surf = self.pause_font.render("Press [P] to Pause", True, (232, 232, 232))
+        self.pause_text_shadow = self.pause_font.render("Press [P] to Pause", True, (0, 0, 0))
+                             
     def draw(self, screen, player, swarm_count, current_survival_time, threat_level):
         # 1. Danger Vignette (Pulse if swarm < 15)
         if swarm_count < 15:
@@ -97,3 +102,10 @@ class HUDController:
         # 4. Text Hints above the bar
         text_color = (232, 232, 232) if progress >= 1.0 else (100, 100, 100)
         draw_text_with_outline(screen, "[LMB] Condense  |  Scatter [RMB]", self.hud_font, text_color, (x_center, y_center - 20))
+        
+        # 5. Pause Hint (above the ability text)
+        pause_x = x_center - self.pause_text_surf.get_width() // 2
+        pause_y = y_center - 55 - self.pause_text_surf.get_height() // 2
+        
+        screen.blit(self.pause_text_shadow, (pause_x + 2, pause_y + 2))
+        screen.blit(self.pause_text_surf, (pause_x, pause_y))
