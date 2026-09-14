@@ -75,6 +75,10 @@ async def main():
     next_shop_milestone_index = 0  # Pointer into SHOP_MILESTONES
     victory_souls = 0              # Captured at the moment of victory for display
     shop_warning_shown = False     # Tracks if the pre-shop warning has been shown
+
+    # Tiered upgrade state — maps upgrade_id -> current_level purchased this run.
+    # This is the single source of truth; ShopController reads from this via sync_levels().
+    upgrade_levels: dict = {}
     
     # External closures needed for systems
     def on_resource_collected(resource):
@@ -149,10 +153,10 @@ async def main():
     def reset_game():
         nonlocal player, resource_timer, shop_timer, current_survival_time, current_boid_max_speed
         nonlocal current_threat_level, next_shop_milestone_index, victory_souls, shop_warning_shown
-        nonlocal current_track_index, dying_start_ticks
+        nonlocal current_track_index, dying_start_ticks, upgrade_levels
         entities.clear()
         dying_start_ticks = 0
-        
+
         if PLAYLIST:
             current_track_index = 0
             try:
@@ -168,42 +172,43 @@ async def main():
         entities.append(player)
 
         current_boid_max_speed = 350.0
-        Resource.yield_amount = 3
-        # Rebuild available_upgrades with is_purchased flags reset to False.
-        # We never remove items mid-run; purchases are tracked via the flag.
-        shop_controller.available_upgrades = [
-            {**upg, "is_purchased": False} for upg in shop_controller.all_upgrades
-        ]
-        shop_controller._compute_layout()
-        
+        Resource.yield_amount = 3  # Base yield; increases with Grave Robber's Yield tiers
+
+        # Reset the authoritative tiered upgrade state and mirror it into the shop.
+        upgrade_levels = {}
+        shop_controller.reset_levels()
+
         current_threat_level = DEBUG_START_THREAT_LEVEL
         if current_threat_level > 1:
             offset_idx = min(current_threat_level - 2, len(THREAT_THRESHOLDS) - 1)
             current_survival_time = THREAT_THRESHOLDS[offset_idx]
         else:
             current_survival_time = 0.0
-            
+
         next_shop_milestone_index = 0
         shop_warning_shown = False
         while next_shop_milestone_index < len(SHOP_MILESTONES) and current_survival_time >= SHOP_MILESTONES[next_shop_milestone_index]:
             next_shop_milestone_index += 1
-            
+
         victory_souls = 0
 
         for _ in range(DEBUG_START_SWARM_COUNT):
             boid = Boid(player_x + random.uniform(-60, 60), player_y + random.uniform(-60, 60), max_speed=current_boid_max_speed)
             entities.append(boid)
-            
-        upgrade_map = {
+
+        # Yield table: Grave Robber's Yield tier -> total Resource.yield_amount
+        _yield_table = {1: 5, 2: 7, 3: 10}
+
+        debug_upgrade_map = {
             "skeletal_archers": 0,
             "grave_robbers_yield": 1,
             "evasion_mastery": 2,
-            "bone_shrapnel": 3,
+            "spectral_agility": 3,
             "necrotic_momentum": 4,
-            "plague_wizard": 5
+            "plague_wizard": 5,
         }
         for upgrade_name in DEBUG_START_UPGRADES:
-            upgrade_id = upgrade_map.get(upgrade_name)
+            upgrade_id = debug_upgrade_map.get(upgrade_name)
             if upgrade_id is not None:
                 if upgrade_id == 0:
                     player.state.has_skeletal_archers = True
@@ -214,11 +219,14 @@ async def main():
                             b.ranged_attack = RangedAttack(fire_rate=1.0, attack_range=150.0, projectile_speed=300.0)
                             b.graphics.sprite_ref = "skeleton_archer"
                 elif upgrade_id == 1:
-                    Resource.yield_amount += 1
+                    new_level = upgrade_levels.get(1, 0) + 1
+                    upgrade_levels[1] = new_level
+                    Resource.yield_amount = _yield_table.get(new_level, Resource.yield_amount)
+                    player.state.grave_robbers_yield_level = new_level
                 elif upgrade_id == 2:
                     player.scatter_timer.cooldown_duration = max(1.0, player.scatter_timer.cooldown_duration - 0.5)
                 elif upgrade_id == 3:
-                    setattr(player.state, 'has_bone_shrapnel', True)
+                    behavior_system.apply_spectral_agility()
                 elif upgrade_id == 4:
                     current_boid_max_speed += 50.0
                     for b in [e for e in entities if isinstance(e, Boid)]:
@@ -230,8 +238,13 @@ async def main():
                     if upgrade_count > 0:
                         for b in random.sample(boids, upgrade_count):
                             b.plague_caster = PlagueCaster(cooldown=3.0, blast_radius=80.0, attack_range=150.0, projectile_speed=300.0)
-                            b.graphics.color = (0, 255, 150) # Tinge them green
-                player.state.purchased_upgrade_ids.add(upgrade_id)
+                            b.graphics.color = (0, 255, 150)  # Tinge them green
+                # For debug upgrades other than Grave Robber's Yield, record as level 1.
+                if upgrade_id != 1:
+                    upgrade_levels[upgrade_id] = upgrade_levels.get(upgrade_id, 0) + 1
+
+        # Sync the debug-applied levels into the shop so cards reflect them correctly.
+        shop_controller.sync_levels(upgrade_levels)
 
         resource_timer = 0.0
         shop_timer = 0.0
@@ -268,13 +281,13 @@ async def main():
                     reset_game()
                     if DEBUG_OPEN_SHOP_AT_START:
                         current_state = GameState.SHOP
-                        shop_controller.refresh_upgrades(player.state.purchased_upgrade_ids)
+                        shop_controller.sync_levels(upgrade_levels)
                     else:
                         current_state = GameState.PLAYING
                 elif action == "MAIN_MENU":
                     current_state = GameState.MENU
                     if PLAYLIST: pygame.mixer.music.stop()
-                    
+
             elif current_state == GameState.SHOP:
                 selected_upgrade = shop_controller.handle_event(event)
                 if selected_upgrade == "CONTINUE":
@@ -282,53 +295,63 @@ async def main():
                     current_state = GameState.PLAYING
                 elif selected_upgrade is not None:
                     upgrade_data = next((u for u in shop_controller.all_upgrades if u["id"] == selected_upgrade), None)
-                    if upgrade_data and player.souls >= upgrade_data["cost"]:
-                        AssetLoader().play_sound("ui_click")
-                        player.souls -= upgrade_data["cost"]
-                        
-                        if selected_upgrade == 0:
-                            # Apply Archer Upgrade
-                            player.state.has_skeletal_archers = True
-                            boids = [e for e in entities if isinstance(e, Boid) and not hasattr(e, 'ranged_attack')]
-                            upgrade_count = min(10, len(boids))
-                            if upgrade_count > 0:
-                                for b in random.sample(boids, upgrade_count):
-                                    b.ranged_attack = RangedAttack(fire_rate=1.0, attack_range=150.0, projectile_speed=300.0)
-                                    b.graphics.sprite_ref = "skeleton_archer"
-                        elif selected_upgrade == 1:
-                            # Grave Robber's Yield
-                            Resource.yield_amount += 1
-                        elif selected_upgrade == 2:
-                            # Evasion Mastery
-                            player.scatter_timer.cooldown_duration = max(1.0, player.scatter_timer.cooldown_duration - 0.5)
-                        elif selected_upgrade == 3:
-                            # Bone Shrapnel
-                            setattr(player.state, 'has_bone_shrapnel', True)
-                        elif selected_upgrade == 4:
-                            # Necrotic Momentum
-                            current_boid_max_speed += 50.0
-                            for b in [e for e in entities if isinstance(e, Boid)]:
-                                b.physics.max_speed = current_boid_max_speed
-                        elif selected_upgrade == 5:
-                            # Plague Wizard
-                            player.state.has_plague_wizard = True
-                            boids = [e for e in entities if isinstance(e, Boid) and not hasattr(e, 'plague_caster') and not hasattr(e, 'ranged_attack')]
-                            upgrade_count = min(10, len(boids))
-                            if upgrade_count > 0:
-                                for b in random.sample(boids, upgrade_count):
-                                    b.plague_caster = PlagueCaster(cooldown=3.0, blast_radius=80.0, attack_range=150.0, projectile_speed=300.0)
-                                    b.graphics.sprite_ref = "plague_wizard"
-                                
-                        # Flag the upgrade as purchased (gray-out) instead of
-                        # removing it.  The shop remains open for further purchases.
-                        player.state.purchased_upgrade_ids.add(selected_upgrade)
-                        for upg in shop_controller.available_upgrades:
-                            if upg["id"] == selected_upgrade:
-                                upg["is_purchased"] = True
-                                break
-                    elif upgrade_data:
-                        AssetLoader().play_sound("ui_error")
-                        print("Not enough souls!")
+                    if upgrade_data is not None:
+                        # Determine the cost for the specific tier being purchased.
+                        current_lvl = upgrade_levels.get(selected_upgrade, 0)
+                        if "costs" in upgrade_data:
+                            tier_cost = upgrade_data["costs"][current_lvl]
+                        else:
+                            tier_cost = upgrade_data["cost"]
+
+                        if player.souls >= tier_cost:
+                            AssetLoader().play_sound("ui_click")
+                            player.souls -= tier_cost
+
+                            # Advance the tiered level in the authoritative state dict.
+                            new_level = current_lvl + 1
+                            upgrade_levels[selected_upgrade] = new_level
+
+                            if selected_upgrade == 0:
+                                # Skeletal Archers
+                                player.state.has_skeletal_archers = True
+                                boids = [e for e in entities if isinstance(e, Boid) and not hasattr(e, 'ranged_attack')]
+                                upgrade_count = min(10, len(boids))
+                                if upgrade_count > 0:
+                                    for b in random.sample(boids, upgrade_count):
+                                        b.ranged_attack = RangedAttack(fire_rate=1.0, attack_range=150.0, projectile_speed=300.0)
+                                        b.graphics.sprite_ref = "skeleton_archer"
+                            elif selected_upgrade == 1:
+                                # Grave Robber's Yield — apply yield from tier table
+                                _yield_table = {1: 5, 2: 7, 3: 10}
+                                Resource.yield_amount = _yield_table.get(new_level, Resource.yield_amount)
+                                player.state.grave_robbers_yield_level = new_level
+                            elif selected_upgrade == 2:
+                                # Evasion Mastery
+                                player.scatter_timer.cooldown_duration = max(1.0, player.scatter_timer.cooldown_duration - 0.5)
+                            elif selected_upgrade == 3:
+                                # Spectral Agility — boost BehaviorSystem steering force
+                                behavior_system.apply_spectral_agility()
+                            elif selected_upgrade == 4:
+                                # Necrotic Momentum
+                                current_boid_max_speed += 50.0
+                                for b in [e for e in entities if isinstance(e, Boid)]:
+                                    b.physics.max_speed = current_boid_max_speed
+                            elif selected_upgrade == 5:
+                                # Plague Wizard
+                                player.state.has_plague_wizard = True
+                                boids = [e for e in entities if isinstance(e, Boid) and not hasattr(e, 'plague_caster') and not hasattr(e, 'ranged_attack')]
+                                upgrade_count = min(10, len(boids))
+                                if upgrade_count > 0:
+                                    for b in random.sample(boids, upgrade_count):
+                                        b.plague_caster = PlagueCaster(cooldown=3.0, blast_radius=80.0, attack_range=150.0, projectile_speed=300.0)
+                                        b.graphics.sprite_ref = "plague_wizard"
+
+                            # Push updated levels into the shop controller so cards
+                            # immediately reflect the new tier state.
+                            shop_controller.sync_levels(upgrade_levels)
+                        else:
+                            AssetLoader().play_sound("ui_error")
+                            print("Not enough souls!")
                             
             elif current_state == GameState.PAUSED:
                 action = pause_controller.handle_event(event)
@@ -376,9 +399,9 @@ async def main():
                     next_shop_milestone_index += 1
                     shop_warning_shown = False
                     current_state = GameState.SHOP
-                    # Reset is_purchased flags for upgrades still in the pool
-                    # so each visit starts with the correct persistent visual state.
-                    shop_controller.refresh_upgrades(player.state.purchased_upgrade_ids)
+                    # Sync the shop cards with the authoritative upgrade_levels so
+                    # each visit correctly reflects all tiers purchased this run.
+                    shop_controller.sync_levels(upgrade_levels)
                     shop_timer = 0.0
                     player.souls += 20  # Passive stipend as per Functional Spec
 

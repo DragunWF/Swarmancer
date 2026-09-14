@@ -17,7 +17,17 @@ class BehaviorSystem(System):
         self.perception_radius = 55.0
         self.separation_radius = 22.0
         self.arrival_radius = 65.0
+        self.base_max_force = 1200.0
         self.max_force = 1200.0
+
+    def apply_spectral_agility(self) -> None:
+        """Apply the Spectral Agility upgrade, increasing boid steering force.
+
+        This raises the max_force clamp on all steering calculations, making the
+        swarm snap to the cursor and condense much faster without changing
+        max_speed (Necrotic Momentum's domain). Called once by main.py on purchase.
+        """
+        self.max_force += 400.0
 
     def update(self, entities, dt, threat_level=1):
         player = None

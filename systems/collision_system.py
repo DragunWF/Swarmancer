@@ -27,9 +27,8 @@ class CollisionSystem:
         enemies = [e for e in entities if getattr(e, 'is_enemy', False) and hasattr(e, 'collider')]
         projectiles = [e for e in entities if e.__class__.__name__ in ('Projectile', 'PlagueBomb')]
         player = next((e for e in entities if getattr(e, 'is_player', False)), None)
-        has_bone_shrapnel = player and getattr(player.state, 'has_bone_shrapnel', False)
 
-        
+
         # 150.0 covers max Boomer blast radius
         spatial_hash = SpatialHash(150.0)
         for boid in boids:
@@ -99,27 +98,7 @@ class CollisionSystem:
                     if self.on_particle_spawned:
                         self.on_particle_spawned("skeleton_shatter", boid.transform.x, boid.transform.y)
                         self.on_particle_spawned("vanguard_pop", enemy.transform.x, enemy.transform.y)
-                    
-                    # Bone Shrapnel: Secondary micro-collision damage check
-                    if has_bone_shrapnel:
-                        shrapnel_radius = 50.0
-                        for other_enemy in enemies:
-                            if other_enemy == enemy or getattr(other_enemy, 'marked_for_deletion', False):
-                                continue
-                            # Ensure it's a Grunt (not a Boomer or LaserDrone)
-                            if getattr(other_enemy, 'collider', None) and other_enemy.collider.is_trigger:
-                                continue
-                            dx_shrapnel = enemy.transform.x - other_enemy.transform.x
-                            dy_shrapnel = enemy.transform.y - other_enemy.transform.y
-                            dist_shrapnel_sq = dx_shrapnel * dx_shrapnel + dy_shrapnel * dy_shrapnel
-                            if dist_shrapnel_sq < shrapnel_radius * shrapnel_radius:
-                                other_enemy.marked_for_deletion = True
-                                self._try_drop_soul(other_enemy.transform.x, other_enemy.transform.y)
-                                AssetLoader().play_sound("skeleton_pop")
-                                if self.on_particle_spawned:
-                                    self.on_particle_spawned("vanguard_pop", other_enemy.transform.x, other_enemy.transform.y)
-                            
-                    break # One enemy pops exactly one boid
+                    break  # One enemy pops exactly one boid
 
         # --- Projectile Hit Detection ---
         for proj in projectiles:
