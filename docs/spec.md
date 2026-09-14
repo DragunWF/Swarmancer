@@ -120,8 +120,10 @@ The player can access a mid-run or end-of-run shop system to mutate the swarm, s
 - The UI displays current currency (e.g., Souls) and renders all available upgrades simultaneously in a persistent grid layout.
 - The player can purchase multiple upgrades during a single shop phase as long as they have sufficient Souls.
 - The shop remains open until the player explicitly clicks a "Continue" button.
-- Purchased upgrades are tracked by a persistent global state (`PlayerState.purchased_upgrade_ids`), and they are flagged and persistently rendered on the grid with a grayed-out tint and disabled interactions, instead of being removed from the pool, so the player can track what they have acquired.
-- Hovering the mouse over an upgrade's bounding box dynamically renders a floating tooltip containing its specific description and cost.
+- **Tiered Upgrade Schema:** Each upgrade entry carries a `current_level` (default 0) and `max_level` integer. Purchased upgrades are not removed from the pool; they are re-purchaseable until `current_level == max_level`, at which point they are grayed out with a `"MAX LEVEL"` label and their click interaction is disabled.
+- **Tier-Suffix Naming Convention:** Card and tooltip names dynamically append a Roman numeral suffix to indicate the next tier (e.g., "Grave Robber's Yield", "Grave Robber's Yield II", "Grave Robber's Yield III"). Single-purchase upgrades (`max_level=1`) never display a suffix.
+- The authoritative tiered state is stored in `upgrade_levels: dict[int, int]` in `main.py` and synced into `ShopController` via `sync_levels()` on every shop open and every purchase.
+- Hovering the mouse over an upgrade's bounding box dynamically renders a floating tooltip containing its specific description, next-tier name, and cost.
 
 ## Feature 2: Specialized Swarm Units
 
@@ -142,7 +144,7 @@ The player can access a mid-run or end-of-run shop system to mutate the swarm, s
 - **As a player**, I want to spend my accumulated resources at a shop interface, **so that** I can purchase permanent upgrades that help me survive longer.
 - **As a player**, I want to see all available upgrades in a grid layout, **so that** I can plan my build progression across the entire pool rather than relying on randomized draws.
 - **As a player**, I want to purchase multiple upgrades in a single shop phase, **so that** I can spend accumulated Souls efficiently in one visit.
-- **As a player**, I want purchased upgrades to remain visible but grayed out on the grid, **so that** I can easily track what I have already acquired during the run.
+- **As a player**, I want purchased upgrades to remain visible but grayed out on the grid when at max level, **so that** I can easily track what I have already acquired during the run.
 - **As a player**, I want a "Continue" button to manually exit the shop, **so that** I control when to return to the combat phase.
 - **As a player**, I want to see a tooltip when hovering over an upgrade, **so that** I understand its effects and cost before spending my Souls.
 - **As a player**, I want to purchase Skeletal Archers that fire projectiles automatically, **so that** my swarm can deal damage without risking direct 1-to-1 collision attrition.
@@ -150,13 +152,13 @@ The player can access a mid-run or end-of-run shop system to mutate the swarm, s
 - **As a player**, I want destroyed enemies to drop temporary Souls, **so that** I am incentivized to maneuver my swarm aggressively into combat zones.
 - **As a player**, I want to receive passive currency the longer I survive, **so that** evasion and longevity are intrinsically rewarded.
 - **As a player**, I want to collect rare Cursed Chalices for massive wealth, **so that** I have to weigh the risk of breaking formation to chase high-value loot.
-- **As a player**, I want to purchase Grave Robber's Yield, **so that** I receive more minions every time I consume an open glowing grave.
+- **As a player**, I want to purchase Grave Robber's Yield across 3 tiers (5 / 7 / 10 minions per grave), **so that** I can progressively amplify my swarm replenishment output across multiple shop phases.
 - **As a player**, I want to purchase Evasion Mastery, **so that** the cooldown on my scatter evasion is reduced, allowing me to dodge Laser Drone beams more frequently.
-- **As a player**, I want to purchase Bone Shrapnel, **so that** my minions deal secondary area damage when they pop against charging peasant militia.
-- **As a player**, I want to purchase Necrotic Momentum, **so that** my swarm's maximum speed increases, letting them condense into a tight ball much faster.
+- **As a player**, I want to purchase Spectral Agility, **so that** my swarm's steering force increases, making them snap to my cursor and condense significantly faster for precision dodging.
+- **As a player**, I want to purchase Necrotic Momentum, **so that** my swarm's absolute top speed increases, allowing them to outrun Grunt hordes and cross the arena faster.
 - **As a player**, I want to purchase Plague Wizard, **so that** a subset of my minions fire toxic projectiles that explode on impact, destroying clusters of enemies simultaneously.
-- **As a player**, I want upgrade items to be grayed out after I purchase them, **so that** I can see my build history and am prevented from re-purchasing the same upgrade.
-- **As a player**, I want the shop to display a "The Dark Altar is Dormant" message with a continue button when all upgrades are purchased, **so that** the shop phase resolves smoothly when the pool is empty.
+- **As a player**, I want upgrade items to be grayed out with a "MAX LEVEL" label after I purchase all tiers, **so that** I can see my build history and am prevented from spending Souls on an already-maxed upgrade.
+- **As a player**, I want the shop to display a "The Dark Altar is Dormant" message with a continue button when all upgrades are at max level, **so that** the shop phase resolves smoothly when the pool is exhausted.
 
 # Epic 5: User Interface & Game State Management
 
@@ -307,7 +309,7 @@ The game includes a centralized configuration file (`config.py`) to streamline p
 - `DEBUG_START_THREAT_LEVEL`: Overrides the initial threat level (Default: 1, Max: 10). Modifying this instantly triggers higher-tier enemies at launch.
 - `DEBUG_START_SOULS`: Overrides the starting currency (Default: 0).
 - `DEBUG_START_SWARM_COUNT`: Overrides the initial size of the player's swarm (Default: 50).
-- `DEBUG_START_UPGRADES`: A list of upgrades the player spawns with (Default: []). Supported values: "skeletal_archers", "grave_robbers_yield", "evasion_mastery", "bone_shrapnel", "necrotic_momentum", "plague_wizard".
+- `DEBUG_START_UPGRADES`: A list of upgrades the player spawns with (Default: []). Supported values: `"skeletal_archers"`, `"grave_robbers_yield"` (repeatable up to 3×), `"evasion_mastery"`, `"spectral_agility"`, `"necrotic_momentum"`, `"plague_wizard"`.
 
 ## Feature 2: Initialization Logic
 

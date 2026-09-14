@@ -55,16 +55,14 @@
 - **Acquisition - Combat Drops:** Destroying enemies has a chance to drop a temporary Soul pickup. The player must physically maneuver the swarm to collect it before it fades.
 - **Acquisition - Survival Milestones:** Players receive a passive Soul stipend for every 30 seconds they remain alive, encouraging evasion and longevity.
 - **Acquisition - Rare Pickups:** High-value powerups spawn occasionally across the map. Unlike glowing graves that replenish the swarm, these specific pickups grant a massive boost to shop currency.
-- **Upgrade - Grave Robber's Yield:** Consuming an open glowing grave grants an increased number of new soldiers per upgrade tier.
+- **Upgrade - Grave Robber's Yield (3 Tiers):** Consuming an open glowing grave grants an increased number of new soldiers per upgrade tier. Yield values are: base 3 minions (no upgrade), Level 1 → 5 minions (cost: 15 Souls), Level 2 → 7 minions (cost: 20 Souls), Level 3 → 10 minions (cost: 25 Souls).
 - **Upgrade - Evasion Mastery:** Reduces the standard 3-second cooldown on the scatter evasion (Right Click), allowing players to utilize repulsion physics more frequently against stationary stone wizard towers.
-- **Upgrade - Bone Shrapnel:** Adds a secondary micro-collision damage check when Grunts pop during a 1-to-1 collision with the swarm, damaging nearby enemies.
-- **Upgrade - Necrotic Momentum:** Increases the maximum speed limits of the swarm, allowing them to condense and shrink into a tight ball much faster.
-- **Persistent Grid Layout:** The Dark Altar renders all available upgrades simultaneously in a structured grid, replacing the previous randomized 3-card draw. The full upgrade pool is always visible so players can plan their build holistically.
-- **Multi-Purchase System:** Upgrades are strictly single-purchase per item, but players may purchase any number of different upgrades in a single shop phase provided they have sufficient Souls.
-- **Gray-Out State:** Once acquired, an upgrade is flagged as `is_purchased`. It remains visible on the grid to show build progress but is rendered with a grayed-out tint and an "ACQUIRED" label, and its click interaction is permanently disabled.
-- **Hover Tooltips:** Hovering the cursor over an unpurchased upgrade dynamically renders a floating tooltip detailing its name, description, and Souls cost. The cost is colored red when the player cannot afford it.
-- **Manual Continuation:** The shop phase does not close automatically upon purchase. A persistent "Continue" button is always rendered, and the shop remains open until the player explicitly clicks it.
-- **Dormant State:** When all upgrades have been purchased, the title changes to "The Dark Altar is Dormant" and only the "Continue" button is active.
+- **Upgrade - Spectral Agility:** Increases the `max_force` steering clamp in the `BehaviorSystem`, raising the acceleration cap on all boid AI calculations. The swarm snaps to the cursor and condenses much faster for precision dodging. Does not affect absolute top speed (`max_speed`), which is Necrotic Momentum's domain. (Cost: 20 Souls, max 1 purchase.)
+- **Upgrade - Necrotic Momentum:** Increases absolute top speed, allowing the swarm to outrun Grunt hordes and cross the arena faster. (Cost: 20 Souls, max 1 purchase.)
+- **Tiered Shop Architecture:** Each upgrade entry in the shop pool carries a `current_level` (default 0) and `max_level` integer. An upgrade is disabled and grayed out only when `current_level == max_level`. Until that point, it may be re-purchased; each purchase increments `current_level` by 1.
+- **Multi-Purchase System:** Players may purchase any number of upgrades — including multiple tiers of the same tiered upgrade — in a single shop phase, provided they have sufficient Souls.
+- **Gray-Out State:** Once an upgrade reaches its `max_level`, it is rendered with a grayed-out tint and a **"MAX LEVEL"** label. Its click interaction is permanently disabled for the rest of the run.
+- **Tier-Suffix Naming:** Upgrade card names dynamically append a Roman numeral suffix to indicate the next tier being purchased. For example: "Grave Robber's Yield" (Tier 1), "Grave Robber's Yield II" (Tier 2), "Grave Robber's Yield III" (Tier 3). Single-purchase upgrades never show a suffix.
 
 ## 7. Threat Level Escalation
 
