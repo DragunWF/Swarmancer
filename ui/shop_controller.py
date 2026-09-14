@@ -4,11 +4,12 @@ from utils.state import GameState
 # ---------------------------------------------------------------------------
 # Layout constants
 # ---------------------------------------------------------------------------
-_COLS = 3               # Grid columns
-_CARD_W = 200           # Card width  (px)
-_CARD_H = 240           # Card height (px)
-_CARD_PAD = 20          # Horizontal padding between cards
-_CARD_ROW_PAD = 20      # Vertical padding between rows
+_COLS        = 3    # Grid columns
+_CARD_W      = 220  # Card width  (px) — widened for text breathing room
+_CARD_H      = 270  # Card height (px) — extra 30px reserved for pip + cost footer
+_CARD_INNER  = 14   # Uniform inner padding applied to all four card edges
+_CARD_PAD    = 20   # Horizontal gap between cards
+_CARD_ROW_PAD = 20  # Vertical gap between rows
 
 # Tooltip dimensions
 _TIP_W = 260
@@ -37,6 +38,15 @@ _COL_CONTINUE_IDLE  = (40, 25, 60)
 _COL_CONTINUE_HOVER = (70, 45, 100)
 _COL_CONTINUE_BORDER= (180, 130, 255)
 _COL_WHITE          = (255, 255, 255)
+
+# Pip indicator colors (multi-tier upgrade progress markers)
+_COL_PIP_FILLED  = (255, 215, 0)   # Solar-Gold fill — matches _COL_COST / _COL_SOULS
+_COL_PIP_EMPTY   = (180, 170, 200) # Muted bone-white outline — clearly "not yet purchased"
+
+# Pip geometry constants
+_PIP_SIZE   = 8  # Square side length (px)
+_PIP_GAP    = 5  # Gap between consecutive pips (px)
+_PIP_RADIUS = 2  # Corner radius for a rounded-square look
 
 # Tier label suffixes for display (index = next level being purchased)
 _TIER_SUFFIXES = ["", " II", " III"]
@@ -286,31 +296,79 @@ class ShopController:
         display_name = upg["name"] + _tier_suffix(upg["current_level"])
         name_color = _COL_PURCH_LABEL if maxed else _COL_WHITE
         name_surf  = self.font_name.render(display_name, True, name_color)
-        screen.blit(name_surf, (rect.centerx - name_surf.get_width() // 2, rect.y + 18))
+        screen.blit(name_surf, (rect.centerx - name_surf.get_width() // 2, rect.y + _CARD_INNER))
 
-        # Divider
-        div_y = rect.y + 18 + name_surf.get_height() + 8
+        # Divider — inset by _CARD_INNER from both edges
+        div_y = rect.y + _CARD_INNER + name_surf.get_height() + 8
         div_color = _COL_BORDER_PURCH if maxed else _COL_BORDER
-        pygame.draw.line(screen, div_color, (rect.x + 16, div_y), (rect.right - 16, div_y), 1)
+        pygame.draw.line(screen, div_color,
+                         (rect.x + _CARD_INNER, div_y),
+                         (rect.right - _CARD_INNER, div_y), 1)
 
-        # Description (word-wrapped)
-        desc_lines = _wrap_text(upg["desc"], self.font_small, rect.width - 24)
+        # Description (word-wrapped, constrained to inner width)
+        desc_lines = _wrap_text(upg["desc"], self.font_small, rect.width - _CARD_INNER * 2)
         desc_color = (70, 70, 70) if maxed else _COL_DESC
-        y = div_y + 12
+        y = div_y + _CARD_INNER
         for line in desc_lines:
             surf = self.font_small.render(line, True, desc_color)
-            screen.blit(surf, (rect.x + 12, y))
+            screen.blit(surf, (rect.x + _CARD_INNER, y))
             y += surf.get_height() + 4
 
-        # Cost / status label at bottom of card
+        # Pip indicators — drawn above the cost label for multi-tier upgrades
+        if upg["max_level"] > 1:
+            self._draw_pips(screen, upg, rect, maxed)
+
+        # Cost / status label — anchored to card bottom via _CARD_INNER
+        label_y = rect.bottom - _CARD_INNER - 14
         if maxed:
             label_surf = self.font_cost.render("MAX LEVEL", True, _COL_PURCH_LABEL)
-            screen.blit(label_surf, (rect.centerx - label_surf.get_width() // 2, rect.bottom - 36))
+            screen.blit(label_surf, (rect.centerx - label_surf.get_width() // 2, label_y))
         else:
             cost = _card_cost(upg)
             cost_color = _COL_COST if affordable else _COL_COST_UNAFFORD
             cost_surf  = self.font_cost.render(f"{cost} Souls", True, cost_color)
-            screen.blit(cost_surf, (rect.centerx - cost_surf.get_width() // 2, rect.bottom - 36))
+            screen.blit(cost_surf, (rect.centerx - cost_surf.get_width() // 2, label_y))
+
+    def _draw_pips(
+        self,
+        screen: pygame.Surface,
+        upg: dict,
+        rect: pygame.Rect,
+        maxed: bool,
+    ) -> None:
+        """Render tier-progress pip indicators for multi-level upgrades.
+
+        Draws ``max_level`` small rounded squares centred horizontally near the
+        card footer. Filled pips (Solar-Gold) represent purchased tiers;
+        hollow pips (bone-white outline) telegraph remaining available tiers.
+        When the card is maxed-out the filled pips use the dimmed label colour
+        to stay consistent with the overall gray-out aesthetic.
+        """
+        max_level     = upg["max_level"]
+        current_level = upg["current_level"]
+
+        # Horizontal centering: total width of all pips + gaps
+        total_w = max_level * _PIP_SIZE + (max_level - 1) * _PIP_GAP
+        pip_start_x = rect.centerx - total_w // 2
+
+        # Vertical position: sits in the gap between description body and cost label
+        pip_y = rect.bottom - _CARD_INNER - _PIP_SIZE - 26
+
+        for i in range(max_level):
+            pip_rect = pygame.Rect(
+                pip_start_x + i * (_PIP_SIZE + _PIP_GAP),
+                pip_y,
+                _PIP_SIZE,
+                _PIP_SIZE,
+            )
+            if i < current_level:
+                # Filled tier — solid Solar-Gold (dimmed to gray if card is maxed)
+                color = _COL_PURCH_LABEL if maxed else _COL_PIP_FILLED
+                pygame.draw.rect(screen, color, pip_rect, border_radius=_PIP_RADIUS)
+            else:
+                # Empty tier — hollow outline signals further upgrades available
+                color = _COL_BORDER_PURCH if maxed else _COL_PIP_EMPTY
+                pygame.draw.rect(screen, color, pip_rect, width=1, border_radius=_PIP_RADIUS)
 
     def _draw_continue_button(self, screen: pygame.Surface, mouse_pos: tuple[int, int]) -> None:
         hovering = self._continue_rect.collidepoint(mouse_pos)
