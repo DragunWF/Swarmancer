@@ -57,6 +57,9 @@ Systems iterate over the entity pool every frame (60 FPS), targeting only entiti
 ## 7. Deployment & Packaging
 
 - **Web Assembly (pygbag):** The project is packaged for the web using `pygbag`.
+  - **Template:** `noctx`
+  - **Known Issues & Fixes:** 
+    - **Firefox Canvas Resizing:** The default square canvas on Firefox is overridden using a runtime JavaScript evaluation (`window_resize()`) injected before `pygame.init()`. This is handled dynamically by checking if `sys.platform == "emscripten"`.
 - **Asynchronous Execution:** The top-level controller in `main.py` utilizes the `asyncio` library. The primary game loop is wrapped in an asynchronous function containing `await asyncio.sleep(0)` to yield execution back to the browser, preventing the tab from locking up during gameplay.
 
 ## 8. Upgrades Logic
