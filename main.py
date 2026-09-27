@@ -1,3 +1,5 @@
+import sys
+import platform
 import asyncio
 import pygame
 import random
@@ -38,6 +40,10 @@ _GRAVE_RATE_EARLY = 3.0   # Levels 1–4
 _GRAVE_RATE_LATE = 5.0    # Levels 5–10
 
 async def main():
+    ON_WEB = (sys.platform == "emscripten")
+    if ON_WEB:
+        platform.window.eval("window_resize()")
+
     pygame.init()
     
     # Audio Playlist Setup
