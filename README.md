@@ -39,3 +39,9 @@ pipenv install
 ```bash
 pipenv run python main.py
 ```
+
+## Build Game Command (Pygbag)
+
+```bash
+pipenv run pygbag --disable-sound-format-error --build main.py
+```
